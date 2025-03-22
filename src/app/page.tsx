@@ -1,9 +1,11 @@
 "use client";
 
 import { ContentWrapper } from "@/components";
+import { useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import type React from "react";
 import styled from "styled-components";
+import type React from "react";
 
 const BodyWrapper = styled.div`
   display: flex;
@@ -105,12 +107,54 @@ const Button = ({
   );
 };
 
+const logos = [
+  "Across the Spider-Verse 3.png",
+  "Agatha All Along.png",
+  "Ant-Man and the Wasp Quantumania.gif",
+  "Deadpool & Wolverine.gif",
+  "Eternals.png",
+  "Guardians of the Galaxy Vol 3.png",
+  "Loki 1.png",
+  "Moon Knight.png",
+  "Ms Marvel Kamala 1 sticker.gif",
+  "Pride 2024.png",
+  "Rivals.gif",
+  "Secret Invasion 2.jpg",
+  "The Marvels.gif",
+  "Venom 3.png",
+  "Werewolf by Night.gif",
+  "X-Men 97.png",
+];
+
 export default function Home() {
+  const [logo, setLogo] = useState("/img/logo.svg");
+
+  const handleLogoChange = () => {
+    const randomLogo = logos[Math.floor(Math.random() * logos.length)];
+    if (randomLogo !== logo) {
+      setLogo(`/img/logos/${randomLogo}`);
+    } else {
+      handleLogoChange();
+    }
+  };
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    const logoElement = document.querySelector(".logo");
+
+    if (logoElement) {
+      logoElement.addEventListener("mouseover", handleLogoChange);
+      return () => {
+        logoElement.removeEventListener("mouseover", handleLogoChange);
+      };
+    }
+  }, []);
+
   return (
     <ContentWrapper showNavbar={false} showFooter={false}>
       <CentreContent>
         <BodyWrapper>
-          <Logo src="/img/logo.svg" alt="Marvel Discord Logo" />
+          <Logo className="logo" src={logo} alt="Marvel Discord Logo" />
           <TextWrapper>
             <HeadingWrapper>
               <Title>Marvel Discord</Title>
@@ -127,4 +171,7 @@ export default function Home() {
       </CentreContent>
     </ContentWrapper>
   );
+}
+function onEffect(arg0: () => void, arg1: never[]) {
+  throw new Error("Function not implemented.");
 }
