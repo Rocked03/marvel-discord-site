@@ -1,9 +1,12 @@
 "use client";
 
 import { ContentWrapper } from "@/components";
+import { useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import styled, { keyframes, css } from "styled-components";
 import type React from "react";
-import styled from "styled-components";
+import Image from "next/image";
 
 const BodyWrapper = styled.div`
   display: flex;
@@ -35,15 +38,6 @@ const HeadingWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-`;
-
-const Logo = styled.img`
-  width: 13rem;
-  border-radius: 2rem;
-
-  @media (max-width: 768px) {
-    width: 10rem;
-  }
 `;
 
 const Title = styled.h1`
@@ -105,12 +99,139 @@ const Button = ({
   );
 };
 
+const shake = keyframes`
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-1px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, 1px); }
+  100% { transform: translate(0, 0); }
+`;
+
+// Apply animation only when the logo changes
+const LogoWrapper = styled.div<{ $isShaking: boolean }>`
+  position: relative;
+  width: 13rem;
+  height: 13rem;
+  border-radius: 2rem;
+  overflow: hidden;
+
+  ${({ $isShaking }) =>
+    $isShaking &&
+    css`
+      animation: ${shake} 0.1s ease-in-out;
+    `}
+
+  @media (max-width: 768px) {
+    width: 10rem;
+    height: 10rem;
+  }
+`;
+
+const logos = [
+  "Across the Spider-Verse 3.png",
+  "Agatha All Along.png",
+  "Ant-Man and the Wasp Quantumania.gif",
+  "Daredevil Born Again.png",
+  "Deadpool & Wolverine.gif",
+  "Eternals.png",
+  "Guardians of the Galaxy Vol 3.png",
+  "Hawkeye (2).png",
+  "Hellfire Gala 4.png",
+  "Helstrom.png",
+  "Loki 1.png",
+  "Moon Knight.png",
+  "Ms Marvel Kamala 1 sticker.gif",
+  "Multiverse of Madness.png",
+  "Pride 2024.png",
+  "Rivals.gif",
+  "Secret Invasion 2.jpg",
+  "The Marvels.gif",
+  "Venom 3.png",
+  "Werewolf by Night.gif",
+  "What If.png",
+  "X-Men 97.png",
+];
+
+const Logo = ({
+  src,
+  alt,
+  isShaking,
+}: {
+  src: string;
+  alt: string;
+  isShaking: boolean;
+}) => (
+  <LogoWrapper $isShaking={isShaking}>
+    <Image
+      className="logo"
+      src={src}
+      alt={alt}
+      fill
+      style={{ objectFit: "contain" }}
+      priority
+      {...(src.endsWith(".gif") && { unoptimized: true })}
+    />
+  </LogoWrapper>
+);
+
 export default function Home() {
+  const [logo, setLogo] = useState("/img/logo.svg");
+  const [isShaking, setIsShaking] = useState(false);
+  const [filteredLogos, setFilteredLogos] = useState<string[]>(logos);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    const updateLogos = () => {
+      const isMobile =
+        window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
+      setFilteredLogos(
+        isMobile ? logos.filter((logo) => !logo.endsWith(".gif")) : logos
+      );
+      console.log("Window width:", window.innerWidth);
+      console.log("User agent:", navigator.userAgent);
+      console.log("Is Mobile?", isMobile);
+      console.log(logos.filter((logo) => !logo.endsWith(".gif")));
+      console.log(filteredLogos);
+    };
+
+    updateLogos();
+    window.addEventListener("resize", updateLogos);
+    return () => window.removeEventListener("resize", updateLogos);
+  }, [logo]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    const handleLogoChange = () => {
+      console.log(filteredLogos);
+      const randomLogo =
+        filteredLogos[Math.floor(Math.random() * filteredLogos.length)];
+      if (randomLogo !== logo) {
+        setIsShaking(true);
+        setLogo(`/img/logos/${randomLogo}`);
+        setTimeout(() => {
+          setIsShaking(false);
+        }, 150);
+      } else {
+        handleLogoChange();
+      }
+    };
+
+    const logoElement = document.querySelector(".logo");
+    if (logoElement) {
+      logoElement.addEventListener("mouseover", handleLogoChange);
+      logoElement.addEventListener("touchstart", handleLogoChange);
+      return () => {
+        logoElement.removeEventListener("mouseover", handleLogoChange);
+        logoElement.removeEventListener("touchstart", handleLogoChange);
+      };
+    }
+  }, [filteredLogos]);
+
   return (
     <ContentWrapper showNavbar={false} showFooter={false}>
       <CentreContent>
         <BodyWrapper>
-          <Logo src="/img/logo.svg" alt="Marvel Discord Logo" />
+          <Logo src={logo} alt="Marvel Discord Logo" isShaking={isShaking} />
           <TextWrapper>
             <HeadingWrapper>
               <Title>Marvel Discord</Title>
