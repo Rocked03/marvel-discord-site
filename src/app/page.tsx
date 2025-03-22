@@ -208,8 +208,11 @@ export default function Home() {
 
     if (logoElement) {
       logoElement.addEventListener("mouseover", handleLogoChange);
+      logoElement.addEventListener("touchstart", handleLogoChange);
+
       return () => {
         logoElement.removeEventListener("mouseover", handleLogoChange);
+        logoElement.removeEventListener("touchstart", handleLogoChange);
       };
     }
   }, []);
