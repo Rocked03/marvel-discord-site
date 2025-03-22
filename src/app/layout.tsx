@@ -4,7 +4,7 @@ import StyledComponentsRegistry from "@/lib/registry";
 
 export const metadata: Metadata = {
   title: "Marvel Discord",
-  description: "The Discord server for everything Marvel.",
+  description: "The largest community-run server for everything Marvel.",
 };
 
 export default function RootLayout({
