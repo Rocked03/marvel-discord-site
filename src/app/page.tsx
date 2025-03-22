@@ -1,32 +1,23 @@
 "use client";
 
+import { ContentWrapper } from "@/components";
 import Link from "next/link";
 import type React from "react";
 import styled from "styled-components";
 
-const Content = styled.div`
+const BodyWrapper = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  margin-block: 2rem;
-  margin-inline: auto;
-  max-width: 90rem;
-  padding-inline: 1rem;
+  flex-direction: row;
+  gap: 3rem;
+  align-items: flex-start;
 `;
 
-const VerticalCentred = styled(Content)`
+const CentreContent = styled.div`
   display: flex;
   flex-direction: column;
   height: 100vh;
   justify-content: center;
   margin-block: 0;
-`;
-
-const ContentWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 3rem;
-  align-items: flex-start;
 `;
 
 const TextWrapper = styled.div`
@@ -47,7 +38,7 @@ const Logo = styled.img`
 `;
 
 const Title = styled.h1`
-  font-size: 8rem;
+  font-size: 7rem;
   font-weight: 700;
   font-stretch: expanded;
 `;
@@ -99,22 +90,24 @@ const Button = ({
 
 export default function Home() {
   return (
-    <VerticalCentred>
-      <ContentWrapper>
-        <Logo src="/img/logo.svg" alt="Marvel Discord Logo" />
-        <TextWrapper>
-          <HeadingWrapper>
-            <Title>Marvel Discord</Title>
-            <Subtitle>
-              The largest community-run server for everything Marvel.
-            </Subtitle>
-          </HeadingWrapper>
-          <Buttons>
-            <Button href="/invite">Join the server</Button>
-            <Button href="/appeal">Make a ban appeal</Button>
-          </Buttons>
-        </TextWrapper>
-      </ContentWrapper>
-    </VerticalCentred>
+    <ContentWrapper showNavbar={false} showFooter={false}>
+      <CentreContent>
+        <BodyWrapper>
+          <Logo src="/img/logo.svg" alt="Marvel Discord Logo" />
+          <TextWrapper>
+            <HeadingWrapper>
+              <Title>Marvel Discord</Title>
+              <Subtitle>
+                The largest community-run server for everything Marvel.
+              </Subtitle>
+            </HeadingWrapper>
+            <Buttons>
+              <Button href="/invite">Join the server</Button>
+              <Button href="/appeal">Make a ban appeal</Button>
+            </Buttons>
+          </TextWrapper>
+        </BodyWrapper>
+      </CentreContent>
+    </ContentWrapper>
   );
 }
