@@ -19,7 +19,7 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Mona Sans", Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -38,5 +38,16 @@ a {
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
+  }
+}
+
+@layer fonts {
+  @font-face {
+    font-family: "Mona Sans";
+    src: url("../fonts/mona-sans.woff2") format("woff2 supports variations"),
+      url("../fonts/mona-sans.woff2") format("woff2 variations"),
+      url("../fonts/mona-sans.ttf") format("truetype");
+    font-weight: 200 900;
+    font-stretch: 75% 125%;
   }
 }
