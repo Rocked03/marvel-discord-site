@@ -10,6 +10,11 @@ const BodyWrapper = styled.div`
   flex-direction: row;
   gap: 3rem;
   align-items: flex-start;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 2rem;
+  }
 `;
 
 const CentreContent = styled.div`
@@ -35,12 +40,20 @@ const HeadingWrapper = styled.div`
 const Logo = styled.img`
   width: 13rem;
   border-radius: 2rem;
+
+  @media (max-width: 768px) {
+    width: 10rem;
+  }
 `;
 
 const Title = styled.h1`
   font-size: 7rem;
   font-weight: 700;
   font-stretch: expanded;
+
+  @media (max-width: 768px) {
+    font-size: 5rem;
+  }
 `;
 
 const Subtitle = styled.h2`
@@ -48,6 +61,10 @@ const Subtitle = styled.h2`
   font-stretch: expanded;
   font-variation-settings: "slnt" -10;
   font-weight: 300;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
 `;
 
 const Buttons = styled.div`

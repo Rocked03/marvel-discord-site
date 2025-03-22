@@ -24,15 +24,15 @@ const Title = styled(Link)`
   &:hover {
     opacity: 1;
   }
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
 `;
 
 const Logo = styled.img`
   width: 3rem;
   border-radius: 0.5rem;
-`;
-
-const Spacer = styled.div`
-  width: 3rem;
 `;
 
 export default function Navbar() {
@@ -41,7 +41,6 @@ export default function Navbar() {
       <Title href="/">
         <Logo src="/img/logo.svg" alt="Marvel Discord Logo" />
         Marvel Discord
-        <Spacer />
       </Title>
     </NavbarStyle>
   );

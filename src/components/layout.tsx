@@ -11,6 +11,10 @@ export const ContentStyle = styled.div`
   max-width: 80rem;
   padding-inline: 1rem;
   width: 100%;
+
+  @media (max-width: 768px) {
+    padding-inline: 2rem;
+  }
 `;
 
 const ContentFull = styled.div`

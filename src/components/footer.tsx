@@ -11,7 +11,7 @@ const StyledFooter = styled.footer`
   width: 100%;
   font-size: 0.7rem;
   font-weight: 100;
-  margin-block: 1rem;
+  margin-block: 2rem;
 `;
 
 export default function Footer() {
