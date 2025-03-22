@@ -177,9 +177,19 @@ const Logo = ({
 export default function Home() {
   const [logo, setLogo] = useState("/img/logo.svg");
   const [isShaking, setIsShaking] = useState(false);
+  const [filteredLogos, setFilteredLogos] = useState<string[]>(logos);
+
+  useEffect(() => {
+    const isMobile =
+      window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
+    setFilteredLogos(
+      isMobile ? logos.filter((logo) => !logo.endsWith(".gif")) : logos
+    );
+  }, []);
 
   const handleLogoChange = () => {
-    const randomLogo = logos[Math.floor(Math.random() * logos.length)];
+    const randomLogo =
+      filteredLogos[Math.floor(Math.random() * filteredLogos.length)];
     if (randomLogo !== logo) {
       setIsShaking(true);
       setLogo(`/img/logos/${randomLogo}`);
