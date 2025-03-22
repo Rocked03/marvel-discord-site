@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/92e22e81-f05e-4c2f-933a-0f40e09d589e/deploy-status)](https://app.netlify.com/sites/marvel-discord/deploys)
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
