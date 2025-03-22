@@ -6,6 +6,7 @@ import { useState } from "react";
 import Link from "next/link";
 import styled from "styled-components";
 import type React from "react";
+import Image from "next/image";
 
 const BodyWrapper = styled.div`
   display: flex;
@@ -37,15 +38,6 @@ const HeadingWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-`;
-
-const Logo = styled.img`
-  width: 13rem;
-  border-radius: 2rem;
-
-  @media (max-width: 768px) {
-    width: 10rem;
-  }
 `;
 
 const Title = styled.h1`
@@ -107,6 +99,33 @@ const Button = ({
   );
 };
 
+const LogoWrapper = styled.div`
+  position: relative;
+  width: 13rem;
+  height: 13rem; // Must set height for fill mode
+  border-radius: 2rem;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    width: 10rem;
+    height: 10rem;
+  }
+`;
+
+const Logo = ({ src, alt }: { src: string; alt: string }) => (
+  <LogoWrapper>
+    <Image
+      className="logo"
+      src={src}
+      alt={alt}
+      fill
+      style={{ objectFit: "contain" }}
+      priority
+      {...(src.endsWith(".gif") && { unoptimized: true })}
+    />
+  </LogoWrapper>
+);
+
 const logos = [
   "Across the Spider-Verse 3.png",
   "Agatha All Along.png",
@@ -154,7 +173,7 @@ export default function Home() {
     <ContentWrapper showNavbar={false} showFooter={false}>
       <CentreContent>
         <BodyWrapper>
-          <Logo className="logo" src={logo} alt="Marvel Discord Logo" />
+          <Logo src={logo} alt="Marvel Discord Logo" />
           <TextWrapper>
             <HeadingWrapper>
               <Title>Marvel Discord</Title>
