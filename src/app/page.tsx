@@ -179,43 +179,53 @@ export default function Home() {
   const [isShaking, setIsShaking] = useState(false);
   const [filteredLogos, setFilteredLogos] = useState<string[]>(logos);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    const isMobile =
-      window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
-    setFilteredLogos(
-      isMobile ? logos.filter((logo) => !logo.endsWith(".gif")) : logos
-    );
-  }, []);
+    const updateLogos = () => {
+      const isMobile =
+        window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
+      setFilteredLogos(
+        isMobile ? logos.filter((logo) => !logo.endsWith(".gif")) : logos
+      );
+      console.log("Window width:", window.innerWidth);
+      console.log("User agent:", navigator.userAgent);
+      console.log("Is Mobile?", isMobile);
+      console.log(logos.filter((logo) => !logo.endsWith(".gif")));
+      console.log(filteredLogos);
+    };
 
-  const handleLogoChange = () => {
-    const randomLogo =
-      filteredLogos[Math.floor(Math.random() * filteredLogos.length)];
-    if (randomLogo !== logo) {
-      setIsShaking(true);
-      setLogo(`/img/logos/${randomLogo}`);
-
-      setTimeout(() => {
-        setIsShaking(false);
-      }, 300); // Matches animation duration
-    } else {
-      handleLogoChange();
-    }
-  };
+    updateLogos();
+    window.addEventListener("resize", updateLogos);
+    return () => window.removeEventListener("resize", updateLogos);
+  }, [logo]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    const logoElement = document.querySelector(".logo");
+    const handleLogoChange = () => {
+      console.log(filteredLogos);
+      const randomLogo =
+        filteredLogos[Math.floor(Math.random() * filteredLogos.length)];
+      if (randomLogo !== logo) {
+        setIsShaking(true);
+        setLogo(`/img/logos/${randomLogo}`);
+        setTimeout(() => {
+          setIsShaking(false);
+        }, 150);
+      } else {
+        handleLogoChange();
+      }
+    };
 
+    const logoElement = document.querySelector(".logo");
     if (logoElement) {
       logoElement.addEventListener("mouseover", handleLogoChange);
       logoElement.addEventListener("touchstart", handleLogoChange);
-
       return () => {
         logoElement.removeEventListener("mouseover", handleLogoChange);
         logoElement.removeEventListener("touchstart", handleLogoChange);
       };
     }
-  }, []);
+  }, [filteredLogos]);
 
   return (
     <ContentWrapper showNavbar={false} showFooter={false}>
