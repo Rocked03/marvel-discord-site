@@ -4,6 +4,7 @@ import { ContentWrapper } from "@/components";
 import Link from "next/link";
 import type React from "react";
 import styled from "styled-components";
+import config from "../config/config";
 
 const TextWrapper = styled.div`
   align-items: flex-start;
@@ -57,7 +58,7 @@ export default function AppealPage() {
           <ol>
             <li>
               Join the{" "}
-              <LinkStyled href="https://discord.gg/ppm8DXZxKp">
+              <LinkStyled href={config.postOfficeInviteUrl || "#"}>
                 Marvel Discord Post Office
               </LinkStyled>{" "}
               server.
