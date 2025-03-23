@@ -1,9 +1,3 @@
-"use client";
-
-import { MarkdownPage } from "@/components";
-
-export default async function AppealPage() {
-  const markdown = `
 # Appeals
 ## Help, how can I get unbanned?
 
@@ -23,7 +17,3 @@ For the appeal to be considered:
 ---
 
 A moderator will respond to your appeal once a decision is made. The timeframe for this will vary depending on the availability of the moderation team, however, all appeals are responded to.
-  `;
-
-  return <MarkdownPage markdown={markdown} />;
-}
