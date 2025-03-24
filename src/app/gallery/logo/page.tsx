@@ -35,6 +35,70 @@ const galleryEntries: GalleryEntry[] = [
     creator: "Rocked03",
   },
   {
+    title: "M.O.D.O.K. S1",
+    description: "Logo for season 1 of the M.O.D.O.K. series.",
+    imageUrls: ["/img/gallery/logo/MODOK.png"],
+    date: new Date("2021-05-21"),
+    creator: "Rocked03",
+  },
+  {
+    title: "Hellfire Gala 2021",
+    description:
+      "Logos and banners for the 2021 Hellfire Gala event in the comics",
+    imageUrls: [
+      "/img/gallery/logo/Hellfire Gala 4.png",
+      "/img/gallery/logo/Hellfire Gala 3.png",
+      "/img/gallery/logo/Hellfire Gala 2.png",
+      "/img/gallery/logo/Hellfire Gala 1.png",
+      "/img/gallery/banner/Hellfire Gala 3.png",
+      "/img/gallery/banner/Hellfire Gala 2.png",
+      "/img/gallery/banner/Hellfire Gala.png",
+    ],
+    date: new Date("2021-06-02"),
+    creator: "Rocked03",
+  },
+  {
+    title: "Loki S1",
+    description: "Logo for season 1 of the Loki series.",
+    imageUrls: [
+      "/img/gallery/logo/Loki 1.png",
+      "/img/gallery/logo/Loki 2.png",
+      "/img/gallery/logo/BW and Loki.gif",
+    ],
+    date: new Date("2021-06-09"),
+    creator: "Rocked03",
+  },
+  {
+    title: "Black Widow",
+    description: "Logo and banner for the Black Widow film.",
+    imageUrls: [
+      "/img/gallery/logo/Black Widow.png",
+      "/img/gallery/logo/BW and Loki.gif",
+      "/img/gallery/banner/Black Widow.png",
+    ],
+    date: new Date("2021-07-09"),
+    creator: "Rocked03",
+  },
+  {
+    title: "What If...? S1",
+    description:
+      "Series of logos and banner for season 1 of the What If...? series.",
+    imageUrls: [
+      "/img/gallery/logo/What If.png",
+      "/img/gallery/logo/What If Captain Carter.png",
+      "/img/gallery/logo/What If T'Challa Star Lord.png",
+      "/img/gallery/logo/What If Fury.png",
+      "/img/gallery/logo/What If Doctor Strange.png",
+      "/img/gallery/logo/What If Zombies.png",
+      "/img/gallery/logo/What If Killmonger.png",
+      "/img/gallery/logo/What If Thor.png",
+      "/img/gallery/logo/What If Avengers.png",
+      "/img/gallery/banner/What If.png",
+    ],
+    date: new Date("2021-08-11"),
+    creator: "Rocked03",
+  },
+  {
     title: "Eternals",
     description:
       "Made to coincide with the release of Marvel Studios' Eternals.",
