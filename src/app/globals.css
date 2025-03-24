@@ -2,6 +2,9 @@
   --background: #ebebeb;
   --foreground: #1d1d1d;
 
+  --background-rgb: 235, 235, 235;
+  --foreground-rgb: 29, 29, 29;
+
   --highlight: #ea2328;
 }
 
@@ -9,6 +12,9 @@
   :root {
     --background: #201b1b;
     --foreground: #e0e0e0;
+
+    --background-rgb: 32, 27, 27;
+    --foreground-rgb: 224, 224, 224;
   }
 }
 

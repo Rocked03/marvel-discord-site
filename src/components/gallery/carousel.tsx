@@ -5,8 +5,10 @@ import useEmblaCarousel from "embla-carousel-react";
 import ClassNames from "embla-carousel-class-names";
 import styled from "styled-components";
 import Image from "next/image";
+
 import type { GalleryEntry } from "@/types";
 import { formatDate } from "@/utils";
+import { Download, ExternalLink } from "lucide-react";
 
 const GalleryWrapper = styled.div`
   display: flex;
@@ -42,6 +44,7 @@ const EntryDescription = styled.p`
 const EmblaWrapper = styled.div`
   overflow: hidden;
   border-radius: 1rem;
+  width: 100%;
 `;
 
 const EmblaContainer = styled.div`
@@ -80,10 +83,35 @@ const AdditionalEmblaContainer = styled(EmblaContainer)`
 const AdditionalEmblaSlide = styled(EmblaSlide)`
   flex: 0 0 auto;
   max-height: 20rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
 `;
 
 const AdditionalEmblaImage = styled(EmblaImage)`
   max-height: 15rem;
+`;
+
+const ImageButtons = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
+const ImageButton = styled.a`
+  align-items: center;
+  border-radius: 0.5rem;
+  color: var(--foreground);
+  cursor: pointer;
+  display: flex;
+  height: 2rem;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  width: 4rem;
+
+  &:hover {
+    background-color: rgba(var(--foreground-rgb), 0.3);
+  }
 `;
 
 interface CarouselProps {
@@ -113,7 +141,6 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const selectedEntry = galleryEntries[selectedIndex];
-  const entryAdditionalImages = selectedEntry.imageUrls.slice(1);
 
   useEffect(() => {
     if (!mainEmblaApi) return;
@@ -162,10 +189,10 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
           <EntryDescription>{selectedEntry.description}</EntryDescription>
         )}
       </EntryDetails>
-      {entryAdditionalImages.length > 0 && (
+      {
         <EmblaWrapper ref={additionalEmblaRef}>
           <AdditionalEmblaContainer>
-            {entryAdditionalImages.map((entry) => (
+            {selectedEntry.imageUrls.map((entry) => (
               <AdditionalEmblaSlide key={entry}>
                 <AdditionalEmblaImage
                   src={entry}
@@ -173,11 +200,19 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
                   width={1000}
                   height={1000}
                 />
+                <ImageButtons>
+                  <ImageButton href={entry} target="_blank" download>
+                    <Download />
+                  </ImageButton>
+                  <ImageButton href={entry} target="_blank">
+                    <ExternalLink />
+                  </ImageButton>
+                </ImageButtons>
               </AdditionalEmblaSlide>
             ))}
           </AdditionalEmblaContainer>
         </EmblaWrapper>
-      )}
+      }
     </GalleryWrapper>
   );
 }
