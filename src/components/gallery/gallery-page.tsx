@@ -59,6 +59,12 @@ const GalleryTypeButtons = styled.div`
   gap: 0.1rem;
 `;
 
+const GalleryTypeButton = styled(LinkButton)`
+  &:hover {
+    background-color: unset;
+  }
+`;
+
 const TippyStyled = styled(Tippy)`
   font-family: var(--font-family);
   font-weight: 300;
@@ -83,9 +89,12 @@ function TabButton({
       delay={100}
       arrow={true}
     >
-      <LinkButton $isActive={galleryType === currentGalleryType} href={href}>
+      <GalleryTypeButton
+        $isActive={galleryType === currentGalleryType}
+        href={href}
+      >
         {children}
-      </LinkButton>
+      </GalleryTypeButton>
     </TippyStyled>
   );
 }
