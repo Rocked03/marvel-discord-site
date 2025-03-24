@@ -1,6 +1,6 @@
 export default interface GalleryEntry {
 	title: string;
-	description: string;
+	description?: string;
 
 	// First image is the main image
 	imageUrls: string[];
