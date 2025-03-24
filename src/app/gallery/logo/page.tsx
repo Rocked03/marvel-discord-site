@@ -44,6 +44,7 @@ const galleryEntries: GalleryEntry[] = [
       "/img/gallery/banner/Wakanda Forever.png",
     ],
     date: new Date("2022-11-11"),
+    creator: "Rocked03",
   },
   {
     title: "Marvel Rivals",
