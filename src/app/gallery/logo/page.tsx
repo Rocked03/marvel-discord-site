@@ -14,6 +14,8 @@ const galleryEntries: GalleryEntry[] = [
       "/img/gallery/logo/Logo with full icon.png",
       "/img/gallery/logo/Base logo.png",
       "/img/gallery/logo/Base logo 2.png",
+      "/img/gallery/banner/Banner centred text.png",
+      "/img/gallery/banner/Banner new.png",
     ],
     date: new Date("2017-02-16"),
     creator: "Rocked03",
@@ -41,6 +43,43 @@ const galleryEntries: GalleryEntry[] = [
     creator: "Rocked03",
   },
   {
+    title: "Hawkeye",
+    description: "Logos and banners for the Hawkeye series.",
+    imageUrls: [
+      "/img/gallery/logo/Hawkeye (2).png",
+      "/img/gallery/logo/Hawkeye.png",
+      "/img/gallery/banner/Hawkeye light.png",
+      "/img/gallery/banner/Hawkeye dark.png",
+    ],
+    date: new Date("2021-11-24"),
+    creator: "Rocked03",
+  },
+  {
+    title: "Spider-Man: No Way Home",
+    description: "Logo for the Spider-Man: No Way Home film.",
+    imageUrls: ["/img/gallery/logo/No Way Home.png"],
+    date: new Date("2021-12-17"),
+    creator: "Rocked03",
+  },
+  {
+    title: "Moon Knight",
+    description: "Logo for the Moon Knight series.",
+    imageUrls: ["/img/gallery/logo/Moon Knight.png"],
+    date: new Date("2022-03-30"),
+    creator: "Rocked03",
+  },
+  {
+    title: "Doctor Strange in the Multiverse of Madness",
+    description:
+      "Logo for the Doctor Strange in the Multiverse of Madness film.",
+    imageUrls: [
+      "/img/gallery/logo/Multiverse of Madness.png",
+      "/img/gallery/logo/Multiverse of Madness clean.png",
+    ],
+    date: new Date("2022-05-06"),
+    creator: "Rocked03",
+  },
+  {
     title: "Ms. Marvel",
     description:
       "Series of animated logos and banner for the Ms. Marvel series.",
@@ -60,6 +99,27 @@ const galleryEntries: GalleryEntry[] = [
     creator: "Rocked03",
   },
   {
+    title: "Thor: Love and Thunder",
+    description: "Logo for the Thor: Love and Thunder film.",
+    imageUrls: ["/img/gallery/logo/Thor Love and Thunder.png"],
+    date: new Date("2022-07-06"),
+    creator: "Rocked03",
+  },
+  {
+    title: "She-Hulk: Attorney at Law",
+    description: "Logo for the She-Hulk: Attorney at Law series.",
+    imageUrls: ["/img/gallery/logo/She-Hulk.png"],
+    date: new Date("2022-08-18"),
+    creator: "Rocked03",
+  },
+  {
+    title: "Werewolf By Night",
+    description: "Animated logo for the Werewolf By Night series.",
+    imageUrls: ["/img/gallery/logo/Werewolf by Night.gif"],
+    date: new Date("2022-10-07"),
+    creator: "Rocked03",
+  },
+  {
     title: "Black Panther: Wakanda Forever",
     description:
       "Logo and animated banner for the Black Panther: Wakanda Forever film.",
@@ -69,6 +129,40 @@ const galleryEntries: GalleryEntry[] = [
       "/img/gallery/banner/Wakanda Forever.png",
     ],
     date: new Date("2022-11-11"),
+    creator: "Rocked03",
+  },
+  {
+    title: "The Guardians of the Galaxy Holiday Special",
+    description: "Logo for the Guardians of the Galaxy Holiday Special.",
+    imageUrls: [
+      "/img/gallery/logo/The Guardians of the Galaxy Holiday Special.png",
+    ],
+    date: new Date("2022-11-25"),
+    creator: "Rocked03",
+  },
+  {
+    title: "Sins of Sinister",
+    description: "Logo for the Sins of Sinister comic event.",
+    imageUrls: ["/img/gallery/logo/Sins of Sinister.png"],
+    date: new Date("2023-01-25"),
+    creator: "Rocked03",
+  },
+  {
+    title: "Ant-Man and the Wasp: Quantumania",
+    description:
+      "Animated logo for the Ant-Man and the Wasp: Quantumania film.",
+    imageUrls: [
+      "/img/gallery/logo/Ant-Man and the Wasp Quantumania.gif",
+      "/img/gallery/logo/Ant-Man and the Wasp Quantumania.png",
+    ],
+    date: new Date("2023-02-17"),
+    creator: "Rocked03",
+  },
+  {
+    title: "Guardians of the Galaxy Vol. 3",
+    description: "Logo for the Guardians of the Galaxy Vol. 3 film.",
+    imageUrls: ["/img/gallery/logo/Guardians of the Galaxy Vol 3.png"],
+    date: new Date("2023-05-05"),
     creator: "Rocked03",
   },
   {
