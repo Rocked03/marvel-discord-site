@@ -27,9 +27,13 @@ const EntryDetails = styled.div`
   align-items: center;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 1rem;
   text-align: center;
   width: 30rem;
+
+  @media (max-width: 768px) {
+    max-width: 100vw - 2rem;
+  }
 `;
 
 const EntryTitle = styled.h1`
@@ -77,6 +81,10 @@ const AdditionalEmblaSlide = styled(EmblaSlide)`
 
 const AdditionalEmblaImage = styled(EmblaImage)`
   max-height: 15rem;
+
+  @media (max-width: 768px) {
+    max-height: 10rem;
+  }
 `;
 
 const ImageButtons = styled.div<{ $isVisible: boolean }>`
