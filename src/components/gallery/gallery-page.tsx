@@ -83,7 +83,7 @@ function TabButton({
       delay={100}
       arrow={true}
     >
-      <LinkButton isActive={galleryType === currentGalleryType} href={href}>
+      <LinkButton $isActive={galleryType === currentGalleryType} href={href}>
         {children}
       </LinkButton>
     </TippyStyled>

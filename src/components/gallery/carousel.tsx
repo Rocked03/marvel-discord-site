@@ -161,6 +161,7 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
                 alt={entry.title}
                 width={1000}
                 height={1000}
+                unoptimized={entry.imageUrls[0].endsWith(".gif")}
               />
             </MainEmblaSlide>
           ))}
@@ -203,6 +204,7 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
                 alt={selectedEntry.title}
                 width={1000}
                 height={1000}
+                unoptimized={entry.endsWith(".gif")}
               />
               <ImageButtons $isVisible={index === additionalSelectedIndex}>
                 <LinkButton href={entry} target="_blank" download>

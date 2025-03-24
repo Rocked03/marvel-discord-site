@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 interface ButtonProps {
-  isActive?: boolean;
+  $isActive?: boolean;
 }
 
 export const Button = styled.button<ButtonProps>`
@@ -17,8 +17,8 @@ export const Button = styled.button<ButtonProps>`
   transition: background-color 0.2s ease;
   width: auto;
 
-  background-color: ${({ isActive }) =>
-    isActive ? "rgba(var(--foreground-rgb), 0.2)" : "transparent"};
+  background-color: ${({ $isActive }) =>
+    $isActive ? "rgba(var(--foreground-rgb), 0.2)" : "transparent"};
 
   &:hover {
     background-color: rgba(var(--foreground-rgb), 0.3);
