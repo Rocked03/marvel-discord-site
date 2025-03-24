@@ -47,6 +47,28 @@ const galleryEntries: GalleryEntry[] = [
     creator: "Rocked03",
   },
   {
+    title: "Across the Spider-Verse",
+    description: "Selection of logos for the Across the Spider-Verse film.",
+    imageUrls: [
+      "/img/gallery/logo/Across the Spider-Verse 3.png",
+      "/img/gallery/logo/Across the Spider-Verse 2.png",
+      "/img/gallery/logo/Across the Spider-Verse 1.png",
+    ],
+    date: new Date("2023-06-02"),
+    creator: "Krazkat",
+  },
+  {
+    title: "Secret Invasion",
+    description:
+      "Animated logo and HD wallpaper for the Secret Invasion series.",
+    imageUrls: [
+      "/img/gallery/logo/Secret Invasion 2.jpg",
+      "/img/gallery/logo/Secret Invasion 1.jpg",
+    ],
+    date: new Date("2023-06-21"),
+    creator: "Krazkat",
+  },
+  {
     title: "Marvel Rivals",
     description:
       "Animated logo and HD wallpaper to coincide with the release of Marvel Rivals.",
