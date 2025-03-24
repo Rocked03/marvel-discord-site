@@ -20,6 +20,8 @@ const EntryDetails = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
+  max-width: 30rem;
+  text-align: center;
 `;
 
 const EntryTitle = styled.h1`
@@ -35,7 +37,6 @@ const EntrySubtext = styled.p`
 
 const EntryDescription = styled.p`
   font-size: 1rem;
-  max-width: 40rem;
 `;
 
 const EmblaWrapper = styled.div`
@@ -70,13 +71,19 @@ const MainEmblaSlide = styled(EmblaSlide)`
   }
 `;
 
+const MainEmblaImage = styled(EmblaImage)``;
+
 const AdditionalEmblaContainer = styled(EmblaContainer)`
   gap: 1rem;
 `;
 
 const AdditionalEmblaSlide = styled(EmblaSlide)`
   flex: 0 0 auto;
-  // max-height: 10rem;
+  max-height: 20rem;
+`;
+
+const AdditionalEmblaImage = styled(EmblaImage)`
+  max-height: 15rem;
 `;
 
 interface CarouselProps {
@@ -129,7 +136,7 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
         <MainEmblaContainer>
           {galleryEntries.map((entry) => (
             <MainEmblaSlide key={entry.title}>
-              <EmblaImage
+              <MainEmblaImage
                 src={entry.imageUrls[0]}
                 alt={entry.title}
                 width={1000}
@@ -154,24 +161,23 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
         {selectedEntry.description && (
           <EntryDescription>{selectedEntry.description}</EntryDescription>
         )}
-
-        {entryAdditionalImages.length > 0 && (
-          <EmblaWrapper ref={additionalEmblaRef}>
-            <AdditionalEmblaContainer>
-              {entryAdditionalImages.map((entry) => (
-                <AdditionalEmblaSlide key={entry}>
-                  <EmblaImage
-                    src={entry}
-                    alt={selectedEntry.title}
-                    width={1000}
-                    height={1000}
-                  />
-                </AdditionalEmblaSlide>
-              ))}
-            </AdditionalEmblaContainer>
-          </EmblaWrapper>
-        )}
       </EntryDetails>
+      {entryAdditionalImages.length > 0 && (
+        <EmblaWrapper ref={additionalEmblaRef}>
+          <AdditionalEmblaContainer>
+            {entryAdditionalImages.map((entry) => (
+              <AdditionalEmblaSlide key={entry}>
+                <AdditionalEmblaImage
+                  src={entry}
+                  alt={selectedEntry.title}
+                  width={1000}
+                  height={1000}
+                />
+              </AdditionalEmblaSlide>
+            ))}
+          </AdditionalEmblaContainer>
+        </EmblaWrapper>
+      )}
     </GalleryWrapper>
   );
 }
