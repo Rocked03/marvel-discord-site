@@ -93,9 +93,12 @@ const AdditionalEmblaImage = styled(EmblaImage)`
   max-height: 15rem;
 `;
 
-const ImageButtons = styled.div`
+const ImageButtons = styled.div<{ $isVisible: boolean }>`
   display: flex;
   gap: 0.5rem;
+  opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
+  pointer-events: ${({ $isVisible }) => ($isVisible ? "auto" : "none")};
+  transition: opacity 0.2s ease;
 `;
 
 const ImageButton = styled.a`
@@ -129,7 +132,7 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
     [ClassNames()]
   );
 
-  const [additionalEmblaRef] = useEmblaCarousel(
+  const [additionalEmblaRef, additionalEmblaApi] = useEmblaCarousel(
     {
       align: "center",
       dragFree: false,
@@ -139,14 +142,15 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
     [ClassNames()]
   );
 
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const selectedEntry = galleryEntries[selectedIndex];
+  const [mainSelectedIndex, setMainSelectedIndex] = useState(0);
+  const [additionalSelectedIndex, setAdditionalSelectedIndex] = useState(0);
+  const selectedEntry = galleryEntries[mainSelectedIndex];
 
   useEffect(() => {
     if (!mainEmblaApi) return;
 
     const onSelect = () => {
-      setSelectedIndex(mainEmblaApi.selectedScrollSnap());
+      setMainSelectedIndex(mainEmblaApi.selectedScrollSnap());
     };
 
     mainEmblaApi.on("select", onSelect);
@@ -156,6 +160,21 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
       mainEmblaApi.off("select", onSelect);
     };
   }, [mainEmblaApi]);
+
+  useEffect(() => {
+    if (!additionalEmblaApi) return;
+
+    const onSelect = () => {
+      setAdditionalSelectedIndex(additionalEmblaApi.selectedScrollSnap());
+    };
+
+    additionalEmblaApi.on("select", onSelect);
+    onSelect();
+
+    return () => {
+      additionalEmblaApi.off("select", onSelect);
+    };
+  }, [additionalEmblaApi]);
 
   return (
     <GalleryWrapper>
@@ -192,7 +211,7 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
       {
         <EmblaWrapper ref={additionalEmblaRef}>
           <AdditionalEmblaContainer>
-            {selectedEntry.imageUrls.map((entry) => (
+            {selectedEntry.imageUrls.map((entry, index) => (
               <AdditionalEmblaSlide key={entry}>
                 <AdditionalEmblaImage
                   src={entry}
@@ -200,7 +219,7 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
                   width={1000}
                   height={1000}
                 />
-                <ImageButtons>
+                <ImageButtons $isVisible={index === additionalSelectedIndex}>
                   <ImageButton href={entry} target="_blank" download>
                     <Download />
                   </ImageButton>
