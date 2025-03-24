@@ -8,7 +8,12 @@ import Image from "next/image";
 
 import type { GalleryEntry } from "@/types";
 import { formatDate } from "@/utils";
-import { Download, ExternalLink } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  ExternalLink,
+} from "lucide-react";
 
 const GalleryWrapper = styled.div`
   display: flex;
@@ -22,8 +27,8 @@ const EntryDetails = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  max-width: 30rem;
   text-align: center;
+  width: 30rem;
 `;
 
 const EntryTitle = styled.h1`
@@ -39,6 +44,11 @@ const EntrySubtext = styled.p`
 
 const EntryDescription = styled.p`
   font-size: 1rem;
+`;
+
+const GalleryDetails = styled.div`
+  display: flex;
+  flex-direction: row;
 `;
 
 const EmblaWrapper = styled.div`
@@ -93,15 +103,7 @@ const AdditionalEmblaImage = styled(EmblaImage)`
   max-height: 15rem;
 `;
 
-const ImageButtons = styled.div<{ $isVisible: boolean }>`
-  display: flex;
-  gap: 0.5rem;
-  opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
-  pointer-events: ${({ $isVisible }) => ($isVisible ? "auto" : "none")};
-  transition: opacity 0.2s ease;
-`;
-
-const ImageButton = styled.a`
+const Button = styled.button`
   align-items: center;
   border-radius: 0.5rem;
   color: var(--foreground);
@@ -115,6 +117,18 @@ const ImageButton = styled.a`
   &:hover {
     background-color: rgba(var(--foreground-rgb), 0.3);
   }
+`;
+
+const ImageButtons = styled.div<{ $isVisible: boolean }>`
+  display: flex;
+  gap: 0.5rem;
+  opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
+  pointer-events: ${({ $isVisible }) => ($isVisible ? "auto" : "none")};
+  transition: opacity 0.2s ease;
+`;
+
+const ImageButton = styled(Button).attrs({ as: "a" })`
+  text-decoration: none;
 `;
 
 interface CarouselProps {
@@ -192,46 +206,56 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
           ))}
         </MainEmblaContainer>
       </EmblaWrapper>
-      <EntryDetails>
-        <EntryTitle>{selectedEntry.title}</EntryTitle>
-        {selectedEntry.date || selectedEntry.creator ? (
-          <EntrySubtext>
-            {[
-              selectedEntry.date && formatDate(selectedEntry.date),
-              selectedEntry.creator && `Made by ${selectedEntry.creator}`,
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </EntrySubtext>
-        ) : null}
-        {selectedEntry.description && (
-          <EntryDescription>{selectedEntry.description}</EntryDescription>
-        )}
-      </EntryDetails>
-      {
-        <EmblaWrapper ref={additionalEmblaRef}>
-          <AdditionalEmblaContainer>
-            {selectedEntry.imageUrls.map((entry, index) => (
-              <AdditionalEmblaSlide key={entry}>
-                <AdditionalEmblaImage
-                  src={entry}
-                  alt={selectedEntry.title}
-                  width={1000}
-                  height={1000}
-                />
-                <ImageButtons $isVisible={index === additionalSelectedIndex}>
-                  <ImageButton href={entry} target="_blank" download>
-                    <Download />
-                  </ImageButton>
-                  <ImageButton href={entry} target="_blank">
-                    <ExternalLink />
-                  </ImageButton>
-                </ImageButtons>
-              </AdditionalEmblaSlide>
-            ))}
-          </AdditionalEmblaContainer>
-        </EmblaWrapper>
-      }
+
+      <GalleryDetails>
+        <Button onClick={() => mainEmblaApi?.scrollPrev()}>
+          <ChevronLeft />
+        </Button>
+
+        <EntryDetails>
+          <EntryTitle>{selectedEntry.title}</EntryTitle>
+          {selectedEntry.date || selectedEntry.creator ? (
+            <EntrySubtext>
+              {[
+                selectedEntry.date && formatDate(selectedEntry.date),
+                selectedEntry.creator && `Made by ${selectedEntry.creator}`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </EntrySubtext>
+          ) : null}
+          {selectedEntry.description && (
+            <EntryDescription>{selectedEntry.description}</EntryDescription>
+          )}
+        </EntryDetails>
+
+        <Button onClick={() => mainEmblaApi?.scrollNext()}>
+          <ChevronRight />
+        </Button>
+      </GalleryDetails>
+
+      <EmblaWrapper ref={additionalEmblaRef}>
+        <AdditionalEmblaContainer>
+          {selectedEntry.imageUrls.map((entry, index) => (
+            <AdditionalEmblaSlide key={entry}>
+              <AdditionalEmblaImage
+                src={entry}
+                alt={selectedEntry.title}
+                width={1000}
+                height={1000}
+              />
+              <ImageButtons $isVisible={index === additionalSelectedIndex}>
+                <ImageButton href={entry} target="_blank" download>
+                  <Download />
+                </ImageButton>
+                <ImageButton href={entry} target="_blank">
+                  <ExternalLink />
+                </ImageButton>
+              </ImageButtons>
+            </AdditionalEmblaSlide>
+          ))}
+        </AdditionalEmblaContainer>
+      </EmblaWrapper>
     </GalleryWrapper>
   );
 }
