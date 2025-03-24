@@ -92,6 +92,10 @@ interface CarouselProps {
 }
 
 export default function Carousel({ galleryEntries }: CarouselProps) {
+  galleryEntries.sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+
   const [mainEmblaRef, mainEmblaApi] = useEmblaCarousel(
     {
       align: "center",

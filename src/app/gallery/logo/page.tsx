@@ -5,7 +5,7 @@ import { GalleryType } from "@/components/gallery/gallery-page";
 import type { GalleryEntry } from "@/types";
 import type React from "react";
 
-// Sequentially ordered
+// Ordered by date
 const galleryEntries: GalleryEntry[] = [
   {
     title: "Eternals",
