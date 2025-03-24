@@ -12,6 +12,26 @@ export enum GalleryType {
   Wallpaper = "Wallpaper",
 }
 
+interface GalleryTypeTextInterface {
+  title: string;
+  descriptor: string;
+}
+
+const galleryTypeText: Record<GalleryType, GalleryTypeTextInterface> = {
+  [GalleryType.Logo]: {
+    title: "Logo Gallery",
+    descriptor: "Logos",
+  },
+  [GalleryType.Banner]: {
+    title: "Banner Gallery",
+    descriptor: "Banners",
+  },
+  [GalleryType.Wallpaper]: {
+    title: "Wallpaper Gallery",
+    descriptor: "Wallpapers",
+  },
+};
+
 const GalleryContentWrapper = styled.div`
   align-items: center;
   display: flex;
@@ -57,7 +77,7 @@ function TabButton({
 }) {
   return (
     <TippyStyled
-      content={<span>{galleryType.toString()}</span>}
+      content={<span>{galleryTypeText[galleryType].descriptor}</span>}
       interactive={true}
       interactiveBorder={20}
       delay={100}
@@ -83,7 +103,7 @@ export default function GalleryPage({
     <ContentWrapper>
       <GalleryContentWrapper>
         <TitleWrapper>
-          <Title>{galleryType.toString()} Gallery</Title>
+          <Title>{galleryTypeText[galleryType].title}</Title>
           <GalleryTypeButtons>
             <TabButton
               galleryType={GalleryType.Logo}
