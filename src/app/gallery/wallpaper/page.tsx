@@ -11,7 +11,10 @@ const galleryEntries: GalleryEntry[] = [
     title: "Pride Month 2024",
     description:
       "HD wallpaper celebrating Pride Month in 2024, featuring Marvel LGBTQ+ characters.",
-    imageUrls: ["/img/gallery/wallpaper/Pride 2024.png"],
+    imageUrls: [
+      "/img/gallery/wallpaper/Pride 2024.png",
+      "/img/gallery/logo/Pride 2024.png",
+    ],
     date: new Date("2024-06-01"),
     creator: "Rocked03",
   },
