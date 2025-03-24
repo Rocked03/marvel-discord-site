@@ -1,6 +1,7 @@
 "use client";
 
 import { GalleryPage } from "@/components/gallery";
+import { GalleryType } from "@/components/gallery/gallery-page";
 import type { GalleryEntry } from "@/types";
 import type React from "react";
 
@@ -31,5 +32,10 @@ const galleryEntries: GalleryEntry[] = [
 ];
 
 export default function LogoGalleryPage() {
-  return <GalleryPage galleryEntries={galleryEntries} />;
+  return (
+    <GalleryPage
+      galleryEntries={galleryEntries}
+      galleryType={GalleryType.Logo}
+    />
+  );
 }

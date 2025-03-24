@@ -14,6 +14,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { EmblaContainer, EmblaSlide, EmblaImage, EmblaWrapper } from "./embla";
+import { Button, LinkButton } from "../button";
 
 const GalleryWrapper = styled.div`
   display: flex;
@@ -78,32 +79,12 @@ const AdditionalEmblaImage = styled(EmblaImage)`
   max-height: 15rem;
 `;
 
-const Button = styled.button`
-  align-items: center;
-  border-radius: 0.5rem;
-  color: var(--foreground);
-  cursor: pointer;
-  display: flex;
-  height: 2rem;
-  justify-content: center;
-  transition: background-color 0.2s ease;
-  width: 4rem;
-
-  &:hover {
-    background-color: rgba(var(--foreground-rgb), 0.3);
-  }
-`;
-
 const ImageButtons = styled.div<{ $isVisible: boolean }>`
   display: flex;
   gap: 0.5rem;
   opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
   pointer-events: ${({ $isVisible }) => ($isVisible ? "auto" : "none")};
   transition: opacity 0.2s ease;
-`;
-
-const ImageButton = styled(Button).attrs({ as: "a" })`
-  text-decoration: none;
 `;
 
 interface CarouselProps {
@@ -220,12 +201,12 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
                 height={1000}
               />
               <ImageButtons $isVisible={index === additionalSelectedIndex}>
-                <ImageButton href={entry} target="_blank" download>
+                <LinkButton href={entry} target="_blank" download>
                   <Download />
-                </ImageButton>
-                <ImageButton href={entry} target="_blank">
+                </LinkButton>
+                <LinkButton href={entry} target="_blank">
                   <ExternalLink />
-                </ImageButton>
+                </LinkButton>
               </ImageButtons>
             </AdditionalEmblaSlide>
           ))}
