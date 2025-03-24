@@ -17,10 +17,11 @@ import { EmblaContainer, EmblaSlide, EmblaImage, EmblaWrapper } from "./embla";
 import { Button, LinkButton } from "../button";
 
 const GalleryWrapper = styled.div`
+  align-items: center;
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  align-items: center;
+  max-width: 100%;
 `;
 
 const EntryDetails = styled.div`
@@ -62,15 +63,32 @@ const GalleryDetails = styled.div`
   }
 `;
 
-const MainEmblaContainer = styled(EmblaContainer)``;
-
-const MainEmblaSlide = styled(EmblaSlide)`
-  &:not(.is-snapped) {
-    opacity: 0.16;
+const MainEmblaContainer = styled(EmblaContainer)`
+  @media (max-width: 768px) {
+    gap: 1rem;
   }
 `;
 
-const MainEmblaImage = styled(EmblaImage)``;
+const MainEmblaSlide = styled(EmblaSlide)`
+  flex: 0 0 auto;
+  max-width: 40%;
+
+  &:not(.is-snapped) {
+    opacity: 0.16;
+  }
+
+  @media (max-width: 768px) {
+    max-width: min(80%);
+  }
+`;
+
+const MainEmblaImage = styled(EmblaImage)`
+  max-height: 30rem;
+
+  @media (max-width: 768px) {
+    max-height: 20rem;
+  }
+`;
 
 const AdditionalEmblaContainer = styled(EmblaContainer)`
   gap: 1rem;
@@ -83,6 +101,7 @@ const AdditionalEmblaSlide = styled(EmblaSlide)`
   flex-direction: column;
   gap: 0.5rem;
   align-items: center;
+  max-width: 80%;
 `;
 
 const AdditionalEmblaImage = styled(EmblaImage)`
