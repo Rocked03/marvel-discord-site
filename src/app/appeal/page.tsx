@@ -14,23 +14,23 @@ const TextWrapper = styled.div`
   width: 100%;
 `;
 
-const Header = styled.h1`
-  font-size: 3rem;
-  font-weight: 400;
-  font-stretch: expanded;
-`;
-
-const Subheader = styled.h2`
-  font-size: 1.5rem;
-  font-weight: 300;
-  font-variation-settings: "slnt" -10;
-`;
-
 const TextContent = styled.div`
   display: flex;
   flex-direction: column;
   font-size: 1rem;
   gap: 1rem;
+
+  h1 {
+    font-size: 3rem;
+    font-weight: 400;
+    font-stretch: expanded;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 300;
+    font-variation-settings: "slnt" -10;
+  }
 
   ol,
   ul {
@@ -51,9 +51,9 @@ export default function AppealPage() {
   return (
     <ContentWrapper>
       <TextWrapper>
-        <Header>Appeals</Header>
-        <Subheader>Help, how can I get unbanned?</Subheader>
         <TextContent>
+          <h1>Appeals</h1>
+          <h2>Help, how can I get unbanned?</h2>
           <p>To appeal a ban, please follow the instructions below.</p>
           <ol>
             <li>
