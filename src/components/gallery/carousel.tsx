@@ -32,7 +32,7 @@ const EntryDetails = styled.div`
   width: 30rem;
 
   @media (max-width: 768px) {
-    max-width: 100vw - 2rem;
+    max-width: calc(100vw - 2rem);
   }
 `;
 
@@ -54,6 +54,12 @@ const EntryDescription = styled.p`
 const GalleryDetails = styled.div`
   display: flex;
   flex-direction: row;
+
+  @media (max-width: 768px) {
+    .slide-button {
+      display: none;
+    }
+  }
 `;
 
 const MainEmblaContainer = styled(EmblaContainer)``;
@@ -177,7 +183,10 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
       </EmblaWrapper>
 
       <GalleryDetails>
-        <Button onClick={() => mainEmblaApi?.scrollPrev()}>
+        <Button
+          onClick={() => mainEmblaApi?.scrollPrev()}
+          className={"slide-button"}
+        >
           <ChevronLeft />
         </Button>
 
@@ -198,7 +207,10 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
           )}
         </EntryDetails>
 
-        <Button onClick={() => mainEmblaApi?.scrollNext()}>
+        <Button
+          onClick={() => mainEmblaApi?.scrollNext()}
+          className={"slide-button"}
+        >
           <ChevronRight />
         </Button>
       </GalleryDetails>
