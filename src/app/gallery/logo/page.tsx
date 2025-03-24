@@ -242,8 +242,7 @@ const galleryEntries: GalleryEntry[] = [
   },
   {
     title: "Secret Invasion",
-    description:
-      "Animated logo and HD wallpaper for the Secret Invasion series.",
+    description: "Logo for the Secret Invasion series.",
     imageUrls: [
       "/img/gallery/logo/Secret Invasion 2.jpg",
       "/img/gallery/logo/Secret Invasion 1.jpg",

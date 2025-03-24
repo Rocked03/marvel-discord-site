@@ -145,8 +145,7 @@ const galleryEntries: GalleryEntry[] = [
   },
   {
     title: "Black Panther: Wakanda Forever",
-    description:
-      "Aanimated banner for the Black Panther: Wakanda Forever film.",
+    description: "Animated banner for the Black Panther: Wakanda Forever film.",
     imageUrls: [
       "/img/gallery/banner/Wakanda Forever 3840x2190.gif",
       "/img/gallery/banner/Wakanda Forever.png",
