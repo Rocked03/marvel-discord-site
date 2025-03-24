@@ -1,7 +1,6 @@
 "use client";
 
-import { ContentWrapper } from "@/components";
-import Carousel from "@/components/gallery/carousel";
+import { GalleryPage } from "@/components/gallery";
 import type { GalleryEntry } from "@/types";
 import type React from "react";
 
@@ -32,9 +31,5 @@ const galleryEntries: GalleryEntry[] = [
 ];
 
 export default function LogoGalleryPage() {
-  return (
-    <ContentWrapper>
-      <Carousel galleryEntries={galleryEntries} />
-    </ContentWrapper>
-  );
+  return <GalleryPage galleryEntries={galleryEntries} />;
 }

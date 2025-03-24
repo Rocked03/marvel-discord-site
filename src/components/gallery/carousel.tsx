@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import ClassNames from "embla-carousel-class-names";
 import styled from "styled-components";
-import Image from "next/image";
 
 import type { GalleryEntry } from "@/types";
 import { formatDate } from "@/utils";
@@ -14,6 +13,7 @@ import {
   Download,
   ExternalLink,
 } from "lucide-react";
+import { EmblaContainer, EmblaSlide, EmblaImage, EmblaWrapper } from "./embla";
 
 const GalleryWrapper = styled.div`
   display: flex;
@@ -49,31 +49,6 @@ const EntryDescription = styled.p`
 const GalleryDetails = styled.div`
   display: flex;
   flex-direction: row;
-`;
-
-const EmblaWrapper = styled.div`
-  overflow: hidden;
-  border-radius: 1rem;
-  width: 100%;
-`;
-
-const EmblaContainer = styled.div`
-  display: flex;
-  gap: 3rem;
-`;
-
-const EmblaSlide = styled.div`
-  flex: 0 0 40%;
-  max-width: 100%;
-  transition: opacity 0.3s ease;
-`;
-
-const EmblaImage = styled(Image)`
-  border-radius: 1rem;
-  display: block;
-  height: auto;
-  object-fit: contain;
-  width: 100%;
 `;
 
 const MainEmblaContainer = styled(EmblaContainer)``;
