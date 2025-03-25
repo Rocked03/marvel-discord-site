@@ -17,7 +17,7 @@ import {
 import { EmblaContainer, EmblaSlide, EmblaImage, EmblaWrapper } from "./embla";
 import { Button, LinkButton } from "../button";
 import AutoHeight from "embla-carousel-auto-height";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const GalleryWrapper = styled.div`
   align-items: center;
@@ -154,7 +154,7 @@ interface CarouselProps {
 
 export default function Carousel({ galleryEntries }: CarouselProps) {
   const router = useRouter();
-  const searchParams = new URLSearchParams(window.location.search);
+  const searchParams = useSearchParams();
 
   galleryEntries.sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -183,8 +183,9 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
   useEffect(() => {
     if (!galleryEntries[thumbSelectedIndex]) return;
     const newSlide = formatEntryTitle(galleryEntries[thumbSelectedIndex].title);
-    searchParams.set("slide", newSlide);
-    router.replace(`?${searchParams.toString()}`, { scroll: false });
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.set("slide", newSlide);
+    router.replace(`?${newSearchParams.toString()}`, { scroll: false });
   }, [thumbSelectedIndex, router, galleryEntries, searchParams]);
 
   useEffect(() => {
