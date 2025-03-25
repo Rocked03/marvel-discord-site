@@ -22,7 +22,8 @@ const galleryEntries: GalleryEntry[] = [
   },
   {
     title: "Marvel Discord Moderation",
-    description: "Various logos used for the Marvel Discord server.",
+    description:
+      "Various logos used around the Marvel Discord server. Mailbox art by Mike Del Mundo.",
     imageUrls: [
       "/img/gallery/logo/Mailbox 2.png",
       "/img/gallery/logo/Mod server.png",
@@ -108,13 +109,14 @@ const galleryEntries: GalleryEntry[] = [
   {
     title: "Classic Logos - 2019",
     description:
-      "Classic logos for the Marvel Discord server. Featuring logos for Spider-Man: Far From Home, Dark Phoenix, Avengers: Endgame, Captain Marvel, and The Punisher S2.",
+      "Classic logos for the Marvel Discord server. Featuring logos for Spider-Man: Far From Home, Dark Phoenix, Avengers: Endgame, Captain Marvel, and The Punisher S2. Additionally, a logo for Black Panther in respect for Chadwick Boseman's passing (in 2020).",
     imageUrls: [
       "/img/gallery/logo/punisher s2.png",
       "/img/gallery/logo/captmarvel2019.png",
       "/img/gallery/logo/Avengers Endgame.png",
       "/img/gallery/logo/Dark Phoenix.png",
       "/img/gallery/logo/Spider-Man Far From Home.png",
+      "/img/gallery/logo/Black Panther.png",
     ],
     date: new Date("2019-12-31"),
     previewImageIndex: 2,
@@ -237,8 +239,7 @@ const galleryEntries: GalleryEntry[] = [
   },
   {
     title: "Eternals",
-    description:
-      "Made to coincide with the release of Marvel Studios' Eternals.",
+    description: "Logo for the Eternals film.",
     imageUrls: ["/img/gallery/logo/Eternals.png"],
     date: new Date("2021-11-05"),
     creator: "Rocked03",
@@ -275,7 +276,7 @@ const galleryEntries: GalleryEntry[] = [
   {
     title: "Doctor Strange in the Multiverse of Madness",
     description:
-      "Logo for the Doctor Strange in the Multiverse of Madness film.",
+      "Logo for the Doctor Strange in the Multiverse of Madness film. Features fragments of the The Falcon and the Winter Soldier, Loki S1, What If...? S1, Eternals, Spider-Man: No Way Home logos.",
     imageUrls: [
       "/img/gallery/logo/Multiverse of Madness.png",
       "/img/gallery/logo/Multiverse of Madness clean.png",
@@ -286,7 +287,7 @@ const galleryEntries: GalleryEntry[] = [
   {
     title: "Ms. Marvel",
     description:
-      "Series of animated logos and banner for the Ms. Marvel series.",
+      "Series of animated logos and banner for the Ms. Marvel series. Logos were automatically cycled periodically to add variety.",
     imageUrls: [
       "/img/gallery/logo/Ms Marvel.gif",
       "/img/gallery/logo/Ms Marvel Kamala 1 sticker.gif",
