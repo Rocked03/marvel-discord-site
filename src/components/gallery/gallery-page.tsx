@@ -3,8 +3,6 @@ import { ContentWrapper, LinkButton } from "..";
 import Carousel from "./carousel";
 import Image from "next/image";
 import styled from "styled-components";
-import Tippy from "@tippyjs/react";
-import "tippy.js/dist/tippy.css";
 
 export enum GalleryType {
   Logo = "Logo",
@@ -13,22 +11,26 @@ export enum GalleryType {
 }
 
 interface GalleryTypeTextInterface {
-  title: string;
   descriptor: string;
+  iconUrl: string;
+  path: string;
 }
 
 const galleryTypeText: Record<GalleryType, GalleryTypeTextInterface> = {
   [GalleryType.Logo]: {
-    title: "Logo Gallery",
     descriptor: "Logos",
+    iconUrl: "/img/icons/logo.svg",
+    path: "../logo",
   },
   [GalleryType.Banner]: {
-    title: "Banner Gallery",
     descriptor: "Banners",
+    iconUrl: "/img/icons/banner.svg",
+    path: "../banner",
   },
   [GalleryType.Wallpaper]: {
-    title: "Wallpaper Gallery",
     descriptor: "Wallpapers",
+    iconUrl: "/img/icons/wallpaper.svg",
+    path: "../wallpaper",
   },
 };
 
@@ -39,29 +41,52 @@ const GalleryContentWrapper = styled.div`
   gap: 1rem;
 `;
 
-const TitleWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  align-items: center;
-`;
-
-const Title = styled.h1`
-  font-size: 2rem;
-  font-weight: 400;
-  font-stretch: expanded;
-`;
-
 const GalleryTypeButtons = styled.div`
   display: flex;
   gap: 0.5rem;
+  border-radius: 0.5rem;
+
+  @media (max-width: 768px) {
+    background-color: rgba(var(--foreground-rgb), 0.1);
+    gap: 0rem;
+  }
 `;
 
-const GalleryTypeButton = styled(LinkButton)`
+const GalleryTypeButtonStyle = styled(LinkButton)<{ $isActiveParent: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.2rem;
+
+  @media (max-width: 768px) {
+    span {
+      display: ${({ $isActiveParent }) => ($isActiveParent ? "block" : "none")};
+    }
+  }
 `;
+
+function GalleryTypeButton({
+  galleryType,
+  currentGalleryType,
+}: {
+  galleryType: GalleryType;
+  currentGalleryType: GalleryType;
+}) {
+  return (
+    <GalleryTypeButtonStyle
+      href={galleryTypeText[galleryType].path}
+      $isActive={galleryType === currentGalleryType}
+      $isActiveParent={galleryType === currentGalleryType}
+    >
+      <Image
+        src={galleryTypeText[galleryType].iconUrl}
+        alt={`${galleryType} icon`}
+        width={24}
+        height={24}
+      />
+      <span>{galleryTypeText[galleryType].descriptor}</span>
+    </GalleryTypeButtonStyle>
+  );
+}
 
 interface GalleryPageProps {
   galleryEntries: GalleryEntry[];
@@ -76,42 +101,13 @@ export default function GalleryPage({
     <ContentWrapper>
       <GalleryContentWrapper>
         <GalleryTypeButtons>
-          <GalleryTypeButton
-            $isActive={galleryType === GalleryType.Logo}
-            href="../logo"
-          >
-            <Image
-              src="/img/icons/logo.svg"
-              alt="Logo icon"
-              width={24}
-              height={24}
+          {Object.values(GalleryType).map((type) => (
+            <GalleryTypeButton
+              key={type}
+              galleryType={type}
+              currentGalleryType={galleryType}
             />
-            Logos
-          </GalleryTypeButton>
-          <GalleryTypeButton
-            $isActive={galleryType === GalleryType.Banner}
-            href="../banner"
-          >
-            <Image
-              src="/img/icons/banner.svg"
-              alt="Banner icon"
-              width={24}
-              height={24}
-            />
-            Banners
-          </GalleryTypeButton>
-          <GalleryTypeButton
-            $isActive={galleryType === GalleryType.Wallpaper}
-            href="../wallpaper"
-          >
-            <Image
-              src="/img/icons/wallpaper.svg"
-              alt="Wallpaper icon"
-              width={24}
-              height={24}
-            />
-            Wallpapers
-          </GalleryTypeButton>
+          ))}
         </GalleryTypeButtons>
         <Carousel galleryEntries={galleryEntries} />
       </GalleryContentWrapper>

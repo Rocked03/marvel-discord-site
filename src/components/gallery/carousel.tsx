@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import ClassNames from "embla-carousel-class-names";
 import styled from "styled-components";
@@ -124,6 +125,20 @@ const ImageButtons = styled.div<{ $isVisible: boolean }>`
   pointer-events: ${({ $isVisible }) => ($isVisible ? "auto" : "none")};
   transition: opacity 0.2s ease;
 `;
+
+function SlideButton({
+  children,
+  onClick,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <Button onClick={onClick} className={"slide-button"}>
+      {children}
+    </Button>
+  );
+}
 
 interface CarouselProps {
   galleryEntries: GalleryEntry[];
@@ -256,12 +271,9 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
       </EmblaWrapper>
 
       <GalleryDetails>
-        <Button
-          onClick={() => thumbEmblaApi?.scrollPrev()}
-          className={"slide-button"}
-        >
+        <SlideButton onClick={() => thumbEmblaApi?.scrollPrev()}>
           <ChevronLeft />
-        </Button>
+        </SlideButton>
 
         <EntryDetails>
           <EntryTitle>{selectedEntry.title}</EntryTitle>
@@ -280,12 +292,9 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
           )}
         </EntryDetails>
 
-        <Button
-          onClick={() => thumbEmblaApi?.scrollNext()}
-          className={"slide-button"}
-        >
+        <SlideButton onClick={() => thumbEmblaApi?.scrollNext()}>
           <ChevronRight />
-        </Button>
+        </SlideButton>
       </GalleryDetails>
     </GalleryWrapper>
   );
