@@ -10,7 +10,7 @@ const galleryEntries: GalleryEntry[] = [
   {
     title: "Pride Month 2024",
     description:
-      "HD wallpaper celebrating Pride Month in 2024, featuring Marvel LGBTQ+ characters.",
+      "HD wallpaper celebrating Pride Month in 2024, featuring many of Marvel's LGBTQ+ characters.",
     imageUrls: [
       "/img/gallery/wallpaper/Pride 2024.png",
       "/img/gallery/logo/Pride 2024.png",
@@ -21,7 +21,7 @@ const galleryEntries: GalleryEntry[] = [
   {
     title: "Deadpool & Wolverine",
     description:
-      "HD wallpaper featuring Deadpool and Wolverine in comics and the 2024 film.",
+      "HD wallpaper featuring Deadpool and Wolverine in comics and the 2024 film, alongside familiar comic faces from Wade and Logan's world.",
     imageUrls: [
       "/img/gallery/wallpaper/Deadpool & Wolverine.png",
       "/img/gallery/logo/Deadpool & Wolverine.gif",
@@ -57,7 +57,7 @@ const galleryEntries: GalleryEntry[] = [
   {
     title: "2024 in Review",
     description:
-      "HD wallpaper collage some of the best parts of Marvel in 2024.",
+      "HD wallpaper collage featuring many Marvel highlights from 2024.",
     imageUrls: ["/img/gallery/wallpaper/2024 Banner.png"],
     date: new Date("2024-12-31"),
     creator: "Rocked03",

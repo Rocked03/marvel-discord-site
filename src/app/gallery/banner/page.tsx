@@ -23,7 +23,8 @@ const galleryEntries: GalleryEntry[] = [
   },
   {
     title: "Marvel Comics",
-    description: "Various banners themed with monthly comics.",
+    description:
+      'Various banners themed with monthly comics. Contains "X-Men", Jan, Mar, Apr, and Dec 2020, and Feb, Mar, and Apr 2021.',
     imageUrls: [
       "/img/gallery/banner/X-Men.png",
       "/img/gallery/banner/Jan 2020.png",
@@ -40,7 +41,7 @@ const galleryEntries: GalleryEntry[] = [
   {
     title: "X of Swords",
     description:
-      "Logos and banners for the X of Swords event in the comics. Also including logos for the S.W.O.R.D. and Hellions series and Empyre and King in Black events.",
+      "Logos and banners for the X of Swords event in the comics. Also including banners and logos for the S.W.O.R.D. series.",
     imageUrls: [
       "/img/gallery/banner/X of Swords blue 1.png",
       "/img/gallery/banner/X of Swords blue 2.png",
@@ -54,9 +55,6 @@ const galleryEntries: GalleryEntry[] = [
       "/img/gallery/logo/X of Swords Orange 2.png",
       "/img/gallery/logo/SWORD 1.png",
       "/img/gallery/logo/SWORD 2.png",
-      "/img/gallery/logo/Hellions.png",
-      "/img/gallery/logo/Empyre.png",
-      "/img/gallery/logo/King in Black.png",
     ],
     date: new Date("2020-09-23"),
     creator: "Rocked03",
@@ -73,7 +71,8 @@ const galleryEntries: GalleryEntry[] = [
   },
   {
     title: "Pride Month 2021",
-    description: "Banners for Pride Month in 2021.",
+    description:
+      "Banners for Pride Month in 2021. Automatically rotated periodically.",
     imageUrls: [
       "/img/gallery/banner/Pride 1.png",
       "/img/gallery/banner/Pride 2.png",
