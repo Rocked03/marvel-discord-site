@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { EmblaContainer, EmblaSlide, EmblaImage, EmblaWrapper } from "./embla";
 import { Button, LinkButton } from "../button";
+import AutoHeight from "embla-carousel-auto-height";
 
 const GalleryWrapper = styled.div`
   align-items: center;
@@ -76,7 +77,7 @@ const ThumbEmblaSlide = styled(EmblaSlide)`
   }
 
   @media (max-width: 768px) {
-    max-width: min(80%);
+    max-width: 25%;
   }
 `;
 
@@ -84,12 +85,15 @@ const ThumbEmblaImage = styled(EmblaImage)`
   max-height: 30rem;
 
   @media (max-width: 768px) {
+    border-radius: 0.5rem;
     max-height: 20rem;
   }
 `;
 
 const MainEmblaContainer = styled(EmblaContainer)`
+  align-items: flex-start;
   gap: 1rem;
+  transition: height 0.2s;
 `;
 
 const MainEmblaSlide = styled(EmblaSlide)`
@@ -99,13 +103,17 @@ const MainEmblaSlide = styled(EmblaSlide)`
   gap: 0.5rem;
   align-items: center;
   max-width: 80%;
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+  }
 `;
 
 const MainEmblaImage = styled(EmblaImage)`
   max-height: 30rem;
 
   @media (max-width: 768px) {
-    max-height: 10rem;
+    max-height: 20rem;
   }
 `;
 
@@ -143,7 +151,7 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
       loop: false,
       containScroll: false,
     },
-    [ClassNames()]
+    [ClassNames(), AutoHeight()]
   );
 
   const [thumbSelectedIndex, setThumbSelectedIndex] = useState(0);

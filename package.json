@@ -11,6 +11,7 @@
   "dependencies": {
     "@tippyjs/react": "^4.2.6",
     "dotenv": "^16.4.7",
+    "embla-carousel-auto-height": "^8.5.2",
     "embla-carousel-class-names": "^8.5.2",
     "embla-carousel-react": "^8.5.2",
     "lucide-react": "^0.483.0",
