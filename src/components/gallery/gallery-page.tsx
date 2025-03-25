@@ -3,6 +3,7 @@ import { ContentWrapper, LinkButton } from "..";
 import Carousel from "./carousel";
 import Image from "next/image";
 import styled from "styled-components";
+import { Suspense } from "react";
 
 export enum GalleryType {
   Logo = "Logo",
@@ -109,7 +110,9 @@ export default function GalleryPage({
             />
           ))}
         </GalleryTypeButtons>
-        <Carousel galleryEntries={galleryEntries} />
+        <Suspense>
+          <Carousel galleryEntries={galleryEntries} />
+        </Suspense>
       </GalleryContentWrapper>
     </ContentWrapper>
   );
