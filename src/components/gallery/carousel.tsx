@@ -20,7 +20,7 @@ const GalleryWrapper = styled.div`
   align-items: center;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1rem;
   max-width: 100%;
 `;
 
@@ -63,18 +63,16 @@ const GalleryDetails = styled.div`
   }
 `;
 
-const MainEmblaContainer = styled(EmblaContainer)`
-  @media (max-width: 768px) {
-    gap: 1rem;
-  }
+const ThumbEmblaContainer = styled(EmblaContainer)`
+  gap: 0.6rem;
 `;
 
-const MainEmblaSlide = styled(EmblaSlide)`
+const ThumbEmblaSlide = styled(EmblaSlide)`
   flex: 0 0 auto;
-  max-width: 40%;
+  max-width: 8%;
 
   &:not(.is-snapped) {
-    opacity: 0.16;
+    opacity: 0.4;
   }
 
   @media (max-width: 768px) {
@@ -82,7 +80,7 @@ const MainEmblaSlide = styled(EmblaSlide)`
   }
 `;
 
-const MainEmblaImage = styled(EmblaImage)`
+const ThumbEmblaImage = styled(EmblaImage)`
   max-height: 30rem;
 
   @media (max-width: 768px) {
@@ -90,13 +88,12 @@ const MainEmblaImage = styled(EmblaImage)`
   }
 `;
 
-const AdditionalEmblaContainer = styled(EmblaContainer)`
+const MainEmblaContainer = styled(EmblaContainer)`
   gap: 1rem;
 `;
 
-const AdditionalEmblaSlide = styled(EmblaSlide)`
+const MainEmblaSlide = styled(EmblaSlide)`
   flex: 0 0 auto;
-  max-height: 20rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -104,8 +101,8 @@ const AdditionalEmblaSlide = styled(EmblaSlide)`
   max-width: 80%;
 `;
 
-const AdditionalEmblaImage = styled(EmblaImage)`
-  max-height: 15rem;
+const MainEmblaImage = styled(EmblaImage)`
+  max-height: 30rem;
 
   @media (max-width: 768px) {
     max-height: 10rem;
@@ -129,6 +126,16 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
+  const [thumbEmblaRef, thumbEmblaApi] = useEmblaCarousel(
+    {
+      align: "center",
+      dragFree: false,
+      loop: false,
+      containScroll: false,
+    },
+    [ClassNames()]
+  );
+
   const [mainEmblaRef, mainEmblaApi] = useEmblaCarousel(
     {
       align: "center",
@@ -139,19 +146,24 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
     [ClassNames()]
   );
 
-  const [additionalEmblaRef, additionalEmblaApi] = useEmblaCarousel(
-    {
-      align: "center",
-      dragFree: false,
-      loop: false,
-      containScroll: false,
-    },
-    [ClassNames()]
-  );
-
+  const [thumbSelectedIndex, setThumbSelectedIndex] = useState(0);
   const [mainSelectedIndex, setMainSelectedIndex] = useState(0);
-  const [additionalSelectedIndex, setAdditionalSelectedIndex] = useState(0);
-  const selectedEntry = galleryEntries[mainSelectedIndex];
+  const selectedEntry = galleryEntries[thumbSelectedIndex];
+
+  useEffect(() => {
+    if (!thumbEmblaApi) return;
+
+    const onSelect = () => {
+      setThumbSelectedIndex(thumbEmblaApi.selectedScrollSnap());
+    };
+
+    thumbEmblaApi.on("select", onSelect);
+    onSelect();
+
+    return () => {
+      thumbEmblaApi.off("select", onSelect);
+    };
+  }, [thumbEmblaApi]);
 
   useEffect(() => {
     if (!mainEmblaApi) return;
@@ -169,33 +181,67 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
   }, [mainEmblaApi]);
 
   useEffect(() => {
-    if (!additionalEmblaApi) return;
+    if (!thumbEmblaApi) return;
 
-    const onSelect = () => {
-      setAdditionalSelectedIndex(additionalEmblaApi.selectedScrollSnap());
+    const onThumbSelect = () => {
+      setThumbSelectedIndex(thumbEmblaApi.selectedScrollSnap());
+      setMainSelectedIndex(0);
+      mainEmblaApi?.scrollTo(0, true);
     };
 
-    additionalEmblaApi.on("select", onSelect);
-    onSelect();
+    thumbEmblaApi.on("select", onThumbSelect);
+    onThumbSelect();
 
     return () => {
-      additionalEmblaApi.off("select", onSelect);
+      thumbEmblaApi.off("select", onThumbSelect);
     };
-  }, [additionalEmblaApi]);
+  }, [thumbEmblaApi, mainEmblaApi]);
 
   return (
     <GalleryWrapper>
+      <EmblaWrapper ref={thumbEmblaRef}>
+        <ThumbEmblaContainer>
+          {galleryEntries.map((entry, index) => (
+            <ThumbEmblaSlide key={entry.title}>
+              <button
+                type="button"
+                onClick={() => {
+                  thumbEmblaApi?.scrollTo(index);
+                  mainEmblaApi?.scrollTo(0);
+                }}
+              >
+                <ThumbEmblaImage
+                  src={entry.imageUrls[entry.previewImageIndex ?? 0]}
+                  alt={entry.title}
+                  width={1000}
+                  height={1000}
+                  unoptimized={entry.imageUrls[0].endsWith(".gif")}
+                />
+              </button>
+            </ThumbEmblaSlide>
+          ))}
+        </ThumbEmblaContainer>
+      </EmblaWrapper>
+
       <EmblaWrapper ref={mainEmblaRef}>
         <MainEmblaContainer>
-          {galleryEntries.map((entry) => (
-            <MainEmblaSlide key={entry.title}>
+          {selectedEntry.imageUrls.map((entry, index) => (
+            <MainEmblaSlide key={entry}>
               <MainEmblaImage
-                src={entry.imageUrls[0]}
-                alt={entry.title}
+                src={entry}
+                alt={selectedEntry.title}
                 width={1000}
                 height={1000}
-                unoptimized={entry.imageUrls[0].endsWith(".gif")}
+                unoptimized={entry.endsWith(".gif")}
               />
+              <ImageButtons $isVisible={index === mainSelectedIndex}>
+                <LinkButton href={entry} target="_blank" download>
+                  <Download />
+                </LinkButton>
+                <LinkButton href={entry} target="_blank">
+                  <ExternalLink />
+                </LinkButton>
+              </ImageButtons>
             </MainEmblaSlide>
           ))}
         </MainEmblaContainer>
@@ -203,7 +249,7 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
 
       <GalleryDetails>
         <Button
-          onClick={() => mainEmblaApi?.scrollPrev()}
+          onClick={() => thumbEmblaApi?.scrollPrev()}
           className={"slide-button"}
         >
           <ChevronLeft />
@@ -227,36 +273,12 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
         </EntryDetails>
 
         <Button
-          onClick={() => mainEmblaApi?.scrollNext()}
+          onClick={() => thumbEmblaApi?.scrollNext()}
           className={"slide-button"}
         >
           <ChevronRight />
         </Button>
       </GalleryDetails>
-
-      <EmblaWrapper ref={additionalEmblaRef}>
-        <AdditionalEmblaContainer>
-          {selectedEntry.imageUrls.map((entry, index) => (
-            <AdditionalEmblaSlide key={entry}>
-              <AdditionalEmblaImage
-                src={entry}
-                alt={selectedEntry.title}
-                width={1000}
-                height={1000}
-                unoptimized={entry.endsWith(".gif")}
-              />
-              <ImageButtons $isVisible={index === additionalSelectedIndex}>
-                <LinkButton href={entry} target="_blank" download>
-                  <Download />
-                </LinkButton>
-                <LinkButton href={entry} target="_blank">
-                  <ExternalLink />
-                </LinkButton>
-              </ImageButtons>
-            </AdditionalEmblaSlide>
-          ))}
-        </AdditionalEmblaContainer>
-      </EmblaWrapper>
     </GalleryWrapper>
   );
 }

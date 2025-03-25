@@ -23,5 +23,6 @@ export const EmblaImage = styled(Image)`
   display: block;
   height: auto;
   object-fit: contain;
+  user-select: none;
   width: 100%;
 `;

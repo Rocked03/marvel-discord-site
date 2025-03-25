@@ -75,47 +75,44 @@ export default function GalleryPage({
   return (
     <ContentWrapper>
       <GalleryContentWrapper>
-        <TitleWrapper>
-          {/* <Title>{galleryTypeText[galleryType].title}</Title> */}
-          <GalleryTypeButtons>
-            <GalleryTypeButton
-              $isActive={galleryType === GalleryType.Logo}
-              href="../logo"
-            >
-              <Image
-                src="/img/icons/logo.svg"
-                alt="Logo icon"
-                width={24}
-                height={24}
-              />
-              Logos
-            </GalleryTypeButton>
-            <GalleryTypeButton
-              $isActive={galleryType === GalleryType.Banner}
-              href="../banner"
-            >
-              <Image
-                src="/img/icons/banner.svg"
-                alt="Banner icon"
-                width={24}
-                height={24}
-              />
-              Banners
-            </GalleryTypeButton>
-            <GalleryTypeButton
-              $isActive={galleryType === GalleryType.Wallpaper}
-              href="../wallpaper"
-            >
-              <Image
-                src="/img/icons/wallpaper.svg"
-                alt="Wallpaper icon"
-                width={24}
-                height={24}
-              />
-              Wallpapers
-            </GalleryTypeButton>
-          </GalleryTypeButtons>
-        </TitleWrapper>
+        <GalleryTypeButtons>
+          <GalleryTypeButton
+            $isActive={galleryType === GalleryType.Logo}
+            href="../logo"
+          >
+            <Image
+              src="/img/icons/logo.svg"
+              alt="Logo icon"
+              width={24}
+              height={24}
+            />
+            Logos
+          </GalleryTypeButton>
+          <GalleryTypeButton
+            $isActive={galleryType === GalleryType.Banner}
+            href="../banner"
+          >
+            <Image
+              src="/img/icons/banner.svg"
+              alt="Banner icon"
+              width={24}
+              height={24}
+            />
+            Banners
+          </GalleryTypeButton>
+          <GalleryTypeButton
+            $isActive={galleryType === GalleryType.Wallpaper}
+            href="../wallpaper"
+          >
+            <Image
+              src="/img/icons/wallpaper.svg"
+              alt="Wallpaper icon"
+              width={24}
+              height={24}
+            />
+            Wallpapers
+          </GalleryTypeButton>
+        </GalleryTypeButtons>
         <Carousel galleryEntries={galleryEntries} />
       </GalleryContentWrapper>
     </ContentWrapper>

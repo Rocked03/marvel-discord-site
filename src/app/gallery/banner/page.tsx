@@ -152,6 +152,7 @@ const galleryEntries: GalleryEntry[] = [
       "/img/gallery/logo/Wakanda Forever.png",
     ],
     date: new Date("2022-11-11"),
+    previewImageIndex: 1,
     creator: "Rocked03",
   },
 ];

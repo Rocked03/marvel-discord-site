@@ -220,6 +220,7 @@ const galleryEntries: GalleryEntry[] = [
       "/img/gallery/logo/Ant-Man and the Wasp Quantumania.png",
     ],
     date: new Date("2023-02-17"),
+    previewImageIndex: 1,
     creator: "Rocked03",
   },
   {
@@ -311,6 +312,7 @@ const galleryEntries: GalleryEntry[] = [
       "/img/gallery/wallpaper/Deadpool & Wolverine.png",
     ],
     date: new Date("2024-07-26"),
+    previewImageIndex: 1,
     creator: "Rocked03",
   },
   {
