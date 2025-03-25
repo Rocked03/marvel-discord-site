@@ -38,6 +38,40 @@ const galleryEntries: GalleryEntry[] = [
     creator: "Rocked03",
   },
   {
+    title: "X of Swords",
+    description:
+      "Logos and banners for the X of Swords event in the comics. Also including logos for the S.W.O.R.D. and Hellions series and Empyre and King in Black events.",
+    imageUrls: [
+      "/img/gallery/banner/X of Swords blue 1.png",
+      "/img/gallery/banner/X of Swords blue 2.png",
+      "/img/gallery/banner/X of Swords orange 1.png",
+      "/img/gallery/banner/X of Swords orange 2.png",
+      "/img/gallery/banner/SWORD 1.png",
+      "/img/gallery/banner/SWORD 2.png",
+      "/img/gallery/logo/X of Swords Blue 1.png",
+      "/img/gallery/logo/X of Swords Blue 2.png",
+      "/img/gallery/logo/X of Swords Orange 1.png",
+      "/img/gallery/logo/X of Swords Orange 2.png",
+      "/img/gallery/logo/SWORD 1.png",
+      "/img/gallery/logo/SWORD 2.png",
+      "/img/gallery/logo/Hellions.png",
+      "/img/gallery/logo/Empyre.png",
+      "/img/gallery/logo/King in Black.png",
+    ],
+    date: new Date("2020-09-23"),
+    creator: "Rocked03",
+  },
+  {
+    title: "Helstrom",
+    description: "Logo and banner for the Helstrom series.",
+    imageUrls: [
+      "/img/gallery/banner/Helstrom.png",
+      "/img/gallery/logo/Helstrom.png",
+    ],
+    date: new Date("2020-10-16"),
+    creator: "Rocked03",
+  },
+  {
     title: "Pride Month 2021",
     description: "Banners for Pride Month in 2021.",
     imageUrls: [
