@@ -35,6 +35,21 @@ const galleryEntries: GalleryEntry[] = [
     creator: "Rocked03",
   },
   {
+    title: "Classic Logos - 2019",
+    description:
+      "Classic logos for the Marvel Discord server. Featuring logos for Spider-Man: Far From Home, Dark Phoenix, Avengers: Endgame, Captain Marvel, and The Punisher S2.",
+    imageUrls: [
+      "/img/gallery/logo/Spider-Man Far From Home.png",
+      "/img/gallery/logo/Dark Phoenix.png",
+      "/img/gallery/logo/Avengers Endgame.png",
+      "/img/gallery/logo/captmarvel2019.png",
+      "/img/gallery/logo/punisher s2.png",
+    ],
+    date: new Date("2019-12-31"),
+    previewImageIndex: 2,
+    creator: "Rocked03",
+  },
+  {
     title: "X of Swords",
     description:
       "Logos and banners for the X of Swords event in the comics. Also including logos for the S.W.O.R.D. and Hellions series and Empyre and King in Black events.",
