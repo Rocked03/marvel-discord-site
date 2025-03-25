@@ -142,7 +142,10 @@ function SlideButton({
 }
 
 function formatEntryTitle(title: string) {
-  return title.replace(/ /g, "-").toLowerCase();
+  return title
+    .replace(/[^a-zA-Z0-9 ]/g, "")
+    .replace(/ /g, "-")
+    .toLowerCase();
 }
 
 interface CarouselProps {

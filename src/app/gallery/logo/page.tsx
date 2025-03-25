@@ -265,7 +265,10 @@ const galleryEntries: GalleryEntry[] = [
   {
     title: "Moon Knight",
     description: "Logo for the Moon Knight series.",
-    imageUrls: ["/img/gallery/logo/Moon Knight.png"],
+    imageUrls: [
+      "/img/gallery/logo/Moon Knight.png",
+      "/img/gallery/logo/Mooon Knight.png",
+    ],
     date: new Date("2022-03-30"),
     creator: "Rocked03",
   },
@@ -293,10 +296,12 @@ const galleryEntries: GalleryEntry[] = [
       "/img/gallery/logo/Ms Marvel Red Dagger.gif",
       "/img/gallery/logo/Ms Marvel Pencil.gif",
       "/img/gallery/logo/Ms Marvel POW sticker.gif",
+      "/img/gallery/logo/Ms Marvel.png",
       "/img/gallery/banner/Ms Marvel.png",
       "/img/gallery/banner/Ms Marvel w stickers.png",
     ],
     date: new Date("2022-06-08"),
+    previewImageIndex: 8,
     creator: "Rocked03",
   },
   {
@@ -316,8 +321,12 @@ const galleryEntries: GalleryEntry[] = [
   {
     title: "Werewolf By Night",
     description: "Animated logo for the Werewolf By Night series.",
-    imageUrls: ["/img/gallery/logo/Werewolf by Night.gif"],
+    imageUrls: [
+      "/img/gallery/logo/Werewolf by Night.gif",
+      "/img/gallery/logo/Werewolf by Night.jpg",
+    ],
     date: new Date("2022-10-07"),
+    previewImageIndex: 1,
     creator: "Rocked03",
   },
   {
@@ -401,8 +410,12 @@ const galleryEntries: GalleryEntry[] = [
   {
     title: "The Marvels",
     description: "Animated logo for the The Marvels film.",
-    imageUrls: ["/img/gallery/logo/The Marvels.gif"],
+    imageUrls: [
+      "/img/gallery/logo/The Marvels.gif",
+      "/img/gallery/logo/The Marvels.png",
+    ],
     date: new Date("2023-11-10"),
+    previewImageIndex: 1,
     creator: "Rocked03",
   },
   {
@@ -486,13 +499,18 @@ const galleryEntries: GalleryEntry[] = [
   {
     title: "Captain America: Brave New World",
     description: "Animated logo for the Captain America: Brave New World film.",
-    imageUrls: ["/img/gallery/logo/Cap Brave New World.gif"],
+    imageUrls: [
+      "/img/gallery/logo/Cap Brave New World.gif",
+      "/img/gallery/logo/BNW Black w filter.png",
+      "/img/gallery/logo/BNW White w filter.png",
+    ],
     date: new Date("2025-02-13"),
+    previewImageIndex: 1,
     creator: "Rocked03",
   },
   {
-    title: "Daredevil: Born Again",
-    description: "Logo for the Daredevil: Born Again series.",
+    title: "Daredevil: Born Again S1",
+    description: "Logo for season 1 of the Daredevil: Born Again series.",
     imageUrls: ["/img/gallery/logo/Daredevil Born Again.png"],
     date: new Date("2025-03-04"),
     creator: "Rocked03",

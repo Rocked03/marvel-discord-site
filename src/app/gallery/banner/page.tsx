@@ -173,6 +173,7 @@ const galleryEntries: GalleryEntry[] = [
       "/img/gallery/logo/Ms Marvel Red Dagger.gif",
       "/img/gallery/logo/Ms Marvel Pencil.gif",
       "/img/gallery/logo/Ms Marvel POW sticker.gif",
+      "/img/gallery/logo/Ms Marvel.png",
     ],
     date: new Date("2022-06-08"),
     creator: "Rocked03",
