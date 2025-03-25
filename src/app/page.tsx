@@ -207,7 +207,7 @@ export default function Home() {
         filteredLogos[Math.floor(Math.random() * filteredLogos.length)];
       if (randomLogo !== logo) {
         setIsShaking(true);
-        setLogo(`/img/logos/${randomLogo}`);
+        setLogo(`/img/gallery/logo/${randomLogo}`);
         setTimeout(() => {
           setIsShaking(false);
         }, 150);
