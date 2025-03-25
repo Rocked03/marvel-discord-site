@@ -17,6 +17,7 @@ import {
 import { EmblaContainer, EmblaSlide, EmblaImage, EmblaWrapper } from "./embla";
 import { Button, LinkButton } from "../button";
 import AutoHeight from "embla-carousel-auto-height";
+import { useRouter } from "next/navigation";
 
 const GalleryWrapper = styled.div`
   align-items: center;
@@ -140,11 +141,18 @@ function SlideButton({
   );
 }
 
+function formatEntryTitle(title: string) {
+  return title.replace(/ /g, "-").toLowerCase();
+}
+
 interface CarouselProps {
   galleryEntries: GalleryEntry[];
 }
 
 export default function Carousel({ galleryEntries }: CarouselProps) {
+  const router = useRouter();
+  const searchParams = new URLSearchParams(window.location.search);
+
   galleryEntries.sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
@@ -152,8 +160,6 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
   const [thumbEmblaRef, thumbEmblaApi] = useEmblaCarousel(
     {
       align: "center",
-      dragFree: false,
-      loop: false,
       containScroll: false,
     },
     [ClassNames()]
@@ -162,8 +168,6 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
   const [mainEmblaRef, mainEmblaApi] = useEmblaCarousel(
     {
       align: "center",
-      dragFree: false,
-      loop: false,
       containScroll: false,
     },
     [ClassNames(), AutoHeight()]
@@ -172,6 +176,27 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
   const [thumbSelectedIndex, setThumbSelectedIndex] = useState(0);
   const [mainSelectedIndex, setMainSelectedIndex] = useState(0);
   const selectedEntry = galleryEntries[thumbSelectedIndex];
+
+  useEffect(() => {
+    if (!galleryEntries[thumbSelectedIndex]) return;
+    const newSlide = formatEntryTitle(galleryEntries[thumbSelectedIndex].title);
+    searchParams.set("slide", newSlide);
+    router.replace(`?${searchParams.toString()}`, { scroll: false });
+  }, [thumbSelectedIndex, router, galleryEntries, searchParams]);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const slideTitle = searchParams.get("slide");
+
+    if (slideTitle) {
+      const index = galleryEntries.findIndex(
+        (entry) => formatEntryTitle(entry.title) === slideTitle
+      );
+      if (index !== -1) {
+        thumbEmblaApi?.scrollTo(index, true);
+      }
+    }
+  }, [thumbEmblaApi, galleryEntries]);
 
   useEffect(() => {
     if (!thumbEmblaApi) return;
