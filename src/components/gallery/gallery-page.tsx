@@ -1,8 +1,8 @@
 import type { GalleryEntry } from "@/types";
 import { ContentWrapper, LinkButton } from "..";
 import Carousel from "./carousel";
+import Image from "next/image";
 import styled from "styled-components";
-import { Image } from "lucide-react";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 
@@ -54,50 +54,14 @@ const Title = styled.h1`
 
 const GalleryTypeButtons = styled.div`
   display: flex;
-  background-color: rgba(var(--foreground-rgb), 0.1);
-  border-radius: 0.5rem;
-  gap: 0.1rem;
+  gap: 0.5rem;
 `;
 
 const GalleryTypeButton = styled(LinkButton)`
-  &:hover {
-    background-color: unset;
-  }
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
 `;
-
-const TippyStyled = styled(Tippy)`
-  font-family: var(--font-family);
-  font-weight: 300;
-`;
-
-function TabButton({
-  galleryType,
-  currentGalleryType,
-  href,
-  children,
-}: {
-  galleryType: GalleryType;
-  currentGalleryType: GalleryType;
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <TippyStyled
-      content={<span>{galleryTypeText[galleryType].descriptor}</span>}
-      interactive={true}
-      interactiveBorder={20}
-      delay={100}
-      arrow={true}
-    >
-      <GalleryTypeButton
-        $isActive={galleryType === currentGalleryType}
-        href={href}
-      >
-        {children}
-      </GalleryTypeButton>
-    </TippyStyled>
-  );
-}
 
 interface GalleryPageProps {
   galleryEntries: GalleryEntry[];
@@ -112,29 +76,44 @@ export default function GalleryPage({
     <ContentWrapper>
       <GalleryContentWrapper>
         <TitleWrapper>
-          <Title>{galleryTypeText[galleryType].title}</Title>
+          {/* <Title>{galleryTypeText[galleryType].title}</Title> */}
           <GalleryTypeButtons>
-            <TabButton
-              galleryType={GalleryType.Logo}
-              currentGalleryType={galleryType}
+            <GalleryTypeButton
+              $isActive={galleryType === GalleryType.Logo}
               href="../logo"
             >
-              <Image />
-            </TabButton>
-            <TabButton
-              galleryType={GalleryType.Banner}
-              currentGalleryType={galleryType}
+              <Image
+                src="/img/icons/logo.svg"
+                alt="Logo icon"
+                width={24}
+                height={24}
+              />
+              Logos
+            </GalleryTypeButton>
+            <GalleryTypeButton
+              $isActive={galleryType === GalleryType.Banner}
               href="../banner"
             >
-              <Image />
-            </TabButton>
-            <TabButton
-              galleryType={GalleryType.Wallpaper}
-              currentGalleryType={galleryType}
+              <Image
+                src="/img/icons/banner.svg"
+                alt="Banner icon"
+                width={24}
+                height={24}
+              />
+              Banners
+            </GalleryTypeButton>
+            <GalleryTypeButton
+              $isActive={galleryType === GalleryType.Wallpaper}
               href="../wallpaper"
             >
-              <Image />
-            </TabButton>
+              <Image
+                src="/img/icons/wallpaper.svg"
+                alt="Wallpaper icon"
+                width={24}
+                height={24}
+              />
+              Wallpapers
+            </GalleryTypeButton>
           </GalleryTypeButtons>
         </TitleWrapper>
         <Carousel galleryEntries={galleryEntries} />
