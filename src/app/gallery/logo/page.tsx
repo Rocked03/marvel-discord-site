@@ -35,6 +35,35 @@ const galleryEntries: GalleryEntry[] = [
     creator: "Rocked03",
   },
   {
+    title: "Legion S1",
+    description:
+      "Our very first logo. Before even settling on the Discord chat bubble design, this played around with the idea of incorporating Discord's branding into our logo. This eyesore was incredibly short-lived...",
+    imageUrls: [
+      "/img/gallery/logo/Legion logo.png",
+      "/img/gallery/logo/Legion logo squared.png",
+    ],
+    date: new Date("2017-02-22"),
+    previewImageIndex: 1,
+    creator: "Rocked03",
+  },
+  {
+    title: "Classic Logos - Basics",
+    description:
+      "Before deciding how logos would be handled, we made a few basic logos. The Spider-Man logo became our default logo to start with.",
+    imageUrls: [
+      "/img/gallery/logo/spiderman.png",
+      "/img/gallery/logo/avengers.png",
+      "/img/gallery/logo/captainamerica.png",
+      "/img/gallery/logo/captainmarvel.png",
+      "/img/gallery/logo/daredevil.png",
+      "/img/gallery/logo/fantasticfour.png",
+      "/img/gallery/logo/ironman.png",
+      "/img/gallery/logo/punisher.png",
+      "/img/gallery/logo/xmen.png",
+    ],
+    date: new Date("2017-03-01"),
+  },
+  {
     title: "Classic Logos - 2018, pt. 1",
     description:
       "Classic logos for the Marvel Discord server. Featuring logos for Avengers: Infinity War, Deadpool, Ant-Man and the Wasp, Marvel Studios's 10th anniversary, Cloak and Dagger S1, Luke Cage S2, Infinity Wars by Gerry Duggan, and Spider-Man PS4",
@@ -58,7 +87,7 @@ const galleryEntries: GalleryEntry[] = [
   {
     title: "Classic Logos - 2018, pt. 2",
     description:
-      "Classic logos for the Marvel Discord server. Featuring logos for Venom, Daredevil S3, Halloween 2018, [the unfortunate lack of both the Inhumans and Dark Phoenix films failing to make their original release dates], Fantastic Four by Dan Slott, Runaways S2, and Into the Spider-Verse.",
+      "Classic logos for the Marvel Discord server. Featuring logos for Venom, Daredevil S3, Halloween 2018, [the unfortunate lack of both the Inhumans and Dark Phoenix films failing to make their original release dates], Fantastic Four by Dan Slott, Runaways S2, and Into the Spider-Verse. Daredevil S3 v2 logo made by Aramis Murat.",
     imageUrls: [
       "/img/gallery/logo/venom.png",
       "/img/gallery/logo/daredevils3 bullseye.png",
