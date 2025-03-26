@@ -10,6 +10,7 @@ export const EmblaWrapper = styled.div`
 export const EmblaContainer = styled.div`
   display: flex;
   gap: 3rem;
+  transition: height 0.2s;
 `;
 
 export const EmblaSlide = styled.div`

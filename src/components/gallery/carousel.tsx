@@ -9,6 +9,8 @@ import styled from "styled-components";
 import type { GalleryEntry } from "@/types";
 import { formatDate } from "@/utils";
 import {
+  ChevronFirst,
+  ChevronLast,
   ChevronLeft,
   ChevronRight,
   Download,
@@ -60,12 +62,6 @@ const EntryDescription = styled.p`
 const GalleryDetails = styled.div`
   display: flex;
   flex-direction: row;
-
-  @media (max-width: 768px) {
-    .slide-button {
-      display: none;
-    }
-  }
 `;
 
 const ThumbEmblaContainer = styled(EmblaContainer)`
@@ -97,7 +93,6 @@ const ThumbEmblaImage = styled(EmblaImage)`
 const MainEmblaContainer = styled(EmblaContainer)`
   align-items: flex-start;
   gap: 1rem;
-  transition: height 0.2s;
 `;
 
 const MainEmblaSlide = styled(EmblaSlide)`
@@ -129,17 +124,27 @@ const ImageButtons = styled.div<{ $isVisible: boolean }>`
   transition: opacity 0.2s ease;
 `;
 
+const SlideButtonStyled = styled(Button)<{ $isDisabled?: boolean }>`
+  ${({ $isDisabled }) => $isDisabled && "pointer-events: none; opacity: 0.5;"};
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
 function SlideButton({
   children,
   onClick,
+  isDisabled = false,
 }: {
   children: React.ReactNode;
   onClick: () => void;
+  isDisabled?: boolean;
 }) {
   return (
-    <Button onClick={onClick} className={"slide-button"}>
+    <SlideButtonStyled onClick={onClick} $isDisabled={isDisabled}>
       {children}
-    </Button>
+    </SlideButtonStyled>
   );
 }
 
@@ -167,7 +172,7 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
       align: "center",
       containScroll: false,
     },
-    [ClassNames()]
+    [ClassNames(), AutoHeight()]
   );
 
   const [mainEmblaRef, mainEmblaApi] = useEmblaCarousel(
@@ -302,7 +307,16 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
       </EmblaWrapper>
 
       <GalleryDetails>
-        <SlideButton onClick={() => thumbEmblaApi?.scrollPrev()}>
+        <SlideButton
+          onClick={() => thumbEmblaApi?.scrollPrev()}
+          isDisabled={thumbSelectedIndex === 0}
+        >
+          <ChevronFirst />
+        </SlideButton>
+        <SlideButton
+          onClick={() => mainEmblaApi?.scrollPrev()}
+          isDisabled={mainSelectedIndex === 0}
+        >
           <ChevronLeft />
         </SlideButton>
 
@@ -323,8 +337,17 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
           )}
         </EntryDetails>
 
-        <SlideButton onClick={() => thumbEmblaApi?.scrollNext()}>
+        <SlideButton
+          onClick={() => mainEmblaApi?.scrollNext()}
+          isDisabled={mainSelectedIndex === selectedEntry.imageUrls.length - 1}
+        >
           <ChevronRight />
+        </SlideButton>
+        <SlideButton
+          onClick={() => thumbEmblaApi?.scrollNext()}
+          isDisabled={thumbSelectedIndex === galleryEntries.length - 1}
+        >
+          <ChevronLast />
         </SlideButton>
       </GalleryDetails>
     </GalleryWrapper>
