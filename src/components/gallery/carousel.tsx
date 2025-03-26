@@ -82,10 +82,10 @@ const ThumbEmblaSlide = styled(EmblaSlide)`
 `;
 
 const ThumbEmblaImage = styled(EmblaImage)`
+  border-radius: 0.5rem;
   max-height: 30rem;
 
   @media (max-width: 768px) {
-    border-radius: 0.5rem;
     max-height: 20rem;
   }
 `;
