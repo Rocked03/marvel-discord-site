@@ -2,13 +2,24 @@
   --background: #ebebeb;
   --foreground: #1d1d1d;
 
+  --background-rgb: 235, 235, 235;
+  --foreground-rgb: 29, 29, 29;
+
   --highlight: #ea2328;
+  --highlight-foreground: #fff;
+  --highlight-rgb: 234, 35, 40;
+  --highlight-foreground-rgb: 255, 255, 255;
+
+  --font-family: "Mona Sans", Arial, Helvetica, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #201b1b;
     --foreground: #e0e0e0;
+
+    --background-rgb: 32, 27, 27;
+    --foreground-rgb: 224, 224, 224;
   }
 }
 
@@ -21,7 +32,7 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: "Mona Sans", Arial, Helvetica, sans-serif;
+  font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
