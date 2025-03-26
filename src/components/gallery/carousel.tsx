@@ -20,6 +20,7 @@ import { EmblaContainer, EmblaSlide, EmblaImage, EmblaWrapper } from "./embla";
 import { Button, LinkButton } from "../button";
 import AutoHeight from "embla-carousel-auto-height";
 import { useRouter, useSearchParams } from "next/navigation";
+import { formatGalleryEntryTitle } from ".";
 
 const GalleryWrapper = styled.div`
   align-items: center;
@@ -148,13 +149,6 @@ function SlideButton({
   );
 }
 
-function formatEntryTitle(title: string) {
-  return title
-    .replace(/[^a-zA-Z0-9 ]/g, "")
-    .replace(/ /g, "-")
-    .toLowerCase();
-}
-
 interface CarouselProps {
   galleryEntries: GalleryEntry[];
 }
@@ -189,7 +183,9 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
 
   useEffect(() => {
     if (!galleryEntries[thumbSelectedIndex]) return;
-    const newSlide = formatEntryTitle(galleryEntries[thumbSelectedIndex].title);
+    const newSlide = formatGalleryEntryTitle(
+      galleryEntries[thumbSelectedIndex].title
+    );
     const newSearchParams = new URLSearchParams(searchParams.toString());
     newSearchParams.set("slide", newSlide);
     router.replace(`?${newSearchParams.toString()}`, { scroll: false });
@@ -201,7 +197,7 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
 
     if (slideTitle) {
       const index = galleryEntries.findIndex(
-        (entry) => formatEntryTitle(entry.title) === slideTitle
+        (entry) => formatGalleryEntryTitle(entry.title) === slideTitle
       );
       if (index !== -1) {
         thumbEmblaApi?.scrollTo(index, true);
