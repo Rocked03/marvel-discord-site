@@ -1,3 +1,4 @@
+import { relativeImagePathToAbsolute } from "@/utils";
 import type { Metadata, Viewport } from "next";
 
 export const defaultMetadata: Metadata = {
@@ -9,7 +10,13 @@ export const defaultMetadata: Metadata = {
 		siteName: "Marvel Discord",
 	},
 	icons: {
-		icon: [{ url: "/img/gallery/logo/Logo with full icon.png" }],
+		icon: [
+			{
+				url: relativeImagePathToAbsolute(
+					"/img/gallery/logo/Logo with full icon.png",
+				),
+			},
+		],
 	},
 };
 
