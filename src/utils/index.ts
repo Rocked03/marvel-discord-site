@@ -1,3 +1,5 @@
+import config from "@/app/config/config";
+
 export const formatDate = (date: Date): string => {
 	return new Intl.DateTimeFormat("en-US", {
 		month: "long",
@@ -10,4 +12,8 @@ export function formatGalleryEntryTitle(title: string) {
 		.replace(/[^a-zA-Z0-9 ]/g, "")
 		.replace(/ /g, "-")
 		.toLowerCase();
+}
+
+export function relativeImagePathToAbsolute(relativePath: string): string {
+	return `${config.publicBaseUrl}/${relativePath}`;
 }

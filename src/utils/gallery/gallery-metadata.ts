@@ -2,7 +2,7 @@ import type { GalleryEntry } from "@/types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { defaultMetadata } from "@/lib/metadata";
-import { formatGalleryEntryTitle } from "@/utils";
+import { formatGalleryEntryTitle, relativeImagePathToAbsolute } from "@/utils";
 
 export interface GalleryPageProps {
 	searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -17,14 +17,23 @@ export async function generateMetadataBase({
 	searchParams,
 	galleryEntries,
 }: GalleryPageBaseProps): Promise<Metadata> {
+	const metadata: Metadata = {
+		...defaultMetadata,
+		title: "Marvel Discord Gallery",
+		description: "Explore the gallery archive of the Marvel Discord.",
+		openGraph: {
+			...defaultMetadata.openGraph,
+			title: "Marvel Discord Gallery",
+			description: "Explore the gallery archive of the Marvel Discord.",
+			siteName: "Marvel Discord - Gallery",
+		},
+	};
+
 	const resolvedSearchParams = await searchParams;
 	const slideTitle = resolvedSearchParams.slide;
 
 	if (!slideTitle) {
-		return {
-			title: "Marvel Discord Gallery",
-			description: "Explore the gallery archive of the Marvel Discord.",
-		};
+		return metadata;
 	}
 
 	const entry = galleryEntries.find(
@@ -34,16 +43,20 @@ export async function generateMetadataBase({
 	if (!entry) return notFound(); // Handle case where slide doesn't exist
 
 	return {
-		...defaultMetadata,
+		...metadata,
 		title: `${entry.title} - Gallery`,
 		description: entry.description || "View this gallery entry.",
 		openGraph: {
-			...defaultMetadata.openGraph,
 			title: `${entry.title} - Gallery`,
 			description: entry.description || "View this gallery entry.",
-			siteName: "Marvel Discord - Gallery",
 			images:
 				entry.imageUrls.length > 0 ? [{ url: entry.imageUrls[0] }] : undefined,
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: `${entry.title} - Gallery`,
+			description: entry.description || "View this gallery entry.",
+			images: relativeImagePathToAbsolute(entry.imageUrls[0]),
 		},
 	};
 }
