@@ -1,9 +1,10 @@
 import type { GalleryEntry } from "@/types";
 import { ContentWrapper, LinkButton } from "..";
 import Carousel from "./carousel";
-import Image from "next/image";
 import styled from "styled-components";
 import { Suspense } from "react";
+
+import { Banner, Logo, Wallpaper } from "@/img/icons/icons";
 
 export enum GalleryType {
   Logo = "Logo",
@@ -13,24 +14,24 @@ export enum GalleryType {
 
 interface GalleryTypeTextInterface {
   descriptor: string;
-  iconUrl: string;
+  icon: React.JSX.Element;
   path: string;
 }
 
 const galleryTypeText: Record<GalleryType, GalleryTypeTextInterface> = {
   [GalleryType.Logo]: {
     descriptor: "Logos",
-    iconUrl: "/img/icons/logo.svg",
+    icon: <Logo />,
     path: "../logo",
   },
   [GalleryType.Banner]: {
     descriptor: "Banners",
-    iconUrl: "/img/icons/banner.svg",
+    icon: <Banner />,
     path: "../banner",
   },
   [GalleryType.Wallpaper]: {
     descriptor: "Wallpapers",
-    iconUrl: "/img/icons/wallpaper.svg",
+    icon: <Wallpaper />,
     path: "../wallpaper",
   },
 };
@@ -62,10 +63,16 @@ const GalleryTypeButtonStyle = styled(LinkButton)<{ $isActive: boolean }>`
     $isActive ? "var(--highlight)" : "transparent"};
   color: ${({ $isActive }) =>
     $isActive ? "var(--highlight-foreground)" : "var(--foreground)"};
+  stroke: ${({ $isActive }) =>
+    $isActive ? "var(--highlight-foreground)" : "var(--foreground)"};
 
-  svg {
-    currentcolor: ${({ $isActive }) =>
-      $isActive ? "var(--highlight-foreground)" : "var(--foreground)"};
+  svg path {
+    stroke: inherit;
+  }
+
+  &:hover {
+    ${({ $isActive }) =>
+      $isActive && "background-color: rgba(var(--highlight-rgb), 0.6)"};
   }
 
   @media (max-width: 768px) {
@@ -87,12 +94,7 @@ function GalleryTypeButton({
       href={galleryTypeText[galleryType].path}
       $isActive={galleryType === currentGalleryType}
     >
-      <Image
-        src={galleryTypeText[galleryType].iconUrl}
-        alt={`${galleryType} icon`}
-        width={24}
-        height={24}
-      />
+      {galleryTypeText[galleryType].icon}
       <span>{galleryTypeText[galleryType].descriptor}</span>
     </GalleryTypeButtonStyle>
   );
