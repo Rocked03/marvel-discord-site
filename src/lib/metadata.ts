@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 export const defaultMetadata: Metadata = {
 	title: "Marvel Discord",
@@ -11,4 +11,8 @@ export const defaultMetadata: Metadata = {
 	icons: {
 		icon: [{ url: "/img/gallery/logo/Logo with full icon.png" }],
 	},
+};
+
+export const defaultViewport: Viewport = {
+	themeColor: "#ea2328",
 };

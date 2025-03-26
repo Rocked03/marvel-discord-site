@@ -57,6 +57,7 @@ export async function generateMetadataBase({
 			title: `${entry.title} - Gallery`,
 			description: entry.description || "View this gallery entry.",
 			images: relativeImagePathToAbsolute(entry.imageUrls[0]),
+			creator: "Marvel Discord",
 		},
 	};
 }
