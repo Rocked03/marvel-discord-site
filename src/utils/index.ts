@@ -15,5 +15,5 @@ export function formatGalleryEntryTitle(title: string) {
 }
 
 export function relativeImagePathToAbsolute(relativePath: string): string {
-	return `${config.publicBaseUrl}/${relativePath}`;
+	return `${config.publicBaseUrl}${relativePath}`;
 }
