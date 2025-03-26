@@ -48,11 +48,13 @@ const EntryTitle = styled.h1`
 
 const EntrySubtext = styled.p`
   font-size: 0.9rem;
-  font-weight: 300;
+  font-weight: 400;
+  letter-spacing: 0.1rem;
 `;
 
 const EntryDescription = styled.p`
   font-size: 1rem;
+  letter-spacing: 0.02rem;
 `;
 
 const GalleryDetails = styled.div`

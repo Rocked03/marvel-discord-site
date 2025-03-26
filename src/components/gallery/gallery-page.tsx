@@ -53,14 +53,24 @@ const GalleryTypeButtons = styled.div`
   }
 `;
 
-const GalleryTypeButtonStyle = styled(LinkButton)<{ $isActiveParent: boolean }>`
+const GalleryTypeButtonStyle = styled(LinkButton)<{ $isActive: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.2rem;
 
+  background-color: ${({ $isActive }) =>
+    $isActive ? "var(--highlight)" : "transparent"};
+  color: ${({ $isActive }) =>
+    $isActive ? "var(--highlight-foreground)" : "var(--foreground)"};
+
+  svg {
+    currentcolor: ${({ $isActive }) =>
+      $isActive ? "var(--highlight-foreground)" : "var(--foreground)"};
+  }
+
   @media (max-width: 768px) {
     span {
-      display: ${({ $isActiveParent }) => ($isActiveParent ? "block" : "none")};
+      display: ${({ $isActive }) => ($isActive ? "block" : "none")};
     }
   }
 `;
@@ -76,7 +86,6 @@ function GalleryTypeButton({
     <GalleryTypeButtonStyle
       href={galleryTypeText[galleryType].path}
       $isActive={galleryType === currentGalleryType}
-      $isActiveParent={galleryType === currentGalleryType}
     >
       <Image
         src={galleryTypeText[galleryType].iconUrl}

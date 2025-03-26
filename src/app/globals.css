@@ -6,6 +6,9 @@
   --foreground-rgb: 29, 29, 29;
 
   --highlight: #ea2328;
+  --highlight-foreground: #fff;
+  --highlight-rgb: 234, 35, 40;
+  --highlight-foreground-rgb: 255, 255, 255;
 
   --font-family: "Mona Sans", Arial, Helvetica, sans-serif;
 }
