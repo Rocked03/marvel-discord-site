@@ -1,14 +1,13 @@
-import {
-  generateMetadataBase,
-  type GalleryPageProps,
-} from "@/components/gallery";
+import { generateMetadataBase } from "@/components/gallery";
 import type { ReactNode } from "react";
 import { galleryEntries } from "./entries";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
   searchParams,
-}: GalleryPageProps): Promise<Metadata> {
+}: {
+  searchParams: { slide?: string };
+}): Promise<Metadata> {
   if (galleryEntries.length > 0) {
     return {
       title: "aaaaaaMarvel Discord",
