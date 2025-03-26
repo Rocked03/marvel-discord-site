@@ -1,14 +1,15 @@
-"use client";
+import { generateMetadataBase } from "@/utils/gallery";
+import GalleryPage from "./gallery-page";
+import type { Metadata } from "next";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}): Promise<Metadata> {
+  return await generateMetadataBase({ searchParams, galleryEntries: [] });
+}
 
-export default function GalleryPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.push("./logo");
-  }, [router]);
-
-  return null;
+export default function Gallery() {
+  <GalleryPage />;
 }
