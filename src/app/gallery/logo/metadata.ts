@@ -2,22 +2,22 @@
 // 	type GalleryPageProps,
 // 	generateMetadataBase,
 // } from "@/components/gallery";
-import type { Metadata } from "next";
+// import type { Metadata } from "next";
 // import { galleryEntries } from "./entries";
 
-export const metadata: Metadata = {
-	title: "aaaaaaMarvel Discord",
-	description: "Taaaahe largest community-run server for everything Marvel.",
-	openGraph: {
-		title: "Maaaaaarvel Discord",
-		description:
-			"The aaaaaalargest community-run server for everything Marvel.",
-		siteName: "Marvaaaaaaaaael Discord",
-	},
-	icons: {
-		icon: [{ url: "/img/gallery/logo/Logo with full icon.png" }],
-	},
-};
+// // export const metadata: Metadata = {
+// // 	title: "aaaaaaMarvel Discord",
+// // 	description: "Taaaahe largest community-run server for everything Marvel.",
+// // 	openGraph: {
+// // 		title: "Maaaaaarvel Discord",
+// // 		description:
+// // 			"The aaaaaalargest community-run server for everything Marvel.",
+// // 		siteName: "Marvaaaaaaaaael Discord",
+// // 	},
+// // 	icons: {
+// // 		icon: [{ url: "/img/gallery/logo/Logo with full icon.png" }],
+// // 	},
+// // };
 
 // export async function generateMetadata({
 // 	searchParams,
