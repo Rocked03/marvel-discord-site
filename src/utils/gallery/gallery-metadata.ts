@@ -1,11 +1,11 @@
 import type { GalleryEntry } from "@/types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { formatGalleryEntryTitle } from ".";
 import { defaultMetadata } from "@/lib/metadata";
+import { formatGalleryEntryTitle } from "@/utils";
 
 export interface GalleryPageProps {
-	searchParams: { slide?: string };
+	searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 interface GalleryPageBaseProps extends GalleryPageProps {
@@ -17,24 +17,8 @@ export async function generateMetadataBase({
 	searchParams,
 	galleryEntries,
 }: GalleryPageBaseProps): Promise<Metadata> {
-	if (galleryEntries.length > 0) {
-		return {
-			title: "aaaaaaMarvel Discord",
-			description:
-				"Taaaahe largest community-run server for everything Marvel.",
-			openGraph: {
-				title: "Maaaaaarvel Discord",
-				description:
-					"The aaaaaalargest community-run server for everything Marvel.",
-				siteName: "Marvaaaaaaaaael Discord",
-			},
-			icons: {
-				icon: [{ url: "/img/gallery/logo/Logo with full icon.png" }],
-			},
-		};
-	}
-
-	const slideTitle = searchParams.slide;
+	const resolvedSearchParams = await searchParams;
+	const slideTitle = resolvedSearchParams.slide;
 
 	if (!slideTitle) {
 		return {

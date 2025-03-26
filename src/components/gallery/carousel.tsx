@@ -7,7 +7,7 @@ import ClassNames from "embla-carousel-class-names";
 import styled from "styled-components";
 
 import type { GalleryEntry } from "@/types";
-import { formatDate } from "@/utils";
+import { formatDate, formatGalleryEntryTitle } from "@/utils";
 import {
   ChevronFirst,
   ChevronLast,
@@ -20,7 +20,6 @@ import { EmblaContainer, EmblaSlide, EmblaImage, EmblaWrapper } from "./embla";
 import { Button, LinkButton } from "../button";
 import AutoHeight from "embla-carousel-auto-height";
 import { useRouter, useSearchParams } from "next/navigation";
-import { formatGalleryEntryTitle } from ".";
 
 const GalleryWrapper = styled.div`
   align-items: center;
@@ -181,17 +180,11 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
   const [mainSelectedIndex, setMainSelectedIndex] = useState(0);
   const selectedEntry = galleryEntries[thumbSelectedIndex];
 
-  useEffect(() => {
-    if (!galleryEntries[thumbSelectedIndex]) return;
-    const newSlide = formatGalleryEntryTitle(
-      galleryEntries[thumbSelectedIndex].title
-    );
-    const newSearchParams = new URLSearchParams(searchParams.toString());
-    newSearchParams.set("slide", newSlide);
-    router.replace(`?${newSearchParams.toString()}`, { scroll: false });
-  }, [thumbSelectedIndex, router, galleryEntries, searchParams]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
+    if (!thumbEmblaApi || isLoaded) return;
+
     const searchParams = new URLSearchParams(window.location.search);
     const slideTitle = searchParams.get("slide");
 
@@ -203,7 +196,21 @@ export default function Carousel({ galleryEntries }: CarouselProps) {
         thumbEmblaApi?.scrollTo(index, true);
       }
     }
-  }, [thumbEmblaApi, galleryEntries]);
+
+    setIsLoaded(true);
+  }, [galleryEntries, thumbEmblaApi, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded || !galleryEntries[thumbSelectedIndex]) return;
+    const newSlide = formatGalleryEntryTitle(
+      galleryEntries[thumbSelectedIndex].title
+    );
+    const currentSlide = searchParams.get("slide");
+    if (currentSlide === newSlide) return;
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    newSearchParams.set("slide", newSlide);
+    router.replace(`?${newSearchParams.toString()}`, { scroll: false });
+  }, [isLoaded, thumbSelectedIndex, router, galleryEntries, searchParams]);
 
   useEffect(() => {
     if (!thumbEmblaApi) return;

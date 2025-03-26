@@ -4,3 +4,10 @@ export const formatDate = (date: Date): string => {
 		year: "numeric",
 	}).format(date);
 };
+
+export function formatGalleryEntryTitle(title: string) {
+	return title
+		.replace(/[^a-zA-Z0-9 ]/g, "")
+		.replace(/ /g, "-")
+		.toLowerCase();
+}

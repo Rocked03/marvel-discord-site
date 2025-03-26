@@ -5,12 +5,7 @@ import styled from "styled-components";
 import { Suspense } from "react";
 
 import { Banner, Logo, Wallpaper } from "@/img/icons/icons";
-
-export enum GalleryType {
-  Logo = "Logo",
-  Banner = "Banner",
-  Wallpaper = "Wallpaper",
-}
+import { GalleryType } from "@/utils/gallery";
 
 interface GalleryTypeTextInterface {
   descriptor: string;

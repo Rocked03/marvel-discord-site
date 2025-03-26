@@ -1,15 +1,22 @@
-"use client";
-
-import { GalleryPage } from "@/components/gallery";
-import { GalleryType } from "@/components/gallery/gallery-page";
-import type React from "react";
+import type { Metadata } from "next";
+import Gallery from "../gallery";
 import { galleryEntries } from "./entries";
+import { generateMetadataBase } from "@/utils/gallery/gallery-metadata";
+import { GalleryType } from "@/utils/gallery";
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}): Promise<Metadata> {
+  return await generateMetadataBase({ searchParams, galleryEntries });
+}
 
 export default function WallpaperGalleryPage() {
   return (
-    <GalleryPage
-      galleryEntries={galleryEntries}
+    <Gallery
       galleryType={GalleryType.Wallpaper}
+      galleryEntries={galleryEntries}
     />
   );
 }
