@@ -2,8 +2,8 @@ import {
 	type GalleryPageProps,
 	generateMetadataBase,
 } from "@/components/gallery";
-import { galleryEntries } from "./entries";
 import type { Metadata } from "next";
+import { galleryEntries } from "./entries";
 
 export async function generateMetadata({
 	searchParams,
