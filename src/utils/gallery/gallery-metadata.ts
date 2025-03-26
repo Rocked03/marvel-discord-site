@@ -25,7 +25,7 @@ export async function generateMetadataBase({
 			...defaultMetadata.openGraph,
 			title: "Marvel Discord Gallery",
 			description: "Explore the gallery archive of the Marvel Discord.",
-			siteName: "Marvel Discord - Gallery",
+			siteName: "Marvel Discord - Marvel Discord Gallery",
 		},
 	};
 
@@ -44,20 +44,21 @@ export async function generateMetadataBase({
 
 	return {
 		...metadata,
-		title: `${entry.title} - Gallery`,
+		title: `${entry.title} - Marvel Discord Gallery`,
 		description: entry.description || "View this gallery entry.",
 		openGraph: {
-			title: `${entry.title} - Gallery`,
+			title: `${entry.title} - Marvel Discord Gallery`,
 			description: entry.description || "View this gallery entry.",
 			images:
-				entry.imageUrls.length > 0 ? [{ url: entry.imageUrls[0] }] : undefined,
+				entry.imageUrls.length > 0
+					? { url: relativeImagePathToAbsolute(entry.imageUrls[0]) }
+					: undefined,
 		},
 		twitter: {
 			card: "summary_large_image",
-			title: `${entry.title} - Gallery`,
+			title: `${entry.title} - Marvel Discord Gallery`,
 			description: entry.description || "View this gallery entry.",
 			images: relativeImagePathToAbsolute(entry.imageUrls[0]),
-			creator: "Marvel Discord",
 		},
 	};
 }
