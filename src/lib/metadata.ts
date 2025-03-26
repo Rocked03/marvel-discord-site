@@ -8,14 +8,8 @@ export const defaultMetadata: Metadata = {
 		title: "Marvel Discord",
 		description: "The largest community-run server for everything Marvel.",
 		siteName: "Marvel Discord",
-	},
-	icons: {
-		icon: [
-			{
-				url: relativeImagePathToAbsolute(
-					"/img/gallery/logo/Logo with full icon.png",
-				),
-			},
+		images: [
+			relativeImagePathToAbsolute("/img/gallery/logo/Logo with full icon.png"),
 		],
 	},
 };

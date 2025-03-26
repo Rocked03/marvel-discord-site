@@ -51,7 +51,7 @@ export async function generateMetadataBase({
 			description: entry.description || "View this gallery entry.",
 			images:
 				entry.imageUrls.length > 0
-					? { url: relativeImagePathToAbsolute(entry.imageUrls[0]) }
+					? relativeImagePathToAbsolute(entry.imageUrls[0])
 					: undefined,
 		},
 		twitter: {
