@@ -1,4 +1,5 @@
 import { getTagColors } from "@/utils";
+import { useIsMobile } from "@/utils/isMobile";
 import type { Tag } from "@jocasta-polls-api";
 import { Box, Select } from "@radix-ui/themes";
 import styled from "styled-components";
@@ -41,6 +42,8 @@ export function TagSelect({
   tags: Record<number, Tag>;
   tagsOrder: number[];
 }) {
+  const isMobile = useIsMobile();
+
   const {
     backgroundColor: selectedTagBackgroundColor,
     textColor: selectedTagTextColor,
@@ -54,7 +57,7 @@ export function TagSelect({
           $backgroundColor={selectedTagBackgroundColor}
           $textColor={selectedTagTextColor}
         >
-          {selectedTag ? tags[selectedTag].name : "All tags"}
+          {isMobile ? "Tag" : selectedTag ? tags[selectedTag].name : "All tags"}
         </TagSelectTrigger>
         <Select.Content>
           <Select.Item value="all">All tags</Select.Item>

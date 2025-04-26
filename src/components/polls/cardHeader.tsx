@@ -10,6 +10,7 @@ import {
 } from "react";
 import styled from "styled-components";
 import { TitleText } from "../titleText";
+import { useIsMobile } from "@/utils/isMobile";
 
 const Header = styled(Flex)`
   flex-wrap: wrap;
@@ -94,10 +95,13 @@ function HeaderTextWithLink({
 }
 
 export function PollCardHeader({ poll, tag }: { poll: Poll; tag: Tag }) {
+  const isMobile = useIsMobile();
+
   const totalVotes = poll.votes.reduce((acc, vote) => acc + vote, 0);
 
-  const isNew = poll.time
-    ? new Date(poll.time).getTime() > Date.now() - 1000 * 60 * 60 * 24 * 7 // 7 days
+  const time = poll.time ? new Date(poll.time) : undefined;
+  const isNew = time
+    ? time.getTime() > Date.now() - 1000 * 60 * 60 * 24 * 7 // 7 days
     : false;
 
   return (
@@ -114,8 +118,8 @@ export function PollCardHeader({ poll, tag }: { poll: Poll; tag: Tag }) {
           <HeaderText
             icon={<Calendar />}
             title={
-              poll.time
-                ? new Date(poll.time).toLocaleDateString("en-US", {
+              time
+                ? time.toLocaleDateString("en-US", {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
@@ -126,12 +130,18 @@ export function PollCardHeader({ poll, tag }: { poll: Poll; tag: Tag }) {
                 : undefined
             }
           >
-            {poll.time
-              ? new Date(poll.time).toLocaleDateString("en-US", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })
+            {time
+              ? isMobile
+                ? time.toLocaleDateString("en-US", {
+                    day: "2-digit",
+                    month: "numeric",
+                    year: "numeric",
+                  })
+                : time.toLocaleDateString("en-US", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })
               : "No date set."}
           </HeaderText>
 
@@ -149,7 +159,11 @@ export function PollCardHeader({ poll, tag }: { poll: Poll; tag: Tag }) {
                 : ""
             }
           >
-            {poll.thread_question ? "Discuss in Discord" : "Open in Discord"}
+            {isMobile
+              ? "Discord"
+              : poll.thread_question
+              ? "Discuss in Discord"
+              : "Open in Discord"}
           </HeaderTextWithLink>
         )}
       </ScrollFlex>
