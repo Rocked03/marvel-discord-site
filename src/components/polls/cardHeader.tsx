@@ -1,4 +1,4 @@
-import { getContrastColorFromInt, intToColorHex } from "@/utils";
+import { getContrastColorFromInt, getTagColors, intToColorHex } from "@/utils";
 import type { Poll, Tag } from "@jocasta-polls-api";
 import { Flex, Link, Text } from "@radix-ui/themes";
 import { Calendar, ExternalLink, type LucideProps, Vote } from "lucide-react";
@@ -16,15 +16,19 @@ const Header = styled(Flex)`
   width: 100%;
 `;
 
-const TagPill = styled(Text)<{ tag?: Tag }>`
-  background-color: ${({ tag }) =>
-    tag?.colour ? intToColorHex(tag.colour) : "var(--red-9)"};
+const TagPill = styled(Text)<{ $tag?: Tag }>`
   border-radius: 100rem;
-  color: ${({ tag }) =>
-    tag?.colour ? getContrastColorFromInt(tag.colour) : "var(--red-9)"};
   font-weight: 500;
   padding-block: 0.3rem;
   padding-inline: 0.5rem;
+
+  ${({ $tag }) => {
+    const { backgroundColor, textColor } = getTagColors($tag);
+    return `
+      background-color: ${backgroundColor ?? "var(--red-9)"};
+      color: ${textColor ?? "#fff"};
+    `;
+  }}
 `;
 
 const ScrollFlex = styled(Flex)`
@@ -86,7 +90,7 @@ export function PollCardHeader({ poll, tag }: { poll: Poll; tag: Tag }) {
 
   return (
     <Header align="center" justify="start" gap="3">
-      <TagPill trim="both" size="1" tag={tag}>
+      <TagPill trim="both" size="1" $tag={tag}>
         {tag.name}
         {poll.num && ` • #${poll.num}`}
       </TagPill>

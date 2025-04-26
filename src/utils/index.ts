@@ -1,4 +1,5 @@
 import config from "@/app/config/config";
+import type { Tag } from "@jocasta-polls-api";
 
 export const formatDate = (date: Date): string => {
 	return new Intl.DateTimeFormat("en-US", {
@@ -31,4 +32,15 @@ export function getContrastColorFromInt(color: number): string {
 	const brightness = (r * 299 + g * 587 + b * 114) / 1000;
 
 	return brightness > 128 ? "#000000" : "#ffffff";
+}
+
+export function getTagColors(tag?: Tag) {
+	if (!tag) {
+		return { backgroundColor: undefined, textColor: undefined };
+	}
+
+	const tagColor = tag.colour ? tag.colour : null;
+	const backgroundColor = tagColor ? intToColorHex(tagColor) : "var(--red-9)";
+	const textColor = tagColor ? getContrastColorFromInt(tagColor) : undefined;
+	return { backgroundColor, textColor };
 }

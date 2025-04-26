@@ -35,12 +35,12 @@ const BarContainer = styled.div`
   width: 100%;
 `;
 
-const BarLine = styled.div<{ percentage: number; color?: string }>`
-  background-color: ${(color) => color.color || "var(--red-9)"};
+const BarLine = styled.div<{ $percentage: number; $color?: string }>`
+  background-color: ${({ $color }) => $color || "var(--red-9)"};
   border-radius: 100rem;
   height: 100%;
   opacity: 0.75;
-  width: ${(props) => `${props.percentage}%`};
+  width: ${({ $percentage }) => `${$percentage}%`};
 `;
 
 const PercentLabel = styled(TitleText)`
@@ -81,8 +81,8 @@ export function Choices({ poll, tag }: { poll: Poll; tag: Tag }) {
 
             <BarContainer>
               <BarLine
-                percentage={relativePercentage(percentageVotes[index])}
-                color={tag.colour ? intToColorHex(tag.colour) : undefined}
+                $percentage={relativePercentage(percentageVotes[index])}
+                $color={tag.colour ? intToColorHex(tag.colour) : undefined}
               />
             </BarContainer>
           </Flex>
