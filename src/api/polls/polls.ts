@@ -31,8 +31,6 @@ export const getPolls = async ({
 	signal,
 }: GetPollsParams): Promise<{ polls: Poll[]; meta: Meta }> => {
 	try {
-		console.log("Fetching polls");
-
 		const params = {
 			guildId: guildId.toString(),
 			published: published,
@@ -46,8 +44,6 @@ export const getPolls = async ({
 
 		const response: AxiosResponse<{ data: Poll[]; meta: Meta }> =
 			await axiosPollsInstance.get("/polls", { params: params, signal });
-
-		console.log("Polls response:", response.data);
 
 		return { polls: response.data.data, meta: response.data.meta };
 	} catch (error) {
