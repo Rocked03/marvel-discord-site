@@ -2,6 +2,7 @@ import { getTagColors } from "@/utils";
 import { useIsMobile } from "@/utils/isMobile";
 import type { Tag } from "@jocasta-polls-api";
 import { Box, Select } from "@radix-ui/themes";
+import { Tag as LucideTag } from "lucide-react";
 import styled from "styled-components";
 
 const TagSelectContainer = styled(Box)`
@@ -14,11 +15,21 @@ const TagSelectTrigger = styled(Select.Trigger)<{
   $backgroundColor?: string;
   $textColor?: string;
 }>`
+  align-items: center;
   border-radius: var(--radius-3);
+  display: flex;
   height: 100%;
+
   ${({ $backgroundColor }) =>
     $backgroundColor && `background-color: ${$backgroundColor};`}
   ${({ $textColor }) => $textColor && `color: ${$textColor};`}
+
+  span {
+    align-items: center;
+    display: flex;
+
+    ${({ $textColor }) => !$textColor && "color: var(--gray-a11);"}
+  }
 `;
 
 const TagSelectItem = styled(Select.Item)<{
@@ -57,7 +68,13 @@ export function TagSelect({
           $backgroundColor={selectedTagBackgroundColor}
           $textColor={selectedTagTextColor}
         >
-          {isMobile ? "Tag" : selectedTag ? tags[selectedTag].name : "All tags"}
+          {isMobile ? (
+            <LucideTag size="20" />
+          ) : selectedTag ? (
+            tags[selectedTag].name
+          ) : (
+            "All tags"
+          )}
         </TagSelectTrigger>
         <Select.Content>
           <Select.Item value="all">All tags</Select.Item>
