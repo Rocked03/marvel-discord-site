@@ -70,7 +70,7 @@ function HeaderText({
   return (
     <Flex gap="1" align="center">
       {styledIcon}
-      <HeaderTextStyled {...props}>{children}</HeaderTextStyled>
+      {children && <HeaderTextStyled {...props}>{children}</HeaderTextStyled>}
     </Flex>
   );
 }
@@ -160,7 +160,7 @@ export function PollCardHeader({ poll, tag }: { poll: Poll; tag: Tag }) {
             }
           >
             {isMobile
-              ? "Discord"
+              ? undefined
               : poll.thread_question
               ? "Discuss in Discord"
               : "Open in Discord"}
