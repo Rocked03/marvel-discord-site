@@ -29,17 +29,23 @@ const TagSelectContainer = styled(Box)`
 
 const TagSelect = styled(Select.Root)``;
 
-const TagSelectTrigger = styled(Select.Trigger)`
+const TagSelectTrigger = styled(Select.Trigger)<{
+  backgroundColor?: string;
+  textColor?: string;
+}>`
   border-radius: var(--radius-3);
   height: 100%;
+  ${({ backgroundColor }) =>
+    backgroundColor && `background-color: ${backgroundColor};`}
+  ${({ textColor }) => textColor && `color: ${textColor};`}
 `;
 
 const TagSelectItem = styled(Select.Item)<{
-  backgroundColor: string;
+  backgroundColor?: string;
   textColor?: string;
 }>`
   &[data-highlighted] {
-    background-color: ${({ backgroundColor }) => backgroundColor};
+    ${({ backgroundColor }) => `background-color: ${backgroundColor}`};
     ${({ textColor }) => textColor && `color: ${textColor};`}
   }
 `;
@@ -69,6 +75,17 @@ const LoadingText = styled.h4`
   text-align: center;
   padding-block: 1rem;
 `;
+
+function getTagColors(tag?: Tag) {
+  if (!tag) {
+    return { backgroundColor: undefined, textColor: undefined };
+  }
+
+  const tagColor = tag.colour ? tag.colour : null;
+  const backgroundColor = tagColor ? intToColorHex(tagColor) : "var(--red-9)";
+  const textColor = tagColor ? getContrastColorFromInt(tagColor) : undefined;
+  return { backgroundColor, textColor };
+}
 
 export default function PollsHome() {
   const [polls, setPolls] = useState<Poll[]>([]);
@@ -124,6 +141,11 @@ export default function PollsHome() {
     setPolls([]);
   };
 
+  const {
+    backgroundColor: selectedTagBackgroundColor,
+    textColor: selectedTagTextColor,
+  } = getTagColors(selectedTag ? tags[selectedTag] : undefined);
+
   return (
     <Flex direction="column" gap="4" align="center" justify="center">
       <SearchContainer gap="2" align="center">
@@ -160,21 +182,18 @@ export default function PollsHome() {
               setPolls([]);
             }}
           >
-            <TagSelectTrigger aria-label="Filter by tag">
+            <TagSelectTrigger
+              aria-label="Filter by tag"
+              backgroundColor={selectedTagBackgroundColor}
+              textColor={selectedTagTextColor}
+            >
               {selectedTag ? tags[selectedTag].name : "All tags"}
             </TagSelectTrigger>
             <Select.Content>
               <Select.Item value="all">All tags</Select.Item>
               <Select.Separator />
               {tagsOrder.map((tag) => {
-                const tagColor = tags[tag].colour ? tags[tag].colour : null;
-                const backgroundColor = tagColor
-                  ? intToColorHex(tagColor)
-                  : "var(--red-9)";
-                const textColor = tagColor
-                  ? getContrastColorFromInt(tagColor)
-                  : undefined;
-
+                const { backgroundColor, textColor } = getTagColors(tags[tag]);
                 return (
                   <TagSelectItem
                     key={tag}

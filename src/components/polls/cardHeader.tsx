@@ -1,4 +1,4 @@
-import { intToColorHex } from "@/utils";
+import { getContrastColorFromInt, intToColorHex } from "@/utils";
 import type { Poll, Tag } from "@jocasta-polls-api";
 import { Flex, Link, Text } from "@radix-ui/themes";
 import { Calendar, ExternalLink, type LucideProps, Vote } from "lucide-react";
@@ -20,22 +20,11 @@ const TagPill = styled(Text)<{ tag?: Tag }>`
   background-color: ${({ tag }) =>
     tag?.colour ? intToColorHex(tag.colour) : "var(--red-9)"};
   border-radius: 100rem;
+  color: ${({ tag }) =>
+    tag?.colour ? getContrastColorFromInt(tag.colour) : "var(--red-9)"};
+  font-weight: 500;
   padding-block: 0.3rem;
   padding-inline: 0.5rem;
-  font-weight: 500;
-
-  span {
-    /*
-    * Ensure contrast of button label against background. The color property
-    * should match that of the background it sits against.
-    *
-    * From https://robinrendle.com/the-cascade/015-context-aware-colors
-    */
-    color: ${({ tag }) =>
-      tag?.colour ? intToColorHex(tag.colour) : "var(--red-9)"};
-    filter: invert(1) grayscale(1) brightness(1.3) contrast(9000);
-    mix-blend-mode: luminosity;
-  }
 `;
 
 const ScrollFlex = styled(Flex)`
@@ -98,10 +87,8 @@ export function PollCardHeader({ poll, tag }: { poll: Poll; tag: Tag }) {
   return (
     <Header align="center" justify="start" gap="3">
       <TagPill trim="both" size="1" tag={tag}>
-        <span>
-          {tag.name}
-          {poll.num && ` • #${poll.num}`}
-        </span>
+        {tag.name}
+        {poll.num && ` • #${poll.num}`}
       </TagPill>
 
       <ScrollFlex gap="3" align="center" justify="between">
