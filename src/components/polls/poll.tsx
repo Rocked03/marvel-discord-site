@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { Choices } from "./choices";
 import type { ComponentProps } from "react";
 import { PollCardHeader } from "./cardHeader";
+import { useIsMobile } from "@/utils/isMobile";
 
 const CardBox = styled(Box)`
   width: 100%;
@@ -80,13 +81,15 @@ function Description({
 }
 
 export function PollCard({ poll, tag }: { poll: Poll; tag: Tag }) {
+  const isMobile = useIsMobile();
+
   return (
     <CardBox>
       <Flex direction="column" gap="3" align="center" justify="start">
         <PollCardHeader poll={poll} tag={tag} />
 
         <CardTitleBlock direction="column" gap="1" align="start">
-          <Heading size="7" weight="medium" align="left">
+          <Heading size={isMobile ? "5" : "7"} weight="medium" align="left">
             {poll.question}
           </Heading>
           {poll.description && (

@@ -4,6 +4,8 @@ import type { Poll, Tag } from "@jocasta-polls-api";
 import { Box, Flex, Heading, Text } from "@radix-ui/themes";
 import styled from "styled-components";
 import { TitleText } from "../titleText";
+import { useIsMobile } from "@/utils/isMobile";
+import Head from "next/head";
 
 const ChoiceLabelMap: Record<number, string> = {
   1: "A",
@@ -43,11 +45,17 @@ const BarLine = styled.div<{ $percentage: number; $color?: string }>`
   width: ${({ $percentage }) => `${$percentage}%`};
 `;
 
+const ChoiceLabel = styled(Heading)`
+  width: 1rem;
+`;
+
 const PercentLabel = styled(TitleText)`
   color: var(--gray-a11);
 `;
 
 export function Choices({ poll, tag }: { poll: Poll; tag: Tag }) {
+  const isMobile = useIsMobile();
+
   const totalVotes = poll.votes.reduce((acc, vote) => acc + vote, 0);
 
   const percentageVotes = poll.votes.map((vote) => {
@@ -63,11 +71,11 @@ export function Choices({ poll, tag }: { poll: Poll; tag: Tag }) {
     <Container>
       {poll.choices.map((choice, index) => (
         <Flex key={ChoiceLabelMap[index + 1]} gap="2" align="center">
-          <Heading size="4">{ChoiceLabelMap[index + 1]}</Heading>
+          <ChoiceLabel size="4">{ChoiceLabelMap[index + 1]}</ChoiceLabel>
 
           <Flex gap="1" direction="column" width="100%">
             <Flex width="100%" align="end">
-              <Text>{choice}</Text>
+              <Text size={isMobile ? "2" : "3"}>{choice}</Text>
               <Spacer />
               <PercentLabel
                 size="1"
