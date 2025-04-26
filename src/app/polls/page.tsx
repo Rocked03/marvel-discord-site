@@ -3,9 +3,9 @@
 import { getPolls } from "@/api/polls/polls";
 import { getTags } from "@/api/polls/tags";
 import { PollCard } from "@/components/polls/poll";
-import { getContrastColorFromInt, intToColorHex } from "@/utils";
+import { TagSelect } from "@/components/polls/tagSelect";
 import type { Meta, Poll, Tag } from "@jocasta-polls-api";
-import { Box, Flex, Select, TextField } from "@radix-ui/themes";
+import { Flex, TextField } from "@radix-ui/themes";
 import { Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -21,33 +21,6 @@ const SearchBar = styled(TextField.Root)`
   border-radius: var(--radius-3);
   flex: 1;
   height: 100%;
-`;
-
-const TagSelectContainer = styled(Box)`
-  height: 100%;
-`;
-
-const TagSelect = styled(Select.Root)``;
-
-const TagSelectTrigger = styled(Select.Trigger)<{
-  backgroundColor?: string;
-  textColor?: string;
-}>`
-  border-radius: var(--radius-3);
-  height: 100%;
-  ${({ backgroundColor }) =>
-    backgroundColor && `background-color: ${backgroundColor};`}
-  ${({ textColor }) => textColor && `color: ${textColor};`}
-`;
-
-const TagSelectItem = styled(Select.Item)<{
-  backgroundColor?: string;
-  textColor?: string;
-}>`
-  &[data-highlighted] {
-    ${({ backgroundColor }) => `background-color: ${backgroundColor}`};
-    ${({ textColor }) => textColor && `color: ${textColor};`}
-  }
 `;
 
 const FullWidthScroll = styled.div`
@@ -75,17 +48,6 @@ const LoadingText = styled.h4`
   text-align: center;
   padding-block: 1rem;
 `;
-
-function getTagColors(tag?: Tag) {
-  if (!tag) {
-    return { backgroundColor: undefined, textColor: undefined };
-  }
-
-  const tagColor = tag.colour ? tag.colour : null;
-  const backgroundColor = tagColor ? intToColorHex(tagColor) : "var(--red-9)";
-  const textColor = tagColor ? getContrastColorFromInt(tagColor) : undefined;
-  return { backgroundColor, textColor };
-}
 
 export default function PollsHome() {
   const [polls, setPolls] = useState<Poll[]>([]);
@@ -141,10 +103,11 @@ export default function PollsHome() {
     setPolls([]);
   };
 
-  const {
-    backgroundColor: selectedTagBackgroundColor,
-    textColor: selectedTagTextColor,
-  } = getTagColors(selectedTag ? tags[selectedTag] : undefined);
+  const handleTagSelect = (value: string) => {
+    setSelectedTag(value === "all" ? null : Number(value));
+    setPage(1);
+    setPolls([]);
+  };
 
   return (
     <Flex direction="column" gap="4" align="center" justify="center">
@@ -173,41 +136,12 @@ export default function PollsHome() {
           {meta && <TextField.Slot>{meta.total} results</TextField.Slot>}
         </SearchBar>
 
-        <TagSelectContainer>
-          <TagSelect
-            defaultValue="all"
-            onValueChange={(value) => {
-              setSelectedTag(value === "all" ? null : Number(value));
-              setPage(1);
-              setPolls([]);
-            }}
-          >
-            <TagSelectTrigger
-              aria-label="Filter by tag"
-              backgroundColor={selectedTagBackgroundColor}
-              textColor={selectedTagTextColor}
-            >
-              {selectedTag ? tags[selectedTag].name : "All tags"}
-            </TagSelectTrigger>
-            <Select.Content>
-              <Select.Item value="all">All tags</Select.Item>
-              <Select.Separator />
-              {tagsOrder.map((tag) => {
-                const { backgroundColor, textColor } = getTagColors(tags[tag]);
-                return (
-                  <TagSelectItem
-                    key={tag}
-                    value={tag.toString()}
-                    backgroundColor={backgroundColor}
-                    textColor={textColor}
-                  >
-                    {tags[Number(tag)].name}
-                  </TagSelectItem>
-                );
-              })}
-            </Select.Content>
-          </TagSelect>
-        </TagSelectContainer>
+        <TagSelect
+          selectedTag={selectedTag}
+          handleTagSelect={handleTagSelect}
+          tags={tags}
+          tagsOrder={tagsOrder}
+        />
       </SearchContainer>
 
       {polls && tags && Object.keys(tags).length > 0 && (
