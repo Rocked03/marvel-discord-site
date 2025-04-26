@@ -5,7 +5,7 @@ import { getTags } from "@/api/polls/tags";
 import { PollCard } from "@/components/polls/poll";
 import type { Meta, Poll, Tag } from "@jocasta-polls-api";
 import { Flex, TextField } from "@radix-ui/themes";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import styled from "styled-components";
@@ -20,6 +20,15 @@ const FullWidthScroll = styled.div`
 
 const PollCardContainer = styled(Flex)`
   width: 100%;
+`;
+
+const ClearButton = styled.button`
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  padding: 0;
 `;
 
 export default function PollsHome() {
@@ -64,8 +73,7 @@ export default function PollsHome() {
     fetchTags();
   }, []);
 
-  const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const handleSearch = (value: string) => {
     setSearchValue(value);
     setPage(1);
     setPolls([]);
@@ -77,11 +85,23 @@ export default function PollsHome() {
         placeholder="Search polls"
         size="3"
         value={searchValue}
-        onChange={handleSearch}
+        onChange={(e) => handleSearch(e.target.value)}
       >
         <TextField.Slot>
           <Search size={20} />
         </TextField.Slot>
+        {searchValue && (
+          <TextField.Slot>
+            <ClearButton
+              type="button"
+              onClick={() => {
+                handleSearch("");
+              }}
+            >
+              <X size={20} />
+            </ClearButton>
+          </TextField.Slot>
+        )}
         {meta && <TextField.Slot>{meta.total} results</TextField.Slot>}
       </SearchBar>
 
