@@ -17,3 +17,8 @@ export function formatGalleryEntryTitle(title: string) {
 export function relativeImagePathToAbsolute(relativePath: string): string {
 	return `${config.publicBaseUrl}${relativePath}`;
 }
+
+export function intToColorHex(int: number): string {
+	const hex = int.toString(16).padStart(6, "0");
+	return `#${hex}`;
+}

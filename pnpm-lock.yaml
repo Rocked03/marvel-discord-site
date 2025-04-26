@@ -26,10 +26,13 @@ importers:
       embla-carousel-react:
         specifier: ^8.5.2
         version: 8.5.2(react@19.0.0)
+      jocasta-polls-api:
+        specifier: github:Rocked03/jocasta-polls-api#feature/polls-api
+        version: https://codeload.github.com/Rocked03/jocasta-polls-api/tar.gz/7042574f69c1e08583d1b4857af619bce99c2419(typescript@5.8.2)
       lucide-react:
         specifier: ^0.483.0
         version: 0.483.0(react@19.0.0)
-      marvel-discord-api-types:
+      jocasta-polls-api:
         specifier: github:Rocked03/jocasta-polls-api#feature/polls-api
         version: jocasta-polls-api@https://codeload.github.com/Rocked03/jocasta-polls-api/tar.gz/b8487dd0d1f0165d09922658c2aacb8c4140817d(typescript@5.8.2)
       next:
@@ -2913,8 +2916,8 @@ packages:
     resolution: {integrity: sha512-H0dkQoCa3b2VEeKQBOxFph+JAbcrQdE7KC0UkqwpLmv2EC4P41QXP+rqo9wYodACiG5/WM5s9oDApTU8utwj9g==}
     engines: {node: '>= 0.4'}
 
-  jocasta-polls-api@https://codeload.github.com/Rocked03/jocasta-polls-api/tar.gz/b8487dd0d1f0165d09922658c2aacb8c4140817d:
-    resolution: {tarball: https://codeload.github.com/Rocked03/jocasta-polls-api/tar.gz/b8487dd0d1f0165d09922658c2aacb8c4140817d}
+  jocasta-polls-api@https://codeload.github.com/Rocked03/jocasta-polls-api/tar.gz/7042574f69c1e08583d1b4857af619bce99c2419:
+    resolution: {tarball: https://codeload.github.com/Rocked03/jocasta-polls-api/tar.gz/7042574f69c1e08583d1b4857af619bce99c2419}
     version: 1.0.0
 
   js-tokens@4.0.0:
@@ -6909,6 +6912,19 @@ snapshots:
       get-proto: 1.0.1
       has-symbols: 1.1.0
       set-function-name: 2.0.2
+
+  jocasta-polls-api@https://codeload.github.com/Rocked03/jocasta-polls-api/tar.gz/7042574f69c1e08583d1b4857af619bce99c2419(typescript@5.8.2):
+    dependencies:
+      '@prisma/client': 6.6.0(prisma@6.6.0(typescript@5.8.2))(typescript@5.8.2)
+      cors: 2.8.5
+      dotenv: 16.5.0
+      express: 5.1.0
+      http: 0.0.1-security
+      prisma: 6.6.0(typescript@5.8.2)
+      zod: 3.24.3
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
 
   jocasta-polls-api@https://codeload.github.com/Rocked03/jocasta-polls-api/tar.gz/b8487dd0d1f0165d09922658c2aacb8c4140817d(typescript@5.8.2):
     dependencies:

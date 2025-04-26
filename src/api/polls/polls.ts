@@ -1,4 +1,4 @@
-import type { Meta, Poll } from "@marvel-discord-api-types";
+import type { Meta, Poll } from "@jocasta-polls-api";
 import { axiosPollsInstance } from "../axios";
 import type { AxiosResponse } from "axios";
 

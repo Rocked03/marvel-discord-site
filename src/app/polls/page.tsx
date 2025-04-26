@@ -1,7 +1,9 @@
 "use client";
 
 import { getPolls } from "@/api/polls/polls";
-import type { Meta, Poll } from "@marvel-discord-api-types";
+import { getTags } from "@/api/polls/tags";
+import { PollCard } from "@/components/polls/poll";
+import type { Meta, Poll, Tag } from "@jocasta-polls-api";
 import { Flex, TextField } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
@@ -13,6 +15,7 @@ const SearchBar = styled(TextField.Root)`
 export default function PollsHome() {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [meta, setMeta] = useState<Meta | null>(null);
+  const [tags, setTags] = useState<Record<number, Tag>>({});
 
   useEffect(() => {
     const fetchPolls = async () => {
@@ -25,7 +28,22 @@ export default function PollsHome() {
       }
     };
 
+    const fetchTags = async () => {
+      try {
+        const response = await getTags();
+        console.log(response);
+        const tags: Record<number, Tag> = Object.fromEntries(
+          response.map((tag) => [tag.tag, tag])
+        );
+        console.log(tags);
+        setTags(tags);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     fetchPolls();
+    fetchTags();
   }, []);
 
   return (
@@ -33,13 +51,13 @@ export default function PollsHome() {
       <SearchBar placeholder="Search the docs…" size="3">
         <TextField.Slot>:o</TextField.Slot>
       </SearchBar>
-      {polls && polls.length > 0 && (
-        <ul>
-          {polls.map((poll) => (
-            <li key={poll.id}>{poll.question}</li>
-          ))}
-        </ul>
-      )}
+      {polls &&
+        polls.length > 0 &&
+        tags &&
+        Object.keys(tags).length > 0 &&
+        polls.map((poll) => (
+          <PollCard key={poll.id} poll={poll} tag={tags[poll.tag]} />
+        ))}
     </Flex>
   );
 }
