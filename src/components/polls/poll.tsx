@@ -1,8 +1,11 @@
 import type { Poll, Tag } from "@jocasta-polls-api";
-import { Box, Container, Flex, Heading, Text } from "@radix-ui/themes";
+import { Box, Container, Flex, Heading, Text, Link } from "@radix-ui/themes";
 import styled from "styled-components";
 import { Choices } from "./choices";
 import { intToColorHex } from "@/utils";
+import { Spacer } from "@/utils/styled";
+import { Calendar, ExternalLink, type LucideProps, Vote } from "lucide-react";
+import { cloneElement, isValidElement, type ReactElement } from "react";
 
 const CardBox = styled(Box)`
   width: 100%;
@@ -40,7 +43,6 @@ const TagPill = styled(Text)<{ tag?: Tag }>`
   background-color: ${({ tag }) =>
     tag?.colour ? intToColorHex(tag.colour) : "var(--red-9)"};
   border-radius: 100rem;
-  font-size: var(--font-size-1);
   padding-block: 0.3rem;
   padding-inline: 0.5rem;
   font-weight: 500;
@@ -59,14 +61,91 @@ const TagPill = styled(Text)<{ tag?: Tag }>`
   }
 `;
 
+const HeaderTextStyled = styled(Text).attrs({ size: "1" })`
+  color: var(--gray-a11);
+`;
+
+function HeaderText({
+  icon,
+  children,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const styledIcon = isValidElement(icon)
+    ? cloneElement(icon as ReactElement<LucideProps>, {
+        size: 16,
+        color: "var(--gray-a11)",
+        strokeWidth: 2,
+      })
+    : icon;
+
+  return (
+    <Flex gap="1" align="center">
+      {styledIcon}
+      <HeaderTextStyled>{children}</HeaderTextStyled>
+    </Flex>
+  );
+}
+
+function HeaderTextWithLink({
+  icon,
+  children,
+  href,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  href: string;
+}) {
+  return (
+    <Link href={href}>
+      <HeaderText icon={icon}>{children}</HeaderText>
+    </Link>
+  );
+}
+
 export function PollCard({ poll, tag }: { poll: Poll; tag: Tag }) {
+  const totalVotes = poll.votes.reduce((acc, vote) => acc + vote, 0);
+
   return (
     <CardBox>
       <Flex direction="column" gap="3" align="center" justify="start">
-        <Header align="start">
-          <TagPill trim="both" tag={tag}>
-            <span>{tag.name}</span>
+        <Header align="center" justify="start" gap="3">
+          <TagPill trim="both" size="1" tag={tag}>
+            <span>
+              {tag.name}
+              {poll.num && ` • #${poll.num}`}
+            </span>
           </TagPill>
+
+          <HeaderText icon={<Calendar />}>
+            {poll.time
+              ? new Date(poll.time).toLocaleDateString("en-US", {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                })
+              : "No date set."}
+          </HeaderText>
+
+          <HeaderText icon={<Vote />}>
+            {totalVotes} {totalVotes === 1 ? "Vote" : "Votes"}
+          </HeaderText>
+
+          <Spacer />
+
+          {poll.published && (
+            <HeaderTextWithLink
+              icon={<ExternalLink />}
+              href={
+                poll.message_id
+                  ? `https://discord.com/channels/${poll.guild_id}/${tag.channel_id}/${poll.message_id}`
+                  : ""
+              }
+            >
+              {poll.thread_question ? "Discuss in Discord" : "Open in Discord"}
+            </HeaderTextWithLink>
+          )}
         </Header>
 
         <CardTitleBlock direction="column" gap="1" align="start">

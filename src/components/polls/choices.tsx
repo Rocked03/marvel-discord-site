@@ -1,4 +1,5 @@
 import { intToColorHex } from "@/utils";
+import { Spacer } from "@/utils/styled";
 import type { Poll, Tag } from "@jocasta-polls-api";
 import { Box, Flex, Heading, Text } from "@radix-ui/themes";
 import styled from "styled-components";
@@ -24,10 +25,6 @@ const Container = styled(Box)`
   gap: 0.5rem;
   padding: 0.75rem;
   width: 100%;
-`;
-
-const Spacer = styled.div`
-  flex: 1;
 `;
 
 const BarContainer = styled.div`
