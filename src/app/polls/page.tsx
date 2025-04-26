@@ -4,8 +4,10 @@ import { getPolls } from "@/api/polls/polls";
 import { getTags } from "@/api/polls/tags";
 import { PollCard } from "@/components/polls/poll";
 import { TagSelect } from "@/components/polls/tagSelect";
+import { useDebounce } from "@/utils/debouncer";
 import type { Meta, Poll, Tag } from "@jocasta-polls-api";
 import { Flex, TextField } from "@radix-ui/themes";
+import axios from "axios";
 import { Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -59,24 +61,42 @@ export default function PollsHome() {
   const [page, setPage] = useState<number>(1);
   const [selectedTag, setSelectedTag] = useState<number | null>(null);
 
+  const debouncedSearchValue = useDebounce(searchValue, 500);
+
   useEffect(() => {
+    const controller = new AbortController();
+
+    let cancelled = false;
+
     const fetchPolls = async () => {
       try {
         const { polls, meta } = await getPolls({
-          search: searchValue,
+          search: debouncedSearchValue,
           page: page,
           tag: selectedTag ?? undefined,
+          signal: controller.signal,
         });
-        setPolls((prevPolls) => [...prevPolls, ...polls]);
-        setMeta(meta);
-        setPage(meta.page);
+        if (!cancelled) {
+          setPolls((prevPolls) => [...prevPolls, ...polls]);
+          setMeta(meta);
+          setPage(meta.page);
+        }
       } catch (err) {
-        console.error(err);
+        if (axios.isCancel(err)) {
+          console.log("Request canceled:", err.message);
+        } else {
+          console.error(err);
+        }
       }
     };
 
     fetchPolls();
-  }, [searchValue, page, selectedTag]);
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [debouncedSearchValue, page, selectedTag]);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -97,16 +117,18 @@ export default function PollsHome() {
     fetchTags();
   }, []);
 
-  const handleSearch = (value: string) => {
-    setSearchValue(value);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Reset whenever they change
+  useEffect(() => {
     setPage(1);
     setPolls([]);
+  }, [debouncedSearchValue, selectedTag]);
+
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
   };
 
   const handleTagSelect = (value: string) => {
     setSelectedTag(value === "all" ? null : Number(value));
-    setPage(1);
-    setPolls([]);
   };
 
   return (

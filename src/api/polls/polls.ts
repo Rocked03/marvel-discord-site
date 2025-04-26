@@ -2,7 +2,7 @@ import type { Meta, Poll } from "@jocasta-polls-api";
 import { axiosPollsInstance } from "../axios";
 import type { AxiosResponse } from "axios";
 
-interface PollFilters {
+interface GetPollsParams {
 	guildId?: string | bigint;
 	published?: boolean;
 	tag?: number;
@@ -11,6 +11,8 @@ interface PollFilters {
 
 	page?: number;
 	limit?: number;
+
+	signal?: AbortSignal;
 }
 
 export interface PollFilterUser {
@@ -26,7 +28,8 @@ export const getPolls = async ({
 	search,
 	page = 1,
 	limit = 10,
-}: PollFilters): Promise<{ polls: Poll[]; meta: Meta }> => {
+	signal,
+}: GetPollsParams): Promise<{ polls: Poll[]; meta: Meta }> => {
 	try {
 		const params = {
 			guildId: guildId.toString(),
@@ -40,7 +43,7 @@ export const getPolls = async ({
 		};
 
 		const response: AxiosResponse<{ data: Poll[]; meta: Meta }> =
-			await axiosPollsInstance.get("/polls", { params: params });
+			await axiosPollsInstance.get("/polls", { params: params, signal });
 
 		return { polls: response.data.data, meta: response.data.meta };
 	} catch (error) {
