@@ -22,3 +22,13 @@ export function intToColorHex(int: number): string {
 	const hex = int.toString(16).padStart(6, "0");
 	return `#${hex}`;
 }
+
+export function getContrastColorFromInt(color: number): string {
+	const r = (color >> 16) & 0xff;
+	const g = (color >> 8) & 0xff;
+	const b = color & 0xff;
+
+	const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+
+	return brightness > 128 ? "#000000" : "#ffffff";
+}
