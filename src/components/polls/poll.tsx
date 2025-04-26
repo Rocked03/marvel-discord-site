@@ -36,7 +36,11 @@ const CardTitleBlock = styled(Flex)`
   width: 100%;
 `;
 
-const Description = styled(Text)`
+const DescriptionContainer = styled(Flex)`
+  width: 100%;
+`;
+
+const DescriptionStyled = styled(Text)`
   color: var(--gray-a12);
   letter-spacing: 0.02rem;
 `;
@@ -106,7 +110,7 @@ function HeaderTextWithLink({
   href: string;
 } & ComponentProps<typeof Text>) {
   return (
-    <Link href={href}>
+    <Link href={href} underline="hover">
       <HeaderText icon={icon} {...props}>
         {children}
       </HeaderText>
@@ -114,8 +118,51 @@ function HeaderTextWithLink({
   );
 }
 
+function Description({
+  text,
+  ...props
+}: {
+  text: string;
+} & ComponentProps<typeof Text>) {
+  const lines = text.split("\n");
+
+  // Simple URL regex
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+  return (
+    <DescriptionContainer direction="column" gap="1">
+      {lines.map((line, index) => {
+        const parts = line.split(urlRegex);
+
+        return (
+          // biome-ignore lint/suspicious/noArrayIndexKey: Just text
+          <DescriptionStyled key={index} {...props}>
+            {parts.map((part) => {
+              if (urlRegex.test(part)) {
+                return (
+                  <Link
+                    href={part}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    underline="hover"
+                  >
+                    {part}
+                  </Link>
+                );
+              }
+              return part;
+            })}
+          </DescriptionStyled>
+        );
+      })}
+    </DescriptionContainer>
+  );
+}
+
 export function PollCard({ poll, tag }: { poll: Poll; tag: Tag }) {
   const totalVotes = poll.votes.reduce((acc, vote) => acc + vote, 0);
+
+  console.log(poll.description);
 
   return (
     <CardBox>
@@ -176,7 +223,7 @@ export function PollCard({ poll, tag }: { poll: Poll; tag: Tag }) {
             {poll.question}
           </Heading>
           {poll.description && (
-            <Description size="2">{poll.description}</Description>
+            <Description text={poll.description} size="2" align="left" />
           )}
         </CardTitleBlock>
 
