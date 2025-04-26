@@ -16,12 +16,14 @@ const Header = styled(Flex)`
   width: 100%;
 `;
 
-const TagPill = styled(Text)<{ $tag?: Tag }>`
+const Pill = styled(Text).attrs({ size: "1", trim: "both" })`
   border-radius: 100rem;
   font-weight: 500;
   padding-block: 0.3rem;
   padding-inline: 0.5rem;
+`;
 
+const TagPill = styled(Pill)<{ $tag?: Tag }>`
   ${({ $tag }) => {
     const { backgroundColor, textColor } = getTagColors($tag);
     return `
@@ -29,6 +31,12 @@ const TagPill = styled(Text)<{ $tag?: Tag }>`
       color: ${textColor ?? "#fff"};
     `;
   }}
+`;
+
+const NewPill = styled(Pill)`
+  background-color: var(--red-9);
+  color: #fff;
+  box-shadow: 0 0 0.5rem var(--red-9);
 `;
 
 const ScrollFlex = styled(Flex)`
@@ -88,9 +96,15 @@ function HeaderTextWithLink({
 export function PollCardHeader({ poll, tag }: { poll: Poll; tag: Tag }) {
   const totalVotes = poll.votes.reduce((acc, vote) => acc + vote, 0);
 
+  const isNew = poll.time
+    ? new Date(poll.time).getTime() > Date.now() - 1000 * 60 * 60 * 24 * 7 // 7 days
+    : false;
+
   return (
     <Header align="center" justify="start" gap="3">
-      <TagPill trim="both" size="1" $tag={tag}>
+      {isNew && <NewPill>NEW</NewPill>}
+
+      <TagPill $tag={tag}>
         {tag.name}
         {poll.num && ` • #${poll.num}`}
       </TagPill>
