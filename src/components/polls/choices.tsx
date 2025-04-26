@@ -5,7 +5,6 @@ import { Box, Flex, Heading, Text } from "@radix-ui/themes";
 import styled from "styled-components";
 import { TitleText } from "../titleText";
 import { useIsMobile } from "@/utils/isMobile";
-import Head from "next/head";
 
 const ChoiceLabelMap: Record<number, string> = {
   1: "A",

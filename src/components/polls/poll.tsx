@@ -21,7 +21,7 @@ const PollImage = styled.img`
 `;
 
 const ImageContainer = styled(Container)`
-  margin-block: 1rem;
+  margin-top: 1rem;
   max-width: var(--container-3);
 `;
 
