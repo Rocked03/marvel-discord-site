@@ -1,4 +1,4 @@
-import { getContrastColorFromInt, getTagColors, intToColorHex } from "@/utils";
+import { getTagColors } from "@/utils";
 import type { Poll, Tag } from "@jocasta-polls-api";
 import { Flex, Link, Text } from "@radix-ui/themes";
 import { Calendar, ExternalLink, type LucideProps, Vote } from "lucide-react";

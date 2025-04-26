@@ -64,6 +64,7 @@ function Description({
                     target="_blank"
                     rel="noopener noreferrer"
                     underline="hover"
+                    key={part}
                   >
                     {part}
                   </Link>

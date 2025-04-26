@@ -171,7 +171,9 @@ export default function PollsHome() {
           <InfiniteScroll
             dataLength={polls.length}
             next={async () => {
-              meta?.nextPage && setPage(meta.nextPage);
+              if (meta?.nextPage) {
+                setPage(meta.nextPage);
+              }
             }}
             hasMore={meta ? meta.page < meta.totalPages : false}
             loader={<LoadingText>Loading...</LoadingText>}

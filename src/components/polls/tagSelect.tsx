@@ -1,4 +1,4 @@
-import { getContrastColorFromInt, getTagColors, intToColorHex } from "@/utils";
+import { getTagColors } from "@/utils";
 import type { Tag } from "@jocasta-polls-api";
 import { Box, Select } from "@radix-ui/themes";
 import styled from "styled-components";
