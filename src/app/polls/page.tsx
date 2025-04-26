@@ -31,6 +31,15 @@ const ClearButton = styled.button`
   padding: 0;
 `;
 
+const LoadingText = styled.h4`
+  color: var(--gray-a11);
+  font-size: var(--font-size-3);
+  font-weight: 500;
+  width: 100%;
+  text-align: center;
+  padding-block: 1rem;
+`;
+
 export default function PollsHome() {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [meta, setMeta] = useState<Meta | null>(null);
@@ -113,7 +122,7 @@ export default function PollsHome() {
               meta?.nextPage && setPage(meta.nextPage);
             }}
             hasMore={meta ? meta.page < meta.totalPages : false}
-            loader={<h4>Loading...</h4>}
+            loader={<LoadingText>Loading...</LoadingText>}
           >
             <PollCardContainer
               direction="column"
