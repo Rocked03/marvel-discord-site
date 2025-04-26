@@ -3,6 +3,7 @@ import { Spacer } from "@/utils/styled";
 import type { Poll, Tag } from "@jocasta-polls-api";
 import { Box, Flex, Heading, Text } from "@radix-ui/themes";
 import styled from "styled-components";
+import { TitleText } from "../titleText";
 
 const ChoiceLabelMap: Record<number, string> = {
   1: "A",
@@ -42,7 +43,7 @@ const BarLine = styled.div<{ percentage: number; color?: string }>`
   width: ${(props) => `${props.percentage}%`};
 `;
 
-const PercentLabel = styled(Text)`
+const PercentLabel = styled(TitleText)`
   color: var(--gray-a11);
 `;
 
@@ -68,7 +69,14 @@ export function Choices({ poll, tag }: { poll: Poll; tag: Tag }) {
             <Flex width="100%" align="end">
               <Text>{choice}</Text>
               <Spacer />
-              <PercentLabel size="1">{percentageVotes[index]}%</PercentLabel>
+              <PercentLabel
+                size="1"
+                title={`${poll.votes[index]} Vote${
+                  poll.votes[index] > 1 ? "s" : ""
+                }`}
+              >
+                {percentageVotes[index]}%
+              </PercentLabel>
             </Flex>
 
             <BarContainer>

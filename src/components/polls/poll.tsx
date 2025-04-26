@@ -5,7 +5,13 @@ import { Choices } from "./choices";
 import { intToColorHex } from "@/utils";
 import { Spacer } from "@/utils/styled";
 import { Calendar, ExternalLink, type LucideProps, Vote } from "lucide-react";
-import { cloneElement, isValidElement, type ReactElement } from "react";
+import {
+  cloneElement,
+  type ComponentProps,
+  isValidElement,
+  type ReactElement,
+} from "react";
+import { TitleText } from "../titleText";
 
 const CardBox = styled(Box)`
   width: 100%;
@@ -61,17 +67,18 @@ const TagPill = styled(Text)<{ tag?: Tag }>`
   }
 `;
 
-const HeaderTextStyled = styled(Text).attrs({ size: "1" })`
+const HeaderTextStyled = styled(TitleText).attrs({ size: "1" })`
   color: var(--gray-a11);
 `;
 
 function HeaderText({
   icon,
   children,
+  ...props
 }: {
   icon: React.ReactNode;
   children: React.ReactNode;
-}) {
+} & ComponentProps<typeof Text>) {
   const styledIcon = isValidElement(icon)
     ? cloneElement(icon as ReactElement<LucideProps>, {
         size: 16,
@@ -83,7 +90,7 @@ function HeaderText({
   return (
     <Flex gap="1" align="center">
       {styledIcon}
-      <HeaderTextStyled>{children}</HeaderTextStyled>
+      <HeaderTextStyled {...props}>{children}</HeaderTextStyled>
     </Flex>
   );
 }
@@ -92,14 +99,17 @@ function HeaderTextWithLink({
   icon,
   children,
   href,
+  ...props
 }: {
   icon: React.ReactNode;
   children: React.ReactNode;
   href: string;
-}) {
+} & ComponentProps<typeof Text>) {
   return (
     <Link href={href}>
-      <HeaderText icon={icon}>{children}</HeaderText>
+      <HeaderText icon={icon} {...props}>
+        {children}
+      </HeaderText>
     </Link>
   );
 }
@@ -117,11 +127,24 @@ export function PollCard({ poll, tag }: { poll: Poll; tag: Tag }) {
               {poll.num && ` • #${poll.num}`}
             </span>
           </TagPill>
-
-          <HeaderText icon={<Calendar />}>
+          <HeaderText
+            icon={<Calendar />}
+            title={
+              poll.time
+                ? new Date(poll.time).toLocaleDateString("en-US", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                    minute: "2-digit",
+                    hour: "2-digit",
+                    timeZoneName: "short",
+                  })
+                : undefined
+            }
+          >
             {poll.time
               ? new Date(poll.time).toLocaleDateString("en-US", {
-                  day: "2-digit",
+                  day: "numeric",
                   month: "long",
                   year: "numeric",
                 })
