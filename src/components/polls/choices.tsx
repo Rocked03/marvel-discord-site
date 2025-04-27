@@ -50,11 +50,15 @@ const BarContainer = styled.div`
   width: 100%;
 `;
 
-const BarLine = styled.div<{ $percentage: number; $color?: string }>`
+const BarLine = styled.div<{
+  $percentage: number;
+  $color?: string;
+  $isChecked?: boolean;
+}>`
   background-color: ${({ $color }) => $color || "var(--red-9)"};
   border-radius: 100rem;
   height: 100%;
-  opacity: 0.75;
+  opacity: ${({ $isChecked }) => ($isChecked ? 0.95 : 0.75)};
   transition: opacity 0.1s ease-in-out, width 0.3s ease-in-out;
   width: ${({ $percentage }) => `${$percentage}%`};
 
@@ -199,8 +203,8 @@ export function Choices({
             <BarContainer>
               <BarLine
                 $percentage={relativePercentage(percentageVotes[index])}
-                // $percentage={percentageVotes[index]}
                 $color={tag.colour ? intToColorHex(tag.colour) : undefined}
+                $isChecked={userVote !== undefined && userVote === index}
               />
             </BarContainer>
           </Flex>
