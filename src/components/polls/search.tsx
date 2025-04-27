@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import styled from "styled-components";
 import { TagSelect } from "./tagSelect";
+import { useIsMobile } from "@/utils/isMobile";
 
 const SearchContainer = styled(Flex)`
   align-items: center;
@@ -96,6 +97,8 @@ export function PollsSearch({
     id: bigint;
   };
 }) {
+  const isMobile = useIsMobile();
+
   return (
     <SearchContainer gap="2" align="center">
       <SearchBar
@@ -120,7 +123,12 @@ export function PollsSearch({
             </ClearButton>
           </TextField.Slot>
         )}
-        {meta && <TextField.Slot>{meta.total} results</TextField.Slot>}
+        {meta && (
+          <TextField.Slot>
+            {meta.total}
+            {isMobile ? "" : " results"}
+          </TextField.Slot>
+        )}
       </SearchBar>
 
       {user && <HasVotedToggle hasVoted={hasVoted} setHasVoted={setHasVoted} />}

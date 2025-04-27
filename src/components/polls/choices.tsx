@@ -77,6 +77,7 @@ const ChoiceText = styled(Text)`
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  text-align: left;
 `;
 
 const scaleUpDown = keyframes`
@@ -176,7 +177,7 @@ export function Choices({
           <ChoiceLabel size="4">{ChoiceLabelMap[index + 1]}</ChoiceLabel>
 
           <Flex gap="1" direction="column" width="100%">
-            <Flex width="100%" align="end">
+            <Flex gap="1" width="100%" align="end">
               <ChoiceText size={isMobile ? "2" : "3"}>
                 {choice}
                 <ChoiceCheck
