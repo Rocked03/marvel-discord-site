@@ -1,5 +1,6 @@
 import config from "@/app/config/config";
 import type { Tag } from "@jocasta-polls-api";
+import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 export const formatDate = (date: Date): string => {
 	return new Intl.DateTimeFormat("en-US", {
@@ -43,4 +44,20 @@ export function getTagColors(tag?: Tag) {
 	const backgroundColor = tagColor ? intToColorHex(tagColor) : "var(--red-9)";
 	const textColor = tagColor ? getContrastColorFromInt(tagColor) : undefined;
 	return { backgroundColor, textColor };
+}
+
+export function updateUrlParameters(
+	router: AppRouterInstance,
+	currentParams: URLSearchParams,
+	newParams: Record<string, string | number | boolean | null | undefined>,
+) {
+	const searchParams = new URLSearchParams(currentParams.toString());
+	for (const [key, value] of Object.entries(newParams)) {
+		if (value === null || value === undefined) {
+			searchParams.delete(key);
+		} else {
+			searchParams.set(key, String(value));
+		}
+	}
+	router.replace(`?${searchParams.toString()}`, { scroll: false });
 }

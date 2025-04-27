@@ -5,11 +5,13 @@ import { getPolls } from "@/api/polls/polls";
 import { getTags } from "@/api/polls/tags";
 import { PollCard } from "@/components/polls/poll";
 import { TagSelect } from "@/components/polls/tagSelect";
+import { updateUrlParameters } from "@/utils";
 import { useDebounce } from "@/utils/debouncer";
 import type { Meta, Poll, PollInfo, Tag } from "@jocasta-polls-api";
 import { Flex, TextField } from "@radix-ui/themes";
 import axios from "axios";
 import { Search, X } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import styled from "styled-components";
@@ -53,15 +55,22 @@ const LoadingText = styled.h4`
 `;
 
 export default function PollsHome() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [polls, setPolls] = useState<Poll[]>([]);
   const [meta, setMeta] = useState<Meta | null>(null);
   const [tags, setTags] = useState<Record<number, Tag>>({});
   const [tagsOrder, setTagsOrder] = useState<number[]>([]);
   const [guilds, setGuilds] = useState<Record<string, PollInfo>>({});
 
-  const [searchValue, setSearchValue] = useState<string>("");
+  const [searchValue, setSearchValue] = useState<string>(
+    searchParams.get("search") || ""
+  );
   const [page, setPage] = useState<number>(1);
-  const [selectedTag, setSelectedTag] = useState<number | null>(null);
+  const [selectedTag, setSelectedTag] = useState<number | null>(
+    Number(searchParams.get("tag")) || null
+  );
 
   const debouncedSearchValue = useDebounce(searchValue, 500);
 
@@ -142,10 +151,16 @@ export default function PollsHome() {
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
+    updateUrlParameters(router, searchParams, {
+      search: value !== "" ? value : null,
+    });
   };
 
   const handleTagSelect = (value: string) => {
     setSelectedTag(value === "all" ? null : Number(value));
+    updateUrlParameters(router, searchParams, {
+      tag: value === "all" ? null : Number(value),
+    });
   };
 
   const loaded =
