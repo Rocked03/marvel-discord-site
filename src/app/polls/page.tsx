@@ -1,11 +1,12 @@
 "use client";
 
+import { getGuilds } from "@/api/polls/guilds";
 import { getPolls } from "@/api/polls/polls";
 import { getTags } from "@/api/polls/tags";
 import { PollCard } from "@/components/polls/poll";
 import { TagSelect } from "@/components/polls/tagSelect";
 import { useDebounce } from "@/utils/debouncer";
-import type { Meta, Poll, Tag } from "@jocasta-polls-api";
+import type { Meta, Poll, PollInfo, Tag } from "@jocasta-polls-api";
 import { Flex, TextField } from "@radix-ui/themes";
 import axios from "axios";
 import { Search, X } from "lucide-react";
@@ -56,6 +57,7 @@ export default function PollsHome() {
   const [meta, setMeta] = useState<Meta | null>(null);
   const [tags, setTags] = useState<Record<number, Tag>>({});
   const [tagsOrder, setTagsOrder] = useState<number[]>([]);
+  const [guilds, setGuilds] = useState<Record<string, PollInfo>>({});
 
   const [searchValue, setSearchValue] = useState<string>("");
   const [page, setPage] = useState<number>(1);
@@ -108,13 +110,28 @@ export default function PollsHome() {
         const tagsOrder: number[] = response.map((tag) => tag.tag);
         setTags(tags);
         setTagsOrder(tagsOrder);
-        console.log(tags);
       } catch (err) {
         console.error(err);
       }
     };
 
     fetchTags();
+  }, []);
+
+  useEffect(() => {
+    const fetchGuilds = async () => {
+      try {
+        const response = await getGuilds();
+        const guilds: Record<string, PollInfo> = Object.fromEntries(
+          response.map((guild) => [guild.guild_id, guild])
+        );
+        setGuilds(guilds);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchGuilds();
   }, []);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Reset whenever they change
@@ -130,6 +147,13 @@ export default function PollsHome() {
   const handleTagSelect = (value: string) => {
     setSelectedTag(value === "all" ? null : Number(value));
   };
+
+  const loaded =
+    polls &&
+    tags &&
+    guilds &&
+    Object.keys(tags).length > 0 &&
+    Object.keys(guilds).length > 0;
 
   return (
     <Flex direction="column" gap="4" align="center" justify="center">
@@ -166,7 +190,7 @@ export default function PollsHome() {
         />
       </SearchContainer>
 
-      {polls && tags && Object.keys(tags).length > 0 && (
+      {loaded && (
         <FullWidthScroll>
           <InfiniteScroll
             dataLength={polls.length}
@@ -185,7 +209,12 @@ export default function PollsHome() {
               justify="center"
             >
               {polls.map((poll) => (
-                <PollCard key={poll.id} poll={poll} tag={tags[poll.tag]} />
+                <PollCard
+                  key={poll.id}
+                  poll={poll}
+                  tag={tags[Number(poll.tag)]}
+                  guild={guilds[poll.guild_id.toString()]}
+                />
               ))}
             </PollCardContainer>
           </InfiniteScroll>

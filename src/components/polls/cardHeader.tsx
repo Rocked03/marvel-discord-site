@@ -1,5 +1,5 @@
 import { getTagColors } from "@/utils";
-import type { Poll, Tag } from "@jocasta-polls-api";
+import type { Poll, PollInfo, Tag } from "@jocasta-polls-api";
 import { Flex, Link, Text } from "@radix-ui/themes";
 import { Calendar, ExternalLink, type LucideProps, Vote } from "lucide-react";
 import {
@@ -86,7 +86,12 @@ function HeaderTextWithLink({
   href: string;
 } & ComponentProps<typeof Text>) {
   return (
-    <Link href={href} underline="hover">
+    <Link
+      href={href}
+      underline="hover"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       <HeaderText icon={icon} {...props}>
         {children}
       </HeaderText>
@@ -94,14 +99,22 @@ function HeaderTextWithLink({
   );
 }
 
-export function PollCardHeader({ poll, tag }: { poll: Poll; tag: Tag }) {
+export function PollCardHeader({
+  poll,
+  tag,
+  guild,
+}: {
+  poll: Poll;
+  tag: Tag;
+  guild: PollInfo;
+}) {
   const isMobile = useIsMobile();
 
   const totalVotes = poll.votes.reduce((acc, vote) => acc + vote, 0);
 
   const time = poll.time ? new Date(poll.time) : undefined;
   const isNew = time
-    ? time.getTime() > Date.now() - 1000 * 60 * 60 * 24 * 7 // 7 days
+    ? time.getTime() > Date.now() - 1000 * 60 * 60 * 24 * 2 // 2 days
     : false;
 
   return (
@@ -134,8 +147,8 @@ export function PollCardHeader({ poll, tag }: { poll: Poll; tag: Tag }) {
               ? isMobile
                 ? time.toLocaleDateString("en-US", {
                     day: "2-digit",
-                    month: "numeric",
-                    year: "numeric",
+                    month: "2-digit",
+                    year: "2-digit",
                   })
                 : time.toLocaleDateString("en-US", {
                     day: "numeric",
@@ -155,7 +168,9 @@ export function PollCardHeader({ poll, tag }: { poll: Poll; tag: Tag }) {
             icon={<ExternalLink />}
             href={
               poll.message_id
-                ? `https://discord.com/channels/${poll.guild_id}/${tag.channel_id}/${poll.message_id}`
+                ? `https://discord.com/channels/${guild.guild_id}/${
+                    poll.fallback ? guild.fallback_channel_id : tag.channel_id
+                  }/${poll.message_id}`
                 : ""
             }
           >

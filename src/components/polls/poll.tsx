@@ -1,4 +1,4 @@
-import type { Poll, Tag } from "@jocasta-polls-api";
+import type { Poll, PollInfo, Tag } from "@jocasta-polls-api";
 import { Box, Container, Flex, Heading, Text, Link } from "@radix-ui/themes";
 import styled from "styled-components";
 import { Choices } from "./choices";
@@ -80,13 +80,21 @@ function Description({
   );
 }
 
-export function PollCard({ poll, tag }: { poll: Poll; tag: Tag }) {
+export function PollCard({
+  poll,
+  tag,
+  guild,
+}: {
+  poll: Poll;
+  tag: Tag;
+  guild: PollInfo;
+}) {
   const isMobile = useIsMobile();
 
   return (
     <CardBox>
       <Flex direction="column" gap="3" align="center" justify="start">
-        <PollCardHeader poll={poll} tag={tag} />
+        <PollCardHeader poll={poll} tag={tag} guild={guild} />
 
         <CardTitleBlock direction="column" gap="1" align="start">
           <Heading size={isMobile ? "5" : "7"} weight="medium" align="left">
