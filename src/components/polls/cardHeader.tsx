@@ -103,14 +103,16 @@ export function PollCardHeader({
   poll,
   tag,
   guild,
+  votes,
 }: {
   poll: Poll;
   tag: Tag;
   guild: PollInfo;
+  votes: Poll["votes"];
 }) {
   const isMobile = useIsMobile();
 
-  const totalVotes = poll.votes.reduce((acc, vote) => acc + vote, 0);
+  const totalVotes = votes.reduce((acc, vote) => acc + vote, 0);
 
   const time = poll.time ? new Date(poll.time) : undefined;
   const isNew = time

@@ -5,6 +5,7 @@ import { Box, Flex, Heading, Skeleton, Text } from "@radix-ui/themes";
 import styled from "styled-components";
 import { TitleText } from "../titleText";
 import { useIsMobile } from "@/utils/isMobile";
+import type { ComponentProps } from "react";
 
 const ChoiceLabelMap: Record<number, string> = {
   1: "A",
@@ -29,6 +30,18 @@ const Container = styled(Box)`
   width: 100%;
 `;
 
+const ChoiceContainerButton = styled.button`
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+`;
+
+const ChoiceContainerInner = styled(Flex).attrs({
+  gap: "2",
+  align: "center",
+})``;
+
 const BarContainer = styled.div`
   background-color: var(--gray-a5);
   border-radius: 100rem;
@@ -41,25 +54,59 @@ const BarLine = styled.div<{ $percentage: number; $color?: string }>`
   border-radius: 100rem;
   height: 100%;
   opacity: 0.75;
+  transition: opacity 0.1s ease-in-out, width 0.3s ease-in-out;
   width: ${({ $percentage }) => `${$percentage}%`};
+
+  ${ChoiceContainerButton}:hover & {
+    opacity: 1;
+  }
 `;
 
 const ChoiceLabel = styled(Heading)`
+  opacity: 0.75;
+  transition: opacity 0.1s ease-in-out;
   width: 1rem;
+
+  ${ChoiceContainerButton}:hover & {
+    opacity: 1;
+  }
 `;
 
 const PercentLabel = styled(TitleText)`
   color: var(--gray-a11);
 `;
 
-export function Choices({ poll, tag }: { poll: Poll; tag: Tag }) {
+function ChoiceContainer({
+  children,
+  ...props
+}: {
+  children: React.ReactNode;
+} & ComponentProps<"button">) {
+  return (
+    <ChoiceContainerButton {...props}>
+      <ChoiceContainerInner>{children}</ChoiceContainerInner>
+    </ChoiceContainerButton>
+  );
+}
+
+export function Choices({
+  poll,
+  tag,
+  votes,
+  setVotes,
+}: {
+  poll: Poll;
+  tag: Tag;
+  votes: Poll["votes"];
+  setVotes: (votes: Poll["votes"]) => void;
+}) {
   const isMobile = useIsMobile();
 
-  const totalVotes = poll.votes.reduce((acc, vote) => acc + vote, 0);
+  const totalVotes = votes.reduce((acc, vote) => acc + vote, 0);
 
-  const percentageVotes = poll.votes.map((vote) => {
+  const percentageVotes = votes.map((vote) => {
     if (totalVotes === 0) return 0;
-    return Number(((vote / totalVotes) * 100).toFixed(0));
+    return Number((vote / totalVotes) * 100);
   });
 
   function relativePercentage(percentage: number) {
@@ -69,7 +116,14 @@ export function Choices({ poll, tag }: { poll: Poll; tag: Tag }) {
   return (
     <Container>
       {poll.choices.map((choice, index) => (
-        <Flex key={ChoiceLabelMap[index + 1]} gap="2" align="center">
+        <ChoiceContainer
+          key={ChoiceLabelMap[index + 1]}
+          onClick={() => {
+            const updatedVotes = [...votes];
+            updatedVotes[index]++;
+            setVotes(updatedVotes);
+          }}
+        >
           <ChoiceLabel size="4">{ChoiceLabelMap[index + 1]}</ChoiceLabel>
 
           <Flex gap="1" direction="column" width="100%">
@@ -82,7 +136,7 @@ export function Choices({ poll, tag }: { poll: Poll; tag: Tag }) {
                   poll.votes[index] > 1 ? "s" : ""
                 }`}
               >
-                {percentageVotes[index]}%
+                {percentageVotes[index].toFixed(0)}%
               </PercentLabel>
             </Flex>
 
@@ -93,7 +147,7 @@ export function Choices({ poll, tag }: { poll: Poll; tag: Tag }) {
               />
             </BarContainer>
           </Flex>
-        </Flex>
+        </ChoiceContainer>
       ))}
     </Container>
   );

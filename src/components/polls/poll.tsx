@@ -9,7 +9,7 @@ import {
 } from "@radix-ui/themes";
 import styled from "styled-components";
 import { Choices, ChoicesSkeleton } from "./choices";
-import type { ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
 import { PollCardHeader, PollCardHeaderSkeleton } from "./cardHeader";
 import { useIsMobile } from "@/utils/isMobile";
 import { randomText } from "@/utils";
@@ -118,9 +118,11 @@ export function PollCard({
 }) {
   const isMobile = useIsMobile();
 
+  const [votes, setVotes] = useState(poll.votes);
+
   return (
     <CardBox direction="column" gap="3" align="center" justify="start">
-      <PollCardHeader poll={poll} tag={tag} guild={guild} />
+      <PollCardHeader poll={poll} tag={tag} guild={guild} votes={votes} />
 
       <CardTitleBlock direction="column" gap="1" align="start">
         <Question isMobile={isMobile}>{poll.question}</Question>
@@ -129,7 +131,7 @@ export function PollCard({
         )}
       </CardTitleBlock>
 
-      <Choices poll={poll} tag={tag} />
+      <Choices poll={poll} tag={tag} votes={votes} setVotes={setVotes} />
 
       {poll.image && (
         <ImageContainer>
