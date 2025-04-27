@@ -5,45 +5,28 @@ import { getPolls } from "@/api/polls/polls";
 import { getTags } from "@/api/polls/tags";
 import { PollCard, PollCardSkeleton } from "@/components/polls/poll";
 import ScrollToTopButton from "@/components/polls/scrollToTop";
-import { TagSelect } from "@/components/polls/tagSelect";
+import { PollsSearch } from "@/components/polls/search";
 import { updateUrlParameters } from "@/utils";
 import { useDebounce } from "@/utils/debouncer";
 import type { Meta, Poll, PollInfo, Tag } from "@jocasta-polls-api";
-import { Flex, TextField } from "@radix-ui/themes";
+import { Flex } from "@radix-ui/themes";
 import axios from "axios";
-import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import styled from "styled-components";
 
-const SearchContainer = styled(Flex)`
-  align-items: center;
-  height: 3rem;
-  width: 100%;
-`;
-
-const SearchBar = styled(TextField.Root)`
-  border-radius: var(--radius-3);
-  flex: 1;
-  height: 100%;
-`;
-
 const FullWidthScroll = styled.div`
   width: 100%;
 `;
 
-const PollCardContainer = styled(Flex)`
+const PollCardContainer = styled(Flex).attrs({
+  direction: "column",
+  gap: "4",
+  align: "center",
+  justify: "center",
+})`
   width: 100%;
-`;
-
-const ClearButton = styled.button`
-  align-items: center;
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  padding: 0;
 `;
 
 const LoadingText = styled.h4`
@@ -191,38 +174,15 @@ export default function PollsHome() {
     <>
       <ScrollToTopButton />
       <Flex direction="column" gap="4" align="center" justify="center">
-        <SearchContainer gap="2" align="center">
-          <SearchBar
-            placeholder="Search polls"
-            size="3"
-            value={searchValue}
-            onChange={(e) => handleSearch(e.target.value)}
-          >
-            <TextField.Slot>
-              <Search size={20} />
-            </TextField.Slot>
-            {searchValue && (
-              <TextField.Slot>
-                <ClearButton
-                  type="button"
-                  onClick={() => {
-                    handleSearch("");
-                  }}
-                >
-                  <X size={20} />
-                </ClearButton>
-              </TextField.Slot>
-            )}
-            {meta && <TextField.Slot>{meta.total} results</TextField.Slot>}
-          </SearchBar>
-
-          <TagSelect
-            selectedTag={selectedTag}
-            handleTagSelect={handleTagSelect}
-            tags={tags}
-            tagsOrder={tagsOrder}
-          />
-        </SearchContainer>
+        <PollsSearch
+          handleSearch={handleSearch}
+          handleTagSelect={handleTagSelect}
+          searchValue={searchValue}
+          meta={meta}
+          tags={tags}
+          tagsOrder={tagsOrder}
+          selectedTag={selectedTag}
+        />
 
         <FullWidthScroll>
           {dataExists && !loading ? (
@@ -236,12 +196,7 @@ export default function PollsHome() {
               hasMore={meta ? meta.page < meta.totalPages : false}
               loader={<LoadingText>Loading...</LoadingText>}
             >
-              <PollCardContainer
-                direction="column"
-                gap="4"
-                align="center"
-                justify="center"
-              >
+              <PollCardContainer>
                 {polls.map((poll) => (
                   <PollCard
                     key={poll.id}
@@ -253,14 +208,7 @@ export default function PollsHome() {
               </PollCardContainer>
             </InfiniteScroll>
           ) : (
-            <PollCardContainer
-              direction="column"
-              gap="4"
-              align="center"
-              justify="center"
-            >
-              {skeletons}
-            </PollCardContainer>
+            <PollCardContainer>{skeletons}</PollCardContainer>
           )}
         </FullWidthScroll>
       </Flex>

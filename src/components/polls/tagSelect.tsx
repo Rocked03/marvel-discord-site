@@ -47,11 +47,13 @@ export function TagSelect({
   handleTagSelect,
   tags,
   tagsOrder,
+  disabled = false,
 }: {
   selectedTag: number | null;
   handleTagSelect: (tag: string) => void;
   tags: Record<number, Tag>;
   tagsOrder: number[];
+  disabled?: boolean;
 }) {
   const isMobile = useIsMobile();
 
@@ -62,7 +64,11 @@ export function TagSelect({
 
   return (
     <TagSelectContainer>
-      <TagSelectRoot defaultValue="all" onValueChange={handleTagSelect}>
+      <TagSelectRoot
+        defaultValue="all"
+        onValueChange={handleTagSelect}
+        disabled={disabled}
+      >
         <TagSelectTrigger
           aria-label="Filter by tag"
           $backgroundColor={selectedTagBackgroundColor}
