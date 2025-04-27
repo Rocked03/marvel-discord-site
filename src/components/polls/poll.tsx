@@ -48,9 +48,9 @@ const CardTitleBlock = styled(Flex)`
   width: 100%;
 `;
 
-const Question = styled(Heading).attrs<{ isMobile: boolean }>(
-  ({ isMobile }) => ({
-    size: isMobile ? "5" : "7",
+const Question = styled(Heading).attrs<{ $isMobile: boolean }>(
+  ({ $isMobile }) => ({
+    size: $isMobile ? "5" : "7",
     weight: "medium",
     align: "left",
   })
@@ -111,10 +111,14 @@ export function PollCard({
   poll,
   tag,
   guild,
+  userVote,
+  setUserVote,
 }: {
   poll: Poll;
   tag: Tag;
   guild: PollInfo;
+  userVote: number | undefined;
+  setUserVote: (vote: number | undefined) => void;
 }) {
   const isMobile = useIsMobile();
 
@@ -125,13 +129,20 @@ export function PollCard({
       <PollCardHeader poll={poll} tag={tag} guild={guild} votes={votes} />
 
       <CardTitleBlock direction="column" gap="1" align="start">
-        <Question isMobile={isMobile}>{poll.question}</Question>
+        <Question $isMobile={isMobile}>{poll.question}</Question>
         {poll.description && (
           <Description text={poll.description} size="2" align="left" />
         )}
       </CardTitleBlock>
 
-      <Choices poll={poll} tag={tag} votes={votes} setVotes={setVotes} />
+      <Choices
+        poll={poll}
+        tag={tag}
+        votes={votes}
+        setVotes={setVotes}
+        userVote={userVote}
+        setUserVote={setUserVote}
+      />
 
       {poll.image && (
         <ImageContainer>
@@ -150,7 +161,7 @@ export function PollCardSkeleton() {
       <PollCardHeaderSkeleton />
 
       <CardTitleBlock direction="column" gap="1" align="start">
-        <Question isMobile={isMobile}>
+        <Question $isMobile={isMobile}>
           <Skeleton>{randomText(5, isMobile ? 20 : 50)}</Skeleton>
         </Question>
         <Skeleton>

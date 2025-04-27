@@ -2,10 +2,11 @@ import { intToColorHex, randomText } from "@/utils";
 import { Spacer } from "@/utils/styled";
 import type { Poll, Tag } from "@jocasta-polls-api";
 import { Box, Flex, Heading, Skeleton, Text } from "@radix-ui/themes";
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import { TitleText } from "../titleText";
 import { useIsMobile } from "@/utils/isMobile";
 import type { ComponentProps } from "react";
+import { CircleCheckBig } from "lucide-react";
 
 const ChoiceLabelMap: Record<number, string> = {
   1: "A",
@@ -72,6 +73,35 @@ const ChoiceLabel = styled(Heading)`
   }
 `;
 
+const ChoiceText = styled(Text)`
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+`;
+
+const scaleUpDown = keyframes`
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05); /* Slightly bigger */
+  }
+  100% {
+    transform: scale(1); /* Back to normal size */
+  }
+`;
+
+const ChoiceCheck = styled(CircleCheckBig)<{ $isChecked: boolean }>`
+  display: ${({ $isChecked }) => ($isChecked ? "block" : "none")};
+
+  animation: ${({ $isChecked }) =>
+    $isChecked
+      ? css`
+          ${scaleUpDown} 0.15s ease-in-out
+        `
+      : "none"};
+`;
+
 const PercentLabel = styled(TitleText)`
   color: var(--gray-a11);
 `;
@@ -94,11 +124,15 @@ export function Choices({
   tag,
   votes,
   setVotes,
+  userVote,
+  setUserVote,
 }: {
   poll: Poll;
   tag: Tag;
   votes: Poll["votes"];
   setVotes: (votes: Poll["votes"]) => void;
+  userVote: number | undefined;
+  setUserVote: (vote: number | undefined) => void;
 }) {
   const isMobile = useIsMobile();
 
@@ -113,22 +147,43 @@ export function Choices({
     return (percentage / Math.max(...percentageVotes)) * 100;
   }
 
+  function handleVote(index: number) {
+    let choice: number | undefined = index;
+    if (userVote === index) {
+      choice = undefined;
+    }
+
+    const updatedVotes = [...votes];
+    if (choice === undefined || userVote !== undefined) {
+      updatedVotes[index]--;
+    }
+
+    if (choice !== undefined) {
+      updatedVotes[choice]++;
+    }
+
+    setVotes(updatedVotes);
+    setUserVote(choice);
+  }
+
   return (
     <Container>
       {poll.choices.map((choice, index) => (
         <ChoiceContainer
           key={ChoiceLabelMap[index + 1]}
-          onClick={() => {
-            const updatedVotes = [...votes];
-            updatedVotes[index]++;
-            setVotes(updatedVotes);
-          }}
+          onClick={() => handleVote(index)}
         >
           <ChoiceLabel size="4">{ChoiceLabelMap[index + 1]}</ChoiceLabel>
 
           <Flex gap="1" direction="column" width="100%">
             <Flex width="100%" align="end">
-              <Text size={isMobile ? "2" : "3"}>{choice}</Text>
+              <ChoiceText size={isMobile ? "2" : "3"}>
+                {choice}
+                <ChoiceCheck
+                  size="20"
+                  $isChecked={userVote !== undefined && userVote === index}
+                />
+              </ChoiceText>
               <Spacer />
               <PercentLabel
                 size="1"
@@ -143,6 +198,7 @@ export function Choices({
             <BarContainer>
               <BarLine
                 $percentage={relativePercentage(percentageVotes[index])}
+                // $percentage={percentageVotes[index]}
                 $color={tag.colour ? intToColorHex(tag.colour) : undefined}
               />
             </BarContainer>

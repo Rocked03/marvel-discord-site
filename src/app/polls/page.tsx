@@ -3,6 +3,7 @@
 import { getGuilds } from "@/api/polls/guilds";
 import { getPolls } from "@/api/polls/polls";
 import { getTags } from "@/api/polls/tags";
+import { getUserVotes } from "@/api/polls/votes";
 import { PollCard, PollCardSkeleton } from "@/components/polls/poll";
 import ScrollToTopButton from "@/components/polls/scrollToTop";
 import { PollsSearch } from "@/components/polls/search";
@@ -85,6 +86,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
   const [tags, setTags] = useState<Record<number, Tag>>({});
   const [tagsOrder, setTagsOrder] = useState<number[]>([]);
   const [guilds, setGuilds] = useState<Record<string, PollInfo>>({});
+  const [userVotes, setUserVotes] = useState<Record<number, number>>({});
 
   const [searchValue, setSearchValue] = useState<string>(
     searchParams.get("search") || ""
@@ -93,6 +95,12 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
   const [selectedTag, setSelectedTag] = useState<number | null>(
     Number(searchParams.get("tag")) || null
   );
+
+  const user: {
+    id: bigint;
+  } = {
+    id: BigInt("204778476102877187"),
+  };
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -172,6 +180,22 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
     fetchGuilds();
   }, []);
 
+  useEffect(() => {
+    const fetchUserVotes = async () => {
+      try {
+        const response = await getUserVotes(user.id.toString());
+        const userVotes: Record<number, number> = Object.fromEntries(
+          response.map((vote) => [vote.poll_id, vote.choice])
+        );
+        setUserVotes(userVotes);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUserVotes();
+  }, [user.id]);
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: Reset whenever they change
   useEffect(() => {
     setPage(1);
@@ -191,6 +215,21 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
       tag: value === "all" ? null : Number(value),
     });
   };
+
+  function setUserVote(pollId: number, choice: number | undefined) {
+    if (choice === undefined) {
+      setUserVotes((prevVotes) => {
+        const newVotes = { ...prevVotes };
+        delete newVotes[pollId];
+        return newVotes;
+      });
+      return;
+    }
+    setUserVotes((prevVotes) => ({
+      ...prevVotes,
+      [pollId]: choice,
+    }));
+  }
 
   const dataExists =
     polls &&
@@ -232,6 +271,10 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
                     poll={poll}
                     tag={tags[Number(poll.tag)]}
                     guild={guilds[poll.guild_id.toString()]}
+                    userVote={userVotes[poll.id]}
+                    setUserVote={(choice: number | undefined) =>
+                      setUserVote(poll.id, choice)
+                    }
                   />
                 ))}
               </PollCardContainer>
