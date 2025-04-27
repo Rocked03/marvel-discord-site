@@ -61,3 +61,18 @@ export function updateUrlParameters(
 	}
 	router.replace(`?${searchParams.toString()}`, { scroll: false });
 }
+
+export function randomText(min = 5, max = 50) {
+	const length = getRandomInt(min, max);
+	const characters =
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	let result = "";
+	for (let i = 0; i < length; i++) {
+		result += characters.charAt(Math.floor(Math.random() * characters.length));
+	}
+	return result;
+}
+
+export function getRandomInt(min = 5, max = 50) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}

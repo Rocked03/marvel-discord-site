@@ -1,6 +1,6 @@
 import { getTagColors } from "@/utils";
 import type { Poll, PollInfo, Tag } from "@jocasta-polls-api";
-import { Flex, Link, Text } from "@radix-ui/themes";
+import { Flex, Link, Skeleton, Text } from "@radix-ui/themes";
 import { Calendar, ExternalLink, type LucideProps, Vote } from "lucide-react";
 import {
   cloneElement,
@@ -181,6 +181,49 @@ export function PollCardHeader({
               : "Open in Discord"}
           </HeaderTextWithLink>
         )}
+      </ScrollFlex>
+    </Header>
+  );
+}
+
+export function PollCardHeaderSkeleton() {
+  const isMobile = useIsMobile();
+
+  return (
+    <Header align="center" justify="start" gap="3">
+      <Skeleton>
+        <TagPill>Loading...</TagPill>
+      </Skeleton>
+      <ScrollFlex gap="3" align="center" justify="between">
+        <Flex gap="3">
+          <HeaderText
+            icon={
+              <Skeleton>
+                <Calendar />
+              </Skeleton>
+            }
+          >
+            <Skeleton>Loading...</Skeleton>
+          </HeaderText>
+          <HeaderText
+            icon={
+              <Skeleton>
+                <Vote />
+              </Skeleton>
+            }
+          >
+            <Skeleton>Loading...</Skeleton>
+          </HeaderText>
+        </Flex>
+        <HeaderText
+          icon={
+            <Skeleton>
+              <ExternalLink />
+            </Skeleton>
+          }
+        >
+          {isMobile ? undefined : <Skeleton>Discuss in Discord</Skeleton>}
+        </HeaderText>
       </ScrollFlex>
     </Header>
   );

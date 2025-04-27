@@ -1,10 +1,20 @@
 import type { Poll, PollInfo, Tag } from "@jocasta-polls-api";
-import { Box, Container, Flex, Heading, Text, Link } from "@radix-ui/themes";
+import {
+  Box,
+  Container,
+  Flex,
+  Heading,
+  Text,
+  Link,
+  Skeleton,
+  AspectRatio,
+} from "@radix-ui/themes";
 import styled from "styled-components";
-import { Choices } from "./choices";
+import { Choices, ChoicesSkeleton } from "./choices";
 import type { ComponentProps } from "react";
-import { PollCardHeader } from "./cardHeader";
+import { PollCardHeader, PollCardHeaderSkeleton } from "./cardHeader";
 import { useIsMobile } from "@/utils/isMobile";
+import { randomText } from "@/utils";
 
 const CardBox = styled(Box)`
   width: 100%;
@@ -18,6 +28,14 @@ const PollImage = styled.img`
   max-width: 100%;
   object-fit: cover;
   width: 100%;
+`;
+
+const PollImageSkeleton = styled(Skeleton)`
+  height: auto;
+  max-width: 100%;
+  object-fit: cover;
+  width: 100%;
+  border-radius: var(--radius-5);
 `;
 
 const ImageContainer = styled(Container)`
@@ -112,6 +130,32 @@ export function PollCard({
             <PollImage src={poll.image} alt={poll.question} />
           </ImageContainer>
         )}
+      </Flex>
+    </CardBox>
+  );
+}
+
+export function PollCardSkeleton() {
+  return (
+    <CardBox>
+      <Flex direction="column" gap="3" align="center" justify="start">
+        <PollCardHeaderSkeleton />
+        <CardTitleBlock direction="column" gap="1" align="start">
+          <Heading size="7" weight="medium" align="left">
+            <Skeleton>{randomText()}</Skeleton>
+          </Heading>
+          <Skeleton>
+            <Description text="Loading..." size="2" align="left" />
+          </Skeleton>
+        </CardTitleBlock>
+
+        <ChoicesSkeleton />
+
+        <ImageContainer>
+          <PollImageSkeleton>
+            <div style={{ width: "50rem", height: "21rem" }} />
+          </PollImageSkeleton>
+        </ImageContainer>
       </Flex>
     </CardBox>
   );

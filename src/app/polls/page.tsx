@@ -3,7 +3,7 @@
 import { getGuilds } from "@/api/polls/guilds";
 import { getPolls } from "@/api/polls/polls";
 import { getTags } from "@/api/polls/tags";
-import { PollCard } from "@/components/polls/poll";
+import { PollCard, PollCardSkeleton } from "@/components/polls/poll";
 import { TagSelect } from "@/components/polls/tagSelect";
 import { updateUrlParameters } from "@/utils";
 import { useDebounce } from "@/utils/debouncer";
@@ -12,7 +12,7 @@ import { Flex, TextField } from "@radix-ui/themes";
 import axios from "axios";
 import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import styled from "styled-components";
 
@@ -72,6 +72,8 @@ export default function PollsHome() {
     Number(searchParams.get("tag")) || null
   );
 
+  const [loading, setLoading] = useState<boolean>(false);
+
   const debouncedSearchValue = useDebounce(searchValue, 500);
 
   useEffect(() => {
@@ -91,6 +93,8 @@ export default function PollsHome() {
           setPolls((prevPolls) => [...prevPolls, ...polls]);
           setMeta(meta);
           setPage(meta.page);
+
+          setLoading(false);
         }
       } catch (err) {
         if (axios.isCancel(err)) {
@@ -101,6 +105,7 @@ export default function PollsHome() {
       }
     };
 
+    setLoading(true);
     fetchPolls();
 
     return () => {
@@ -163,12 +168,21 @@ export default function PollsHome() {
     });
   };
 
-  const loaded =
+  const dataExists =
     polls &&
     tags &&
     guilds &&
     Object.keys(tags).length > 0 &&
     Object.keys(guilds).length > 0;
+
+  const skeletons = useMemo(
+    () =>
+      Array.from({ length: 10 }, (_, index) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: Skeletons
+        <PollCardSkeleton key={index} />
+      )),
+    []
+  );
 
   return (
     <Flex direction="column" gap="4" align="center" justify="center">
@@ -205,8 +219,8 @@ export default function PollsHome() {
         />
       </SearchContainer>
 
-      {loaded && (
-        <FullWidthScroll>
+      <FullWidthScroll>
+        {dataExists && !loading ? (
           <InfiniteScroll
             dataLength={polls.length}
             next={async () => {
@@ -233,8 +247,17 @@ export default function PollsHome() {
               ))}
             </PollCardContainer>
           </InfiniteScroll>
-        </FullWidthScroll>
-      )}
+        ) : (
+          <PollCardContainer
+            direction="column"
+            gap="4"
+            align="center"
+            justify="center"
+          >
+            {skeletons}
+          </PollCardContainer>
+        )}
+      </FullWidthScroll>
     </Flex>
   );
 }

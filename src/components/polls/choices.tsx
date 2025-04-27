@@ -1,7 +1,7 @@
-import { intToColorHex } from "@/utils";
+import { intToColorHex, randomText } from "@/utils";
 import { Spacer } from "@/utils/styled";
 import type { Poll, Tag } from "@jocasta-polls-api";
-import { Box, Flex, Heading, Text } from "@radix-ui/themes";
+import { Box, Flex, Heading, Skeleton, Text } from "@radix-ui/themes";
 import styled from "styled-components";
 import { TitleText } from "../titleText";
 import { useIsMobile } from "@/utils/isMobile";
@@ -92,6 +92,39 @@ export function Choices({ poll, tag }: { poll: Poll; tag: Tag }) {
                 $color={tag.colour ? intToColorHex(tag.colour) : undefined}
               />
             </BarContainer>
+          </Flex>
+        </Flex>
+      ))}
+    </Container>
+  );
+}
+
+export function ChoicesSkeleton() {
+  return (
+    <Container>
+      {Array.from({ length: 4 }, (_, index) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: Skeletons
+        <Flex key={index} gap="2" align="center">
+          <Skeleton>
+            <ChoiceLabel size="4">{ChoiceLabelMap[index + 1]}</ChoiceLabel>
+          </Skeleton>
+
+          <Flex gap="1" direction="column" width="100%">
+            <Flex width="100%" align="end">
+              <Skeleton>
+                <Text size="2">{randomText()}</Text>
+              </Skeleton>
+              <Spacer />
+              <Skeleton>
+                <PercentLabel size="1" title="">
+                  50%
+                </PercentLabel>
+              </Skeleton>
+            </Flex>
+
+            <Skeleton>
+              <BarContainer />
+            </Skeleton>
           </Flex>
         </Flex>
       ))}
