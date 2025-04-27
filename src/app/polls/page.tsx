@@ -4,6 +4,7 @@ import { getGuilds } from "@/api/polls/guilds";
 import { getPolls } from "@/api/polls/polls";
 import { getTags } from "@/api/polls/tags";
 import { PollCard, PollCardSkeleton } from "@/components/polls/poll";
+import ScrollToTopButton from "@/components/polls/scrollToTop";
 import { TagSelect } from "@/components/polls/tagSelect";
 import { updateUrlParameters } from "@/utils";
 import { useDebounce } from "@/utils/debouncer";
@@ -185,79 +186,82 @@ export default function PollsHome() {
   );
 
   return (
-    <Flex direction="column" gap="4" align="center" justify="center">
-      <SearchContainer gap="2" align="center">
-        <SearchBar
-          placeholder="Search polls"
-          size="3"
-          value={searchValue}
-          onChange={(e) => handleSearch(e.target.value)}
-        >
-          <TextField.Slot>
-            <Search size={20} />
-          </TextField.Slot>
-          {searchValue && (
-            <TextField.Slot>
-              <ClearButton
-                type="button"
-                onClick={() => {
-                  handleSearch("");
-                }}
-              >
-                <X size={20} />
-              </ClearButton>
-            </TextField.Slot>
-          )}
-          {meta && <TextField.Slot>{meta.total} results</TextField.Slot>}
-        </SearchBar>
-
-        <TagSelect
-          selectedTag={selectedTag}
-          handleTagSelect={handleTagSelect}
-          tags={tags}
-          tagsOrder={tagsOrder}
-        />
-      </SearchContainer>
-
-      <FullWidthScroll>
-        {dataExists && !loading ? (
-          <InfiniteScroll
-            dataLength={polls.length}
-            next={async () => {
-              if (meta?.nextPage) {
-                setPage(meta.nextPage);
-              }
-            }}
-            hasMore={meta ? meta.page < meta.totalPages : false}
-            loader={<LoadingText>Loading...</LoadingText>}
+    <>
+      <ScrollToTopButton />
+      <Flex direction="column" gap="4" align="center" justify="center">
+        <SearchContainer gap="2" align="center">
+          <SearchBar
+            placeholder="Search polls"
+            size="3"
+            value={searchValue}
+            onChange={(e) => handleSearch(e.target.value)}
           >
+            <TextField.Slot>
+              <Search size={20} />
+            </TextField.Slot>
+            {searchValue && (
+              <TextField.Slot>
+                <ClearButton
+                  type="button"
+                  onClick={() => {
+                    handleSearch("");
+                  }}
+                >
+                  <X size={20} />
+                </ClearButton>
+              </TextField.Slot>
+            )}
+            {meta && <TextField.Slot>{meta.total} results</TextField.Slot>}
+          </SearchBar>
+
+          <TagSelect
+            selectedTag={selectedTag}
+            handleTagSelect={handleTagSelect}
+            tags={tags}
+            tagsOrder={tagsOrder}
+          />
+        </SearchContainer>
+
+        <FullWidthScroll>
+          {dataExists && !loading ? (
+            <InfiniteScroll
+              dataLength={polls.length}
+              next={async () => {
+                if (meta?.nextPage) {
+                  setPage(meta.nextPage);
+                }
+              }}
+              hasMore={meta ? meta.page < meta.totalPages : false}
+              loader={<LoadingText>Loading...</LoadingText>}
+            >
+              <PollCardContainer
+                direction="column"
+                gap="4"
+                align="center"
+                justify="center"
+              >
+                {polls.map((poll) => (
+                  <PollCard
+                    key={poll.id}
+                    poll={poll}
+                    tag={tags[Number(poll.tag)]}
+                    guild={guilds[poll.guild_id.toString()]}
+                  />
+                ))}
+              </PollCardContainer>
+            </InfiniteScroll>
+          ) : (
             <PollCardContainer
               direction="column"
               gap="4"
               align="center"
               justify="center"
             >
-              {polls.map((poll) => (
-                <PollCard
-                  key={poll.id}
-                  poll={poll}
-                  tag={tags[Number(poll.tag)]}
-                  guild={guilds[poll.guild_id.toString()]}
-                />
-              ))}
+              {skeletons}
             </PollCardContainer>
-          </InfiniteScroll>
-        ) : (
-          <PollCardContainer
-            direction="column"
-            gap="4"
-            align="center"
-            justify="center"
-          >
-            {skeletons}
-          </PollCardContainer>
-        )}
-      </FullWidthScroll>
-    </Flex>
+          )}
+        </FullWidthScroll>
+      </Flex>
+    </>
   );
 }
