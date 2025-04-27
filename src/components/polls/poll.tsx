@@ -1,6 +1,5 @@
 import type { Poll, PollInfo, Tag } from "@jocasta-polls-api";
 import {
-  Box,
   Container,
   Flex,
   Heading,
