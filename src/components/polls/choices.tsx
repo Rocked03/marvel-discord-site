@@ -100,6 +100,8 @@ export function Choices({ poll, tag }: { poll: Poll; tag: Tag }) {
 }
 
 export function ChoicesSkeleton() {
+  const isMobile = useIsMobile();
+
   return (
     <Container>
       {Array.from({ length: 4 }, (_, index) => (
@@ -112,7 +114,7 @@ export function ChoicesSkeleton() {
           <Flex gap="1" direction="column" width="100%">
             <Flex width="100%" align="end">
               <Skeleton>
-                <Text size="2">{randomText()}</Text>
+                <Text size="2">{randomText(5, isMobile ? 20 : 50)}</Text>
               </Skeleton>
               <Spacer />
               <Skeleton>

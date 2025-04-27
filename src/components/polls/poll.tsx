@@ -29,16 +29,19 @@ const PollImage = styled.img`
 `;
 
 const PollImageSkeleton = styled(Skeleton)`
+  aspect-ratio: 50 / 21;
+  border-radius: var(--radius-5);
+  display: block;
   height: auto;
-  max-width: 100%;
+  min-height: 0;
   object-fit: cover;
   width: 100%;
-  border-radius: var(--radius-5);
 `;
 
 const ImageContainer = styled(Container)`
   margin-top: 1rem;
   max-width: var(--container-3);
+  width: 100%;
 `;
 
 const CardTitleBlock = styled(Flex)`
@@ -146,7 +149,7 @@ export function PollCardSkeleton() {
 
       <CardTitleBlock direction="column" gap="1" align="start">
         <Question isMobile={isMobile}>
-          <Skeleton>{randomText()}</Skeleton>
+          <Skeleton>{randomText(5, isMobile ? 20 : 50)}</Skeleton>
         </Question>
         <Skeleton>
           <Description text="Loading..." size="2" align="left" />
@@ -156,9 +159,7 @@ export function PollCardSkeleton() {
       <ChoicesSkeleton />
 
       <ImageContainer>
-        <PollImageSkeleton>
-          <div style={{ width: "50rem", height: "21rem" }} />
-        </PollImageSkeleton>
+        <PollImageSkeleton />
       </ImageContainer>
     </CardBox>
   );
