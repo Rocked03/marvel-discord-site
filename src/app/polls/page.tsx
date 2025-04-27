@@ -106,7 +106,9 @@ export default function PollsHome() {
       }
     };
 
-    setLoading(true);
+    if (page === 1) {
+      setLoading(true);
+    }
     fetchPolls();
 
     return () => {
