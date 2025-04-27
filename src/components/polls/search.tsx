@@ -1,5 +1,5 @@
 import type { Meta, Tag } from "@jocasta-polls-api";
-import { Flex, IconButton, TextField } from "@radix-ui/themes";
+import { Flex, IconButton, TextField, Tooltip } from "@radix-ui/themes";
 import {
   CircleDot,
   CircleCheck,
@@ -40,6 +40,26 @@ const HasVotedButton = styled(IconButton)`
   width: 3rem;
 `;
 
+interface HasVotedInfoType {
+  icon: React.ReactNode;
+  tooltip: string;
+}
+
+const HasVotedInfo: Record<string, HasVotedInfoType> = {
+  undefined: {
+    icon: <CircleCheck />,
+    tooltip: "All polls",
+  },
+  false: {
+    icon: <CircleDot />,
+    tooltip: "Unvoted polls",
+  },
+  true: {
+    icon: <CircleCheckBig />,
+    tooltip: "Voted polls",
+  },
+};
+
 function HasVotedToggle({
   hasVoted,
   setHasVoted,
@@ -57,16 +77,14 @@ function HasVotedToggle({
     }
   }
 
+  const { icon, tooltip } = HasVotedInfo[String(hasVoted)];
+
   return (
-    <HasVotedButton variant="surface" color="gray" onClick={cycle}>
-      {hasVoted === undefined ? (
-        <CircleCheck />
-      ) : hasVoted ? (
-        <CircleCheckBig />
-      ) : (
-        <CircleDot />
-      )}
-    </HasVotedButton>
+    <Tooltip content={tooltip}>
+      <HasVotedButton variant="surface" color="gray" onClick={cycle}>
+        {icon}
+      </HasVotedButton>
+    </Tooltip>
   );
 }
 

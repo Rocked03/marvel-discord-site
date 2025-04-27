@@ -1,6 +1,6 @@
 import { getTagColors } from "@/utils";
 import type { Poll, PollInfo, Tag } from "@jocasta-polls-api";
-import { Flex, Link, Skeleton, Text } from "@radix-ui/themes";
+import { Flex, Link, Skeleton, Text, Tooltip } from "@radix-ui/themes";
 import { Calendar, ExternalLink, type LucideProps, Vote } from "lucide-react";
 import {
   cloneElement,
@@ -130,9 +130,8 @@ export function PollCardHeader({
 
       <ScrollFlex gap="3" align="center" justify="between">
         <Flex gap="3">
-          <HeaderText
-            icon={<Calendar />}
-            title={
+          <Tooltip
+            content={
               time
                 ? time.toLocaleDateString("en-US", {
                     day: "numeric",
@@ -142,23 +141,25 @@ export function PollCardHeader({
                     hour: "2-digit",
                     timeZoneName: "short",
                   })
-                : undefined
+                : "No date set."
             }
           >
-            {time
-              ? isMobile
-                ? time.toLocaleDateString("en-US", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "2-digit",
-                  })
-                : time.toLocaleDateString("en-US", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })
-              : "No date set."}
-          </HeaderText>
+            <HeaderText icon={<Calendar />}>
+              {time
+                ? isMobile
+                  ? time.toLocaleDateString("en-US", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "2-digit",
+                    })
+                  : time.toLocaleDateString("en-US", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })
+                : "No date set."}
+            </HeaderText>
+          </Tooltip>
 
           <HeaderText icon={<Vote />}>
             {totalVotes} {totalVotes === 1 ? "Vote" : "Votes"}
