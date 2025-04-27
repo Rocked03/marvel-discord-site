@@ -15,7 +15,7 @@ import { PollCardHeader, PollCardHeaderSkeleton } from "./cardHeader";
 import { useIsMobile } from "@/utils/isMobile";
 import { randomText } from "@/utils";
 
-const CardBox = styled(Box)`
+const CardBox = styled(Flex)`
   width: 100%;
   padding: 1.5rem;
   border-radius: var(--radius-3);
@@ -45,6 +45,14 @@ const ImageContainer = styled(Container)`
 const CardTitleBlock = styled(Flex)`
   width: 100%;
 `;
+
+const Question = styled(Heading).attrs<{ isMobile: boolean }>(
+  ({ isMobile }) => ({
+    size: isMobile ? "5" : "7",
+    weight: "medium",
+    align: "left",
+  })
+)``;
 
 const DescriptionContainer = styled(Flex)`
   width: 100%;
@@ -109,53 +117,50 @@ export function PollCard({
   const isMobile = useIsMobile();
 
   return (
-    <CardBox>
-      <Flex direction="column" gap="3" align="center" justify="start">
-        <PollCardHeader poll={poll} tag={tag} guild={guild} />
+    <CardBox direction="column" gap="3" align="center" justify="start">
+      <PollCardHeader poll={poll} tag={tag} guild={guild} />
 
-        <CardTitleBlock direction="column" gap="1" align="start">
-          <Heading size={isMobile ? "5" : "7"} weight="medium" align="left">
-            {poll.question}
-          </Heading>
-          {poll.description && (
-            <Description text={poll.description} size="2" align="left" />
-          )}
-        </CardTitleBlock>
-
-        <Choices poll={poll} tag={tag} />
-
-        {poll.image && (
-          <ImageContainer>
-            <PollImage src={poll.image} alt={poll.question} />
-          </ImageContainer>
+      <CardTitleBlock direction="column" gap="1" align="start">
+        <Question isMobile={isMobile}>{poll.question}</Question>
+        {poll.description && (
+          <Description text={poll.description} size="2" align="left" />
         )}
-      </Flex>
+      </CardTitleBlock>
+
+      <Choices poll={poll} tag={tag} />
+
+      {poll.image && (
+        <ImageContainer>
+          <PollImage src={poll.image} alt={poll.question} />
+        </ImageContainer>
+      )}
     </CardBox>
   );
 }
 
 export function PollCardSkeleton() {
+  const isMobile = useIsMobile();
+
   return (
-    <CardBox>
-      <Flex direction="column" gap="3" align="center" justify="start">
-        <PollCardHeaderSkeleton />
-        <CardTitleBlock direction="column" gap="1" align="start">
-          <Heading size="7" weight="medium" align="left">
-            <Skeleton>{randomText()}</Skeleton>
-          </Heading>
-          <Skeleton>
-            <Description text="Loading..." size="2" align="left" />
-          </Skeleton>
-        </CardTitleBlock>
+    <CardBox direction="column" gap="3" align="center" justify="start">
+      <PollCardHeaderSkeleton />
 
-        <ChoicesSkeleton />
+      <CardTitleBlock direction="column" gap="1" align="start">
+        <Question isMobile={isMobile}>
+          <Skeleton>{randomText()}</Skeleton>
+        </Question>
+        <Skeleton>
+          <Description text="Loading..." size="2" align="left" />
+        </Skeleton>
+      </CardTitleBlock>
 
-        <ImageContainer>
-          <PollImageSkeleton>
-            <div style={{ width: "50rem", height: "21rem" }} />
-          </PollImageSkeleton>
-        </ImageContainer>
-      </Flex>
+      <ChoicesSkeleton />
+
+      <ImageContainer>
+        <PollImageSkeleton>
+          <div style={{ width: "50rem", height: "21rem" }} />
+        </PollImageSkeleton>
+      </ImageContainer>
     </CardBox>
   );
 }
