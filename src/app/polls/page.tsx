@@ -211,7 +211,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
   useEffect(() => {
     setPage(1);
     setPolls([]);
-  }, [debouncedSearchValue, selectedTag]);
+  }, [debouncedSearchValue, selectedTag, hasVoted]);
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
