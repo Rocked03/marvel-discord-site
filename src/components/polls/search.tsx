@@ -28,20 +28,20 @@ const ClearButton = styled.button`
 export function PollsSearch({
   handleSearch,
   handleTagSelect,
-  searchValue,
-  meta,
-  selectedTag,
-  tags,
-  tagsOrder,
+  searchValue = "",
+  selectedTag = null,
+  meta = null,
+  tags = {},
+  tagsOrder = [],
   disabled = false,
 }: {
   handleSearch: (value: string) => void;
   handleTagSelect: (tag: string) => void;
-  searchValue: string;
-  selectedTag: number | null;
-  meta: Meta | null;
-  tags: Record<number, Tag>;
-  tagsOrder: number[];
+  searchValue?: string;
+  selectedTag?: number | null;
+  meta?: Meta | null;
+  tags?: Record<number, Tag>;
+  tagsOrder?: number[];
   disabled?: boolean;
 }) {
   return (

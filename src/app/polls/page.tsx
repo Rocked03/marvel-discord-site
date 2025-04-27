@@ -12,9 +12,16 @@ import type { Meta, Poll, PollInfo, Tag } from "@jocasta-polls-api";
 import { Flex } from "@radix-ui/themes";
 import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import styled from "styled-components";
+
+const BodyContainer = styled(Flex).attrs({
+  direction: "column",
+  gap: "4",
+  align: "center",
+  justify: "center",
+})``;
 
 const FullWidthScroll = styled.div`
   width: 100%;
@@ -39,6 +46,37 @@ const LoadingText = styled.h4`
 `;
 
 export default function PollsHome() {
+  const skeletons = useMemo(
+    () =>
+      Array.from({ length: 10 }, (_, index) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: Skeletons
+        <PollCardSkeleton key={index} />
+      )),
+    []
+  );
+
+  return (
+    <Suspense
+      fallback={
+        <BodyContainer>
+          <PollsSearch
+            handleSearch={() => {}}
+            handleTagSelect={() => {}}
+            disabled
+          />
+
+          <FullWidthScroll>
+            <PollCardContainer>{skeletons}</PollCardContainer>
+          </FullWidthScroll>
+        </BodyContainer>
+      }
+    >
+      <PollsContent skeletons={skeletons} />
+    </Suspense>
+  );
+}
+
+function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -161,19 +199,10 @@ export default function PollsHome() {
     Object.keys(tags).length > 0 &&
     Object.keys(guilds).length > 0;
 
-  const skeletons = useMemo(
-    () =>
-      Array.from({ length: 10 }, (_, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: Skeletons
-        <PollCardSkeleton key={index} />
-      )),
-    []
-  );
-
   return (
     <>
       <ScrollToTopButton />
-      <Flex direction="column" gap="4" align="center" justify="center">
+      <BodyContainer>
         <PollsSearch
           handleSearch={handleSearch}
           handleTagSelect={handleTagSelect}
@@ -211,7 +240,7 @@ export default function PollsHome() {
             <PollCardContainer>{skeletons}</PollCardContainer>
           )}
         </FullWidthScroll>
-      </Flex>
+      </BodyContainer>
     </>
   );
 }
