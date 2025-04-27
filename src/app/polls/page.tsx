@@ -95,6 +95,9 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
   const [selectedTag, setSelectedTag] = useState<number | null>(
     Number(searchParams.get("tag")) || null
   );
+  const [hasVoted, setHasVoted] = useState<boolean | undefined>(
+    searchParams.get("hasVoted") !== "false" || undefined
+  );
 
   const user: {
     id: bigint;
@@ -106,6 +109,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
 
   const debouncedSearchValue = useDebounce(searchValue, 500);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: User doesn't change
   useEffect(() => {
     const controller = new AbortController();
 
@@ -118,6 +122,13 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
           page: page,
           tag: selectedTag ?? undefined,
           signal: controller.signal,
+          user:
+            user && hasVoted !== undefined
+              ? {
+                  userId: user.id,
+                  notVoted: !hasVoted,
+                }
+              : undefined,
         });
         if (!cancelled) {
           setPolls((prevPolls) => [...prevPolls, ...polls]);
@@ -144,7 +155,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
       cancelled = true;
       controller.abort();
     };
-  }, [debouncedSearchValue, page, selectedTag]);
+  }, [debouncedSearchValue, page, selectedTag, hasVoted]);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -216,6 +227,12 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
     });
   };
 
+  useEffect(() => {
+    updateUrlParameters(router, searchParams, {
+      hasVoted: hasVoted !== undefined ? hasVoted : null,
+    });
+  }, [hasVoted, router, searchParams]);
+
   function setUserVote(pollId: number, choice: number | undefined) {
     if (choice === undefined) {
       setUserVotes((prevVotes) => {
@@ -250,6 +267,9 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
           tags={tags}
           tagsOrder={tagsOrder}
           selectedTag={selectedTag}
+          hasVoted={hasVoted}
+          setHasVoted={setHasVoted}
+          user={user}
         />
 
         <FullWidthScroll>

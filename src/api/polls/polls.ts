@@ -35,7 +35,7 @@ export const getPolls = async ({
 			guildId: guildId.toString(),
 			published: published,
 			tag: tag,
-			user: user ? user.userId.toString() : undefined,
+			userId: user ? user.userId.toString() : undefined,
 			notVoted: user ? user?.notVoted : undefined,
 			search: search,
 			page: page,

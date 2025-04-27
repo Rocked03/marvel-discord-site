@@ -1,6 +1,12 @@
 import type { Meta, Tag } from "@jocasta-polls-api";
-import { Flex, TextField } from "@radix-ui/themes";
-import { Search, X } from "lucide-react";
+import { Flex, IconButton, TextField } from "@radix-ui/themes";
+import {
+  CircleDot,
+  CircleCheck,
+  CircleCheckBig,
+  Search,
+  X,
+} from "lucide-react";
 import styled from "styled-components";
 import { TagSelect } from "./tagSelect";
 
@@ -25,6 +31,44 @@ const ClearButton = styled.button`
   padding: 0;
 `;
 
+const HasVotedButton = styled(IconButton)`
+  background-color: var(--color-surface);
+  border-radius: var(--radius-3);
+  color: var(--gray-a11);
+  height: 100%;
+  width: 3rem;
+`;
+
+function HasVotedToggle({
+  hasVoted,
+  setHasVoted,
+}: {
+  hasVoted: boolean | undefined;
+  setHasVoted: (value: boolean | undefined) => void;
+}) {
+  function cycle() {
+    if (hasVoted === undefined) {
+      setHasVoted(false);
+    } else if (hasVoted === false) {
+      setHasVoted(true);
+    } else {
+      setHasVoted(undefined);
+    }
+  }
+
+  return (
+    <HasVotedButton variant="surface" color="gray" onClick={cycle}>
+      {hasVoted === undefined ? (
+        <CircleCheck />
+      ) : hasVoted ? (
+        <CircleCheckBig />
+      ) : (
+        <CircleDot />
+      )}
+    </HasVotedButton>
+  );
+}
+
 export function PollsSearch({
   handleSearch,
   handleTagSelect,
@@ -34,6 +78,9 @@ export function PollsSearch({
   tags = {},
   tagsOrder = [],
   disabled = false,
+  hasVoted = undefined,
+  setHasVoted = () => {},
+  user = undefined,
 }: {
   handleSearch: (value: string) => void;
   handleTagSelect: (tag: string) => void;
@@ -43,6 +90,11 @@ export function PollsSearch({
   tags?: Record<number, Tag>;
   tagsOrder?: number[];
   disabled?: boolean;
+  hasVoted?: boolean | undefined;
+  setHasVoted?: (value: boolean | undefined) => void;
+  user?: {
+    id: bigint;
+  };
 }) {
   return (
     <SearchContainer gap="2" align="center">
@@ -70,6 +122,8 @@ export function PollsSearch({
         )}
         {meta && <TextField.Slot>{meta.total} results</TextField.Slot>}
       </SearchBar>
+
+      {user && <HasVotedToggle hasVoted={hasVoted} setHasVoted={setHasVoted} />}
 
       <TagSelect
         selectedTag={selectedTag}
