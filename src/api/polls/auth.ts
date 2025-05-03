@@ -22,7 +22,7 @@ export const getUser = async (): Promise<DiscordUserProfile | null> => {
 
 export const signOut = async (): Promise<void> => {
 	try {
-		const response: AxiosResponse = await axiosPollsInstance.post(
+		await axiosPollsInstance.post(
 			"/auth/logout",
 			{},
 			{

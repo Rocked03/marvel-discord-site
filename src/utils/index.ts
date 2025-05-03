@@ -76,3 +76,29 @@ export function randomText(min = 5, max = 50) {
 export function getRandomInt(min = 5, max = 50) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+export function createDefaultAvatarUrl(userId: bigint): string {
+	const BIT_SHIFT_VALUE = BigInt(22);
+	const NUMBER_OF_AVATARS = BigInt(6);
+	const avatarId = (userId >> BIT_SHIFT_VALUE) % NUMBER_OF_AVATARS;
+
+	return `https://cdn.discordapp.com/embed/avatars/${avatarId}.png`;
+}
+
+export function getProfilePictureUrlFromHash(
+	userId: bigint,
+	profilePictureHash: string | null,
+): string {
+	if (!profilePictureHash) {
+		return createDefaultAvatarUrl(userId);
+	}
+
+	return createCustomAvatarUrl(userId, profilePictureHash);
+}
+
+export function createCustomAvatarUrl(
+	userId: bigint,
+	profilePictureHash: string,
+): string {
+	return `https://cdn.discordapp.com/avatars/${userId}/${profilePictureHash}.png`;
+}

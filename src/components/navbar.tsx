@@ -1,14 +1,28 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import styled from "styled-components";
 
 const NavbarStyle = styled.nav`
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: start;
   padding: 1rem;
   width: 100%;
+`;
+
+const Section = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+`;
+
+const Center = styled.div`
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const Title = styled(Link)`
@@ -35,13 +49,26 @@ const Logo = styled.img`
   border-radius: 0.5rem;
 `;
 
-export default function Navbar() {
+interface NavbarProps {
+  leftComponent?: ReactNode;
+  rightComponent?: ReactNode;
+}
+
+export default function Navbar({ leftComponent, rightComponent }: NavbarProps) {
   return (
     <NavbarStyle>
-      <Title href="/">
-        <Logo src="/img/logo.svg" alt="Marvel Discord Logo" />
-        Marvel Discord
-      </Title>
+      <Section style={{ justifyContent: "flex-start" }}>
+        {leftComponent ?? <div />}
+      </Section>
+      <Center>
+        <Title href="/">
+          <Logo src="/img/logo.svg" alt="Marvel Discord Logo" />
+          Marvel Discord
+        </Title>
+      </Center>
+      <Section style={{ justifyContent: "flex-end" }}>
+        {rightComponent ?? <div />}
+      </Section>
     </NavbarStyle>
   );
 }

@@ -272,11 +272,6 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
     <>
       <ScrollToTopButton />
       <BodyContainer>
-        <a href={`${config.apiUrlPolls}/auth`}>Sign in</a>
-        <button type="button" onClick={signOut}>
-          Sign out
-        </button>
-        {discordUserProfile && <p>{discordUserProfile.username}</p>}
         <PollsSearch
           handleSearch={handleSearch}
           handleTagSelect={handleTagSelect}
