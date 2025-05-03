@@ -6,13 +6,14 @@ import {
   Text,
   Link,
   Skeleton,
+  TextField,
 } from "@radix-ui/themes";
 import styled from "styled-components";
 import { Choices, ChoicesSkeleton } from "./choices";
 import { useState, type ComponentProps } from "react";
 import { PollCardHeader, PollCardHeaderSkeleton } from "./cardHeader";
 import { useIsMobile } from "@/utils/isMobile";
-import { randomText } from "@/utils";
+import { pollDescriptionAuthorshipRegex, randomText } from "@/utils";
 
 const CardBox = styled(Flex)`
   width: 100%;
@@ -124,14 +125,30 @@ export function PollCard({
 
   const [votes, setVotes] = useState(poll.votes);
 
+  const newDescription = poll.description
+    ?.replace(pollDescriptionAuthorshipRegex, "")
+    .trim();
+
   return (
     <CardBox direction="column" gap="3" align="center" justify="start">
       <PollCardHeader poll={poll} tag={tag} guild={guild} votes={votes} />
 
       <CardTitleBlock direction="column" gap="1" align="start">
         <Question $isMobile={isMobile}>{poll.question}</Question>
-        {poll.description && (
-          <Description text={poll.description} size="2" align="left" />
+        {/* <TextField.Root
+          style={{
+            fontSize: "var(--font-size-7)",
+            fontWeight: "var(--font-weight-medium)",
+            padding: 0,
+            border: "none",
+            background: "transparent",
+            outline: "none",
+            width: "100%",
+          }}
+          // value={poll.question}
+        /> */}
+        {newDescription && (
+          <Description text={newDescription} size="2" align="left" />
         )}
       </CardTitleBlock>
 

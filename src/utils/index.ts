@@ -102,3 +102,6 @@ export function createCustomAvatarUrl(
 ): string {
 	return `https://cdn.discordapp.com/avatars/${userId}/${profilePictureHash}.png`;
 }
+
+export const pollDescriptionAuthorshipRegex =
+	/\n?\s*(\w+)\s+by\s+@?(\w+)\s+\(<@\d+>\)/;

@@ -1,7 +1,22 @@
-import { getTagColors } from "@/utils";
+import { getTagColors, pollDescriptionAuthorshipRegex } from "@/utils";
 import type { Poll, PollInfo, Tag } from "@jocasta-polls-api";
-import { Flex, Link, Skeleton, Text, Tooltip } from "@radix-ui/themes";
-import { Calendar, ExternalLink, type LucideProps, Vote } from "lucide-react";
+import {
+  Flex,
+  HoverCard,
+  Inset,
+  Link,
+  Skeleton,
+  Text,
+  Tooltip,
+} from "@radix-ui/themes";
+import {
+  Calendar,
+  ExternalLink,
+  type LucideProps,
+  MessagesSquare,
+  UserPen,
+  Vote,
+} from "lucide-react";
 import {
   cloneElement,
   type ComponentProps,
@@ -99,6 +114,21 @@ function HeaderTextWithLink({
   );
 }
 
+function PollAuthorship({ poll }: { poll: Poll }) {
+  const match = poll.description?.match(pollDescriptionAuthorshipRegex);
+
+  if (!match) {
+    return null;
+  }
+
+  const firstWord = match[1];
+  const username = match[2];
+
+  return (
+    <HeaderText icon={<UserPen />}>{`${firstWord} by @${username}`}</HeaderText>
+  );
+}
+
 export function PollCardHeader({
   poll,
   tag,
@@ -118,6 +148,12 @@ export function PollCardHeader({
   const isNew = time
     ? time.getTime() > Date.now() - 1000 * 60 * 60 * 24 * 2 // 2 days
     : false;
+
+  const pollLink = poll.message_id
+    ? `https://discord.com/channels/${guild.guild_id}/${
+        poll.fallback ? guild.fallback_channel_id : tag.channel_id
+      }/${poll.message_id}`
+    : "";
 
   return (
     <Header align="center" justify="start" gap="3">
@@ -164,24 +200,43 @@ export function PollCardHeader({
           <HeaderText icon={<Vote />}>
             {totalVotes} {totalVotes === 1 ? "Vote" : "Votes"}
           </HeaderText>
+
+          <PollAuthorship poll={poll} />
         </Flex>
 
         {poll.published && (
           <HeaderTextWithLink
             icon={<ExternalLink />}
-            href={
-              poll.message_id
-                ? `https://discord.com/channels/${guild.guild_id}/${
-                    poll.fallback ? guild.fallback_channel_id : tag.channel_id
-                  }/${poll.message_id}`
-                : ""
-            }
+            href={pollLink}
+            rel="noopener noreferrer"
           >
-            {isMobile
-              ? undefined
-              : poll.thread_question
-              ? "Discuss in Discord"
-              : "Open in Discord"}
+            {isMobile ? undefined : poll.thread_question ? (
+              poll.thread_question !== "def" ? (
+                <HoverCard.Root>
+                  <HoverCard.Trigger>
+                    <Text>Discuss in Discord</Text>
+                  </HoverCard.Trigger>
+                  <HoverCard.Content side="bottom" align="end">
+                    <Link
+                      href={pollLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      color="gray"
+                      underline="none"
+                    >
+                      <Flex gap="2" align="center">
+                        <Text size="2">{poll.thread_question}</Text>
+                        <MessagesSquare size="1.5rem" />
+                      </Flex>
+                    </Link>
+                  </HoverCard.Content>
+                </HoverCard.Root>
+              ) : (
+                "Discuss in Discord"
+              )
+            ) : (
+              "Open in Discord"
+            )}
           </HeaderTextWithLink>
         )}
       </ScrollFlex>
