@@ -1,6 +1,7 @@
 import config from "@/app/config/config";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import { getProfilePictureUrlFromHash } from "@/utils";
+import { useIsMobile } from "@/utils/isMobile";
 import {
   Avatar,
   Button,
@@ -10,6 +11,7 @@ import {
   Heading,
   Text,
 } from "@radix-ui/themes";
+import { LogIn } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
@@ -26,11 +28,13 @@ export default function ProfileContainer() {
 
 function ProfileButton() {
   const { loading } = useAuthContext();
+  const isMobile = useIsMobile();
 
   return (
     <Link href={`${config.apiUrlPolls}/auth`}>
       <Button variant="surface" color="gray" loading={loading}>
-        Sign in with Discord
+        <LogIn />
+        {!isMobile && "Sign in with Discord"}
       </Button>
     </Link>
   );
@@ -38,6 +42,8 @@ function ProfileButton() {
 
 function ProfileCard() {
   const { user, signOut } = useAuthContext();
+
+  const isMobile = useIsMobile();
 
   if (!user) return null;
 
@@ -57,21 +63,34 @@ function ProfileCard() {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
-        <ProfileCardStyle>
-          <Flex gap="2" align="center" justify="center">
-            <Avatar
-              src={avatarUrl}
-              fallback={user.global_name?.charAt(0) || "?"}
-            />
-            <Flex direction="column" gap="0" align="start">
-              <Heading size="3">{user.global_name}</Heading>
-              <Text size="1">@{user.username}</Text>
+        {!isMobile ? (
+          <ProfileCardStyle>
+            <Flex gap="2" align="center" justify="center">
+              <Avatar
+                src={avatarUrl}
+                fallback={user.global_name?.charAt(0) || "?"}
+              />
+              <Flex direction="column" gap="0" align="start">
+                <Heading size="3">{user.global_name}</Heading>
+                <Text size="1">@{user.username}</Text>
+              </Flex>
             </Flex>
-          </Flex>
-        </ProfileCardStyle>
+          </ProfileCardStyle>
+        ) : (
+          <Avatar
+            src={avatarUrl}
+            fallback={user.global_name?.charAt(0) || "?"}
+            style={{
+              width: "3rem",
+              height: "3rem",
+            }}
+          />
+        )}
       </DropdownMenu.Trigger>
       <DropdownMenu.Content>
-        <DropdownMenu.Item onClick={handleLogout}>Logout</DropdownMenu.Item>
+        <DropdownMenu.Label>Logged in as @{user.username}</DropdownMenu.Label>
+        <DropdownMenu.Separator />
+        <DropdownMenu.Item onClick={handleLogout}>Sign out</DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   );

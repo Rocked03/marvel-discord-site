@@ -1,4 +1,4 @@
-import type { Meta, Tag } from "@jocasta-polls-api";
+import type { DiscordUserProfile, Meta, Tag } from "@jocasta-polls-api";
 import { Flex, IconButton, TextField, Tooltip } from "@radix-ui/themes";
 import {
   CircleDot,
@@ -111,9 +111,7 @@ export function PollsSearch({
   disabled?: boolean;
   hasVoted?: boolean | undefined;
   setHasVoted?: (value: boolean | undefined) => void;
-  user?: {
-    id: bigint;
-  };
+  user?: DiscordUserProfile | null;
 }) {
   const isMobile = useIsMobile();
 

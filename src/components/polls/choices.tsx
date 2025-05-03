@@ -1,12 +1,22 @@
 import { intToColorHex, randomText } from "@/utils";
 import { Spacer } from "@/utils/styled";
 import type { Poll, Tag } from "@jocasta-polls-api";
-import { Box, Flex, Heading, Skeleton, Text } from "@radix-ui/themes";
+import {
+  AlertDialog,
+  Button,
+  Box,
+  Flex,
+  Heading,
+  Skeleton,
+  Text,
+} from "@radix-ui/themes";
 import styled, { css, keyframes } from "styled-components";
 import { TitleText } from "../titleText";
 import { useIsMobile } from "@/utils/isMobile";
-import type { ComponentProps } from "react";
 import { CircleCheckBig } from "lucide-react";
+import { useAuthContext } from "@/contexts/AuthProvider";
+import config from "@/app/config/config";
+import { useRouter } from "next/navigation";
 
 const ChoiceLabelMap: Record<number, string> = {
   1: "A",
@@ -112,14 +122,62 @@ const PercentLabel = styled(TitleText)`
 `;
 
 function ChoiceContainer({
-  children,
-  ...props
+  index,
+  tag,
+  choice,
+  userVote,
+  poll,
+  percentageVotes,
+  onClick,
 }: {
-  children: React.ReactNode;
-} & ComponentProps<"button">) {
+  index: number;
+  tag: Tag;
+  choice: string;
+  userVote?: number | undefined;
+  poll: Poll;
+  percentageVotes: number[];
+  onClick: () => void;
+}) {
+  const isMobile = useIsMobile();
+
+  function relativePercentage(percentage: number) {
+    return (percentage / Math.max(...percentageVotes)) * 100;
+  }
+
   return (
-    <ChoiceContainerButton {...props}>
-      <ChoiceContainerInner>{children}</ChoiceContainerInner>
+    <ChoiceContainerButton onClick={onClick}>
+      <ChoiceContainerInner>
+        <ChoiceLabel size="4">{ChoiceLabelMap[index + 1]}</ChoiceLabel>
+
+        <Flex gap="1" direction="column" width="100%">
+          <Flex gap="1" width="100%" align="end">
+            <ChoiceText size={isMobile ? "2" : "3"}>
+              {choice}
+              <ChoiceCheck
+                size="20"
+                $isChecked={userVote !== undefined && userVote === index}
+              />
+            </ChoiceText>
+            <Spacer />
+            <PercentLabel
+              size="1"
+              title={`${poll.votes[index]} Vote${
+                poll.votes[index] > 1 ? "s" : ""
+              }`}
+            >
+              {percentageVotes[index].toFixed(0)}%
+            </PercentLabel>
+          </Flex>
+
+          <BarContainer>
+            <BarLine
+              $percentage={relativePercentage(percentageVotes[index])}
+              $color={tag.colour ? intToColorHex(tag.colour) : undefined}
+              $isChecked={userVote !== undefined && userVote === index}
+            />
+          </BarContainer>
+        </Flex>
+      </ChoiceContainerInner>
     </ChoiceContainerButton>
   );
 }
@@ -139,7 +197,8 @@ export function Choices({
   userVote: number | undefined;
   setUserVote: (vote: number | undefined) => void;
 }) {
-  const isMobile = useIsMobile();
+  const { user } = useAuthContext();
+  const router = useRouter();
 
   const totalVotes = votes.reduce((acc, vote) => acc + vote, 0);
 
@@ -148,11 +207,9 @@ export function Choices({
     return Number((vote / totalVotes) * 100);
   });
 
-  function relativePercentage(percentage: number) {
-    return (percentage / Math.max(...percentageVotes)) * 100;
-  }
-
   function handleVote(index: number) {
+    if (!user) return;
+
     let choice: number | undefined = index;
     if (userVote === index) {
       choice = undefined;
@@ -171,45 +228,53 @@ export function Choices({
     setUserVote(choice);
   }
 
+  const choiceComponents = poll.choices.map((choice, index) => (
+    <ChoiceContainer
+      key={ChoiceLabelMap[index + 1]}
+      index={index}
+      onClick={() => handleVote(index)}
+      tag={tag}
+      choice={choice}
+      userVote={userVote}
+      poll={poll}
+      percentageVotes={percentageVotes}
+    />
+  ));
+
   return (
     <Container>
-      {poll.choices.map((choice, index) => (
-        <ChoiceContainer
-          key={ChoiceLabelMap[index + 1]}
-          onClick={() => handleVote(index)}
-        >
-          <ChoiceLabel size="4">{ChoiceLabelMap[index + 1]}</ChoiceLabel>
-
-          <Flex gap="1" direction="column" width="100%">
-            <Flex gap="1" width="100%" align="end">
-              <ChoiceText size={isMobile ? "2" : "3"}>
-                {choice}
-                <ChoiceCheck
-                  size="20"
-                  $isChecked={userVote !== undefined && userVote === index}
-                />
-              </ChoiceText>
-              <Spacer />
-              <PercentLabel
-                size="1"
-                title={`${poll.votes[index]} Vote${
-                  poll.votes[index] > 1 ? "s" : ""
-                }`}
-              >
-                {percentageVotes[index].toFixed(0)}%
-              </PercentLabel>
-            </Flex>
-
-            <BarContainer>
-              <BarLine
-                $percentage={relativePercentage(percentageVotes[index])}
-                $color={tag.colour ? intToColorHex(tag.colour) : undefined}
-                $isChecked={userVote !== undefined && userVote === index}
-              />
-            </BarContainer>
-          </Flex>
-        </ChoiceContainer>
-      ))}
+      {choiceComponents.map((choiceComponent, index) =>
+        user ? (
+          choiceComponent
+        ) : (
+          <AlertDialog.Root key={ChoiceLabelMap[index + 1]}>
+            <AlertDialog.Trigger>{choiceComponent}</AlertDialog.Trigger>
+            <AlertDialog.Content>
+              <AlertDialog.Title>Sign In Required</AlertDialog.Title>
+              <AlertDialog.Description>
+                You need to sign in to vote on this poll.
+              </AlertDialog.Description>
+              <Flex gap="5" justify="end" mt="4">
+                <AlertDialog.Action>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      router.push(`${config.apiUrlPolls}/auth`);
+                    }}
+                  >
+                    Sign In
+                  </Button>
+                </AlertDialog.Action>
+                <AlertDialog.Cancel>
+                  <Button variant="ghost" color="gray">
+                    Cancel
+                  </Button>
+                </AlertDialog.Cancel>
+              </Flex>
+            </AlertDialog.Content>
+          </AlertDialog.Root>
+        )
+      )}
     </Container>
   );
 }

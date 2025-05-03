@@ -22,8 +22,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import styled from "styled-components";
-import config from "../config/config";
-import { getUser } from "@/api/polls/auth";
 import { useAuthContext } from "@/contexts/AuthProvider";
 
 const BodyContainer = styled(Flex).attrs({
@@ -97,7 +95,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
   const [guilds, setGuilds] = useState<Record<string, PollInfo>>({});
   const [userVotes, setUserVotes] = useState<Record<number, number>>({});
 
-  const { user: discordUserProfile, signOut } = useAuthContext();
+  const { user } = useAuthContext();
 
   const [searchValue, setSearchValue] = useState<string>(
     searchParams.get("search") || ""
@@ -112,17 +110,10 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
       undefined
   );
 
-  const user: {
-    id: bigint;
-  } = {
-    id: BigInt("204778476102877187"),
-  };
-
   const [loading, setLoading] = useState<boolean>(false);
 
   const debouncedSearchValue = useDebounce(searchValue, 500);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: User doesn't change
   useEffect(() => {
     const controller = new AbortController();
 
@@ -138,7 +129,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
           user:
             user && hasVoted !== undefined
               ? {
-                  userId: user.id,
+                  userId: BigInt(user.id),
                   notVoted: !hasVoted,
                 }
               : undefined,
@@ -168,7 +159,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
       cancelled = true;
       controller.abort();
     };
-  }, [debouncedSearchValue, page, selectedTag, hasVoted]);
+  }, [debouncedSearchValue, page, selectedTag, hasVoted, user]);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -206,8 +197,12 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
 
   useEffect(() => {
     const fetchUserVotes = async () => {
+      if (!user) {
+        setUserVotes({});
+        return;
+      }
       try {
-        const response = await getUserVotes(user.id.toString());
+        const response = await getUserVotes(user.id);
         const userVotes: Record<number, number> = Object.fromEntries(
           response.map((vote) => [vote.poll_id, vote.choice])
         );
@@ -218,7 +213,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
     };
 
     fetchUserVotes();
-  }, [user.id]);
+  }, [user]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Reset whenever they change
   useEffect(() => {
