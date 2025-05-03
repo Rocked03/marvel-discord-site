@@ -9,13 +9,22 @@ import ScrollToTopButton from "@/components/polls/scrollToTop";
 import { PollsSearch } from "@/components/polls/search";
 import { updateUrlParameters } from "@/utils";
 import { useDebounce } from "@/utils/debouncer";
-import type { Meta, Poll, PollInfo, Tag } from "@jocasta-polls-api";
+import type {
+  DiscordUserProfile,
+  Meta,
+  Poll,
+  PollInfo,
+  Tag,
+} from "@jocasta-polls-api";
 import { Flex } from "@radix-ui/themes";
 import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import styled from "styled-components";
+import config from "../config/config";
+import { getUser } from "@/api/polls/auth";
+import { useAuthContext } from "@/contexts/AuthProvider";
 
 const BodyContainer = styled(Flex).attrs({
   direction: "column",
@@ -88,6 +97,8 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
   const [guilds, setGuilds] = useState<Record<string, PollInfo>>({});
   const [userVotes, setUserVotes] = useState<Record<number, number>>({});
 
+  const { user: discordUserProfile, signOut } = useAuthContext();
+
   const [searchValue, setSearchValue] = useState<string>(
     searchParams.get("search") || ""
   );
@@ -95,8 +106,10 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
   const [selectedTag, setSelectedTag] = useState<number | null>(
     Number(searchParams.get("tag")) || null
   );
+  const searchParamHasVoted = searchParams.get("hasVoted");
   const [hasVoted, setHasVoted] = useState<boolean | undefined>(
-    searchParams.get("hasVoted") !== "false" || undefined
+    (searchParamHasVoted !== null && searchParamHasVoted !== "false") ||
+      undefined
   );
 
   const user: {
@@ -259,6 +272,11 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
     <>
       <ScrollToTopButton />
       <BodyContainer>
+        <a href={`${config.apiUrlPolls}/auth`}>Sign in</a>
+        <button type="button" onClick={signOut}>
+          Sign out
+        </button>
+        {discordUserProfile && <p>{discordUserProfile.username}</p>}
         <PollsSearch
           handleSearch={handleSearch}
           handleTagSelect={handleTagSelect}
