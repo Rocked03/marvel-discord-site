@@ -111,3 +111,8 @@ export const pollDescriptionAnonymousAuthorshipRegex =
 
 export const pollDescriptionArtRegex =
 	/((?:[\w]+ )*?[Aa]rt) by (((\w\.?\w*)[ &-]*)+)\.?/g;
+
+export enum PollSearchType {
+	ID = "id",
+	SEARCH = "search",
+}

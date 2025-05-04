@@ -7,7 +7,7 @@ import { getUserVotes } from "@/api/polls/votes";
 import { PollCard, PollCardSkeleton } from "@/components/polls/poll";
 import ScrollToTopButton from "@/components/polls/scrollToTop";
 import { PollsSearch } from "@/components/polls/search";
-import { updateUrlParameters } from "@/utils";
+import { PollSearchType, updateUrlParameters } from "@/utils";
 import { useDebounce } from "@/utils/debouncer";
 import type { Meta, Poll, PollInfo, Tag } from "@jocasta-polls-api";
 import { Flex } from "@radix-ui/themes";
@@ -76,11 +76,6 @@ export default function PollsHome() {
       <PollsContent skeletons={skeletons} />
     </Suspense>
   );
-}
-
-export enum PollSearchType {
-  ID = "id",
-  SEARCH = "search",
 }
 
 function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {

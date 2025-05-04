@@ -11,7 +11,7 @@ import {
 import styled from "styled-components";
 import { TagSelect } from "./tagSelect";
 import { useIsMobile } from "@/utils/isMobile";
-import { PollSearchType } from "@/app/polls/page";
+import { PollSearchType } from "@/utils";
 
 const SearchContainer = styled(Flex)`
   align-items: center;
