@@ -10,7 +10,6 @@ import {
   Flex,
   Heading,
   Text,
-  Tooltip,
 } from "@radix-ui/themes";
 import { LogIn } from "lucide-react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
@@ -115,7 +114,7 @@ function ProfileCard({ router }: { router: AppRouterInstance }) {
         )}
 
         <DropdownMenu.Separator />
-        <Tooltip
+        {/* <Tooltip
           content="Refreshes your server memberships"
           side="left"
           delayDuration={10}
@@ -123,7 +122,7 @@ function ProfileCard({ router }: { router: AppRouterInstance }) {
           <DropdownMenu.Item onClick={fetchUser}>
             Refresh user
           </DropdownMenu.Item>
-        </Tooltip>
+        </Tooltip> */}
         <DropdownMenu.Item onClick={handleLogout}>Sign out</DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>

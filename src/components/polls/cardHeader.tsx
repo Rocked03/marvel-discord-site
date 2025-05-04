@@ -242,14 +242,17 @@ function InfoTags({
     return (
       <Flex gap="3" align="center" justify="between">
         {tags.map((tag) => {
-          return tag.mobileOnly !== true && tag.tooltip ? (
-            <Tooltip key={tag.text} content={tag.tooltip}>
-              <HeaderText icon={tag.icon}>{tag.text}</HeaderText>
-            </Tooltip>
-          ) : (
-            <HeaderText key={tag.text} icon={tag.icon}>
-              {tag.text}
-            </HeaderText>
+          return (
+            tag.mobileOnly !== true &&
+            (tag.tooltip ? (
+              <Tooltip key={tag.text} content={tag.tooltip}>
+                <HeaderText icon={tag.icon}>{tag.text}</HeaderText>
+              </Tooltip>
+            ) : (
+              <HeaderText key={tag.text} icon={tag.icon}>
+                {tag.text}
+              </HeaderText>
+            ))
           );
         })}
       </Flex>
