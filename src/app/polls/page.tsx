@@ -9,13 +9,7 @@ import ScrollToTopButton from "@/components/polls/scrollToTop";
 import { PollsSearch } from "@/components/polls/search";
 import { updateUrlParameters } from "@/utils";
 import { useDebounce } from "@/utils/debouncer";
-import type {
-  DiscordUserProfile,
-  Meta,
-  Poll,
-  PollInfo,
-  Tag,
-} from "@jocasta-polls-api";
+import type { Meta, Poll, PollInfo, Tag } from "@jocasta-polls-api";
 import { Flex } from "@radix-ui/themes";
 import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";

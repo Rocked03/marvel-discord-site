@@ -6,7 +6,6 @@ import {
   Text,
   Link,
   Skeleton,
-  TextField,
 } from "@radix-ui/themes";
 import styled from "styled-components";
 import { Choices, ChoicesSkeleton } from "./choices";

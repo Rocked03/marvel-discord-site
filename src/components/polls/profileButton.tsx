@@ -13,6 +13,7 @@ import {
   Tooltip,
 } from "@radix-ui/themes";
 import { LogIn } from "lucide-react";
+import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
@@ -23,8 +24,9 @@ const ProfileCardStyle = styled(Card)`
 
 export default function ProfileContainer() {
   const { user } = useAuthContext();
+  const router = useRouter();
 
-  return user ? <ProfileCard /> : <ProfileButton />;
+  return user ? <ProfileCard router={router} /> : <ProfileButton />;
 }
 
 function ProfileButton() {
@@ -41,7 +43,7 @@ function ProfileButton() {
   );
 }
 
-function ProfileCard() {
+function ProfileCard({ router }: { router: AppRouterInstance }) {
   const { user, fetchUser, signOut } = useAuthContext();
 
   const isMobile = useIsMobile();
@@ -52,8 +54,6 @@ function ProfileCard() {
     BigInt(user.id),
     user.avatar ?? null
   );
-
-  const router = useRouter();
 
   const handleLogout = async () => {
     await signOut().then(() => {
