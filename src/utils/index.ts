@@ -110,4 +110,4 @@ export const pollDescriptionAnonymousAuthorshipRegex =
 	/\n?\s*(\w+)\s+by Anonymous/;
 
 export const pollDescriptionArtRegex =
-	/((?:[\w]+ )*?[Aa]rt) by (((\w\.?\w*)[ &-]*)*)\.?/g;
+	/((?:[\w]+ )*?[Aa]rt) by (((\w\.?\w*)[ &-]*)+)\.?/g;
