@@ -9,6 +9,7 @@ import {
   Heading,
   Skeleton,
   Text,
+  Link,
 } from "@radix-ui/themes";
 import styled, { css, keyframes } from "styled-components";
 import { TitleText } from "../titleText";
@@ -78,7 +79,7 @@ const BarLine = styled.div<{
 `;
 
 const ChoiceLabel = styled(Heading)`
-  opacity: 0.75;
+  opacity: 0.4;
   transition: opacity 0.1s ease-in-out;
   width: 1rem;
 
@@ -182,6 +183,36 @@ function ChoiceContainer({
   );
 }
 
+function ChoiceAlert({
+  trigger,
+  title,
+  description,
+  button,
+}: {
+  trigger: React.ReactNode;
+  title: string;
+  description: string;
+  button: React.ReactNode;
+}) {
+  return (
+    <AlertDialog.Root>
+      <AlertDialog.Trigger>{trigger}</AlertDialog.Trigger>
+      <AlertDialog.Content>
+        <AlertDialog.Title>{title}</AlertDialog.Title>
+        <AlertDialog.Description>{description}</AlertDialog.Description>
+        <Flex gap="5" justify="end" mt="4">
+          <AlertDialog.Action>{button}</AlertDialog.Action>
+          <AlertDialog.Cancel>
+            <Button variant="ghost" color="gray">
+              Cancel
+            </Button>
+          </AlertDialog.Cancel>
+        </Flex>
+      </AlertDialog.Content>
+    </AlertDialog.Root>
+  );
+}
+
 export function Choices({
   poll,
   tag,
@@ -199,6 +230,10 @@ export function Choices({
 }) {
   const { user } = useAuthContext();
   const router = useRouter();
+
+  const inServer =
+    user?.guilds?.some((guild) => guild.id === poll.guild_id.toString()) ||
+    false;
 
   const totalVotes = votes.reduce((acc, vote) => acc + vote, 0);
 
@@ -245,34 +280,42 @@ export function Choices({
     <Container>
       {choiceComponents.map((choiceComponent, index) =>
         user ? (
-          choiceComponent
+          inServer ? (
+            choiceComponent
+          ) : (
+            <ChoiceAlert
+              key={ChoiceLabelMap[index + 1]}
+              trigger={choiceComponent}
+              title={"Not In Server"}
+              description={
+                "You need to join the Marvel Discord server to be able to vote."
+              }
+              button={
+                <Link href={"https://discord.gg/marvel"} target="_blank">
+                  <Button variant="ghost">Join Server</Button>
+                </Link>
+              }
+            />
+          )
         ) : (
-          <AlertDialog.Root key={ChoiceLabelMap[index + 1]}>
-            <AlertDialog.Trigger>{choiceComponent}</AlertDialog.Trigger>
-            <AlertDialog.Content>
-              <AlertDialog.Title>Sign In Required</AlertDialog.Title>
-              <AlertDialog.Description>
-                You need to sign in with Discord to vote on this poll.
-              </AlertDialog.Description>
-              <Flex gap="5" justify="end" mt="4">
-                <AlertDialog.Action>
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      router.push(`${config.apiUrlPolls}/auth`);
-                    }}
-                  >
-                    Sign In
-                  </Button>
-                </AlertDialog.Action>
-                <AlertDialog.Cancel>
-                  <Button variant="ghost" color="gray">
-                    Cancel
-                  </Button>
-                </AlertDialog.Cancel>
-              </Flex>
-            </AlertDialog.Content>
-          </AlertDialog.Root>
+          <ChoiceAlert
+            key={ChoiceLabelMap[index + 1]}
+            trigger={choiceComponent}
+            title={"Sign In Required"}
+            description={
+              "You need to sign in with Discord to vote on this poll."
+            }
+            button={
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  router.push(`${config.apiUrlPolls}/auth`);
+                }}
+              >
+                Sign In
+              </Button>
+            }
+          />
         )
       )}
     </Container>
