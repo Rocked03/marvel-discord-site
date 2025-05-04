@@ -1,15 +1,17 @@
 import type { DiscordUserProfile, Meta, Tag } from "@jocasta-polls-api";
-import { Flex, IconButton, TextField, Tooltip } from "@radix-ui/themes";
+import { Button, Flex, IconButton, TextField, Tooltip } from "@radix-ui/themes";
 import {
   CircleDot,
   CircleCheck,
   CircleCheckBig,
   Search,
   X,
+  Hash,
 } from "lucide-react";
 import styled from "styled-components";
 import { TagSelect } from "./tagSelect";
 import { useIsMobile } from "@/utils/isMobile";
+import { PollSearchType } from "@/app/polls/page";
 
 const SearchContainer = styled(Flex)`
   align-items: center;
@@ -38,6 +40,12 @@ const HasVotedButton = styled(IconButton)`
   color: var(--gray-a11);
   height: 100%;
   width: 3rem;
+`;
+
+const SearchIconButton = styled(Button)`
+  @media (hover: hover) {
+    background-color: transparent;
+  }
 `;
 
 interface HasVotedInfoType {
@@ -99,9 +107,10 @@ export function PollsSearch({
   disabled = false,
   hasVoted = undefined,
   setHasVoted = () => {},
+  searchType = PollSearchType.SEARCH,
   user = undefined,
 }: {
-  handleSearch: (value: string) => void;
+  handleSearch: (value: string, searchType?: PollSearchType) => void;
   handleTagSelect: (tag: string) => void;
   searchValue?: string;
   selectedTag?: number | null;
@@ -111,28 +120,45 @@ export function PollsSearch({
   disabled?: boolean;
   hasVoted?: boolean | undefined;
   setHasVoted?: (value: boolean | undefined) => void;
+  searchType?: PollSearchType;
   user?: DiscordUserProfile | null;
 }) {
   const isMobile = useIsMobile();
 
+  const isIdSearch = searchType === "id";
+
+  const handleSearchTypeCycle = () => {
+    if (isIdSearch) {
+      handleSearch(searchValue, PollSearchType.SEARCH);
+    } else {
+      handleSearch(searchValue, PollSearchType.ID);
+    }
+  };
+
   return (
     <SearchContainer gap="2" align="center">
       <SearchBar
-        placeholder="Search polls"
+        placeholder={!isIdSearch ? "Search polls" : "Search by ID"}
         size="3"
         value={searchValue}
         onChange={(e) => handleSearch(e.target.value)}
         disabled={disabled}
       >
         <TextField.Slot>
-          <Search size={20} />
+          <SearchIconButton
+            variant="ghost"
+            color="gray"
+            onClick={handleSearchTypeCycle}
+          >
+            {!isIdSearch ? <Search size={20} /> : <Hash size={20} />}
+          </SearchIconButton>
         </TextField.Slot>
-        {searchValue && !disabled && (
+        {(searchValue || isIdSearch) && !disabled && (
           <TextField.Slot>
             <ClearButton
               type="button"
               onClick={() => {
-                handleSearch("");
+                handleSearch("", PollSearchType.SEARCH);
               }}
             >
               <X size={20} />

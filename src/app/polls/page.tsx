@@ -1,7 +1,7 @@
 "use client";
 
 import { getGuilds } from "@/api/polls/guilds";
-import { getPolls } from "@/api/polls/polls";
+import { getPollById, getPolls } from "@/api/polls/polls";
 import { getTags } from "@/api/polls/tags";
 import { getUserVotes } from "@/api/polls/votes";
 import { PollCard, PollCardSkeleton } from "@/components/polls/poll";
@@ -78,7 +78,12 @@ export default function PollsHome() {
   );
 }
 
-function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
+export enum PollSearchType {
+  ID = "id",
+  SEARCH = "search",
+}
+
+function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -93,6 +98,9 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
 
   const [searchValue, setSearchValue] = useState<string>(
     searchParams.get("search") || ""
+  );
+  const [searchType, setSearchType] = useState<PollSearchType>(
+    PollSearchType.SEARCH
   );
   const [page, setPage] = useState<number>(1);
   const [selectedTag, setSelectedTag] = useState<number | null>(
@@ -115,26 +123,38 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
 
     const fetchPolls = async () => {
       try {
-        const { polls, meta } = await getPolls({
-          search: debouncedSearchValue,
-          page: page,
-          tag: selectedTag ?? undefined,
-          signal: controller.signal,
-          user:
-            user && hasVoted !== undefined
-              ? {
-                  userId: BigInt(user.id),
-                  notVoted: !hasVoted,
-                }
-              : undefined,
-        });
-        if (!cancelled) {
-          setPolls((prevPolls) => [...prevPolls, ...polls]);
-          setMeta(meta);
-          setPage(meta.page);
-
-          setLoading(false);
+        if (searchType === PollSearchType.SEARCH) {
+          const { polls, meta } = await getPolls({
+            search: debouncedSearchValue,
+            page: page,
+            tag: selectedTag ?? undefined,
+            signal: controller.signal,
+            user:
+              user && hasVoted !== undefined
+                ? {
+                    userId: BigInt(user.id),
+                    notVoted: !hasVoted,
+                  }
+                : undefined,
+          });
+          if (!cancelled) {
+            setPolls((prevPolls) => [...prevPolls, ...polls]);
+            setMeta(meta);
+            setPage(meta.page);
+          }
+        } else {
+          try {
+            const poll = await getPollById(debouncedSearchValue);
+            if (!cancelled) {
+              setPolls([poll]);
+            }
+          } catch (err) {
+            setPolls([]);
+          } finally {
+            setMeta(null);
+          }
         }
+        setLoading(false);
       } catch (err) {
         if (axios.isCancel(err)) {
           console.log("Request canceled:", err.message);
@@ -153,7 +173,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
       cancelled = true;
       controller.abort();
     };
-  }, [debouncedSearchValue, page, selectedTag, hasVoted, user]);
+  }, [debouncedSearchValue, page, selectedTag, hasVoted, user, searchType]);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -189,6 +209,11 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
     fetchGuilds();
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Just on start
+  useEffect(() => {
+    handleSearch(searchValue);
+  }, []);
+
   useEffect(() => {
     const fetchUserVotes = async () => {
       if (!user) {
@@ -215,10 +240,26 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
     setPolls([]);
   }, [debouncedSearchValue, selectedTag, hasVoted]);
 
-  const handleSearch = (value: string) => {
-    setSearchValue(value);
+  const handleSearch = (value: string, newSearchType?: PollSearchType) => {
+    if (newSearchType !== undefined) {
+      setSearchType(newSearchType);
+    }
+
+    if (
+      value.toLowerCase().startsWith("id:") &&
+      searchType === PollSearchType.SEARCH
+    ) {
+      setSearchType(PollSearchType.ID);
+      setSearchValue(value.substring(3).trim());
+    } else {
+      setSearchValue(value);
+    }
+
+    const fullValue = (
+      searchType === PollSearchType.ID ? `id: ${value}` : value
+    ).trim();
     updateUrlParameters(router, searchParams, {
-      search: value !== "" ? value : null,
+      search: fullValue !== "" ? fullValue : null,
     });
   };
 
@@ -271,6 +312,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
           selectedTag={selectedTag}
           hasVoted={hasVoted}
           setHasVoted={setHasVoted}
+          searchType={searchType}
           user={user}
         />
 
@@ -302,7 +344,13 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode }) {
               </PollCardContainer>
             </InfiniteScroll>
           ) : (
-            <PollCardContainer>{skeletons}</PollCardContainer>
+            <PollCardContainer>
+              {searchType === PollSearchType.ID
+                ? Array.isArray(skeletons)
+                  ? skeletons.slice(0, 1)
+                  : []
+                : skeletons}
+            </PollCardContainer>
           )}
         </FullWidthScroll>
       </BodyContainer>

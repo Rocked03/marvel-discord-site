@@ -51,3 +51,15 @@ export const getPolls = async ({
 		throw error;
 	}
 };
+
+export const getPollById = async (pollId: string): Promise<Poll> => {
+	try {
+		const response: AxiosResponse<Poll> = await axiosPollsInstance.get(
+			`/polls/${pollId ?? 0}`,
+		);
+		return response.data;
+	} catch (error) {
+		console.error("Error fetching poll:", error);
+		throw error;
+	}
+};
