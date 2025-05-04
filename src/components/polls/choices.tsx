@@ -252,7 +252,7 @@ export function Choices({
             <AlertDialog.Content>
               <AlertDialog.Title>Sign In Required</AlertDialog.Title>
               <AlertDialog.Description>
-                You need to sign in to vote on this poll.
+                You need to sign in with Discord to vote on this poll.
               </AlertDialog.Description>
               <Flex gap="5" justify="end" mt="4">
                 <AlertDialog.Action>

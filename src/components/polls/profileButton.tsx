@@ -60,6 +60,8 @@ function ProfileCard() {
     });
   };
 
+  const isInServer: boolean = true; // TODO: Check if user is in server
+
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
@@ -88,7 +90,26 @@ function ProfileCard() {
         )}
       </DropdownMenu.Trigger>
       <DropdownMenu.Content>
-        <DropdownMenu.Label>Logged in as @{user.username}</DropdownMenu.Label>
+        <DropdownMenu.Label>Signed in as @{user.username}</DropdownMenu.Label>
+        <DropdownMenu.Separator />
+        <DropdownMenu.Item disabled>
+          My contributions (coming soon)
+        </DropdownMenu.Item>
+        <DropdownMenu.Item asChild>
+          <Link href="https://forms.gle/G2BPKdTdGEMN1yhk7" target="_blank">
+            Suggest a question
+          </Link>
+        </DropdownMenu.Item>
+        {isInServer && (
+          <>
+            <DropdownMenu.Separator />
+            <DropdownMenu.Item asChild>
+              <Link href="https://discord.gg/marvel" target="_blank">
+                Join the Marvel Discord
+              </Link>
+            </DropdownMenu.Item>
+          </>
+        )}
         <DropdownMenu.Separator />
         <DropdownMenu.Item onClick={handleLogout}>Sign out</DropdownMenu.Item>
       </DropdownMenu.Content>

@@ -13,7 +13,12 @@ import { Choices, ChoicesSkeleton } from "./choices";
 import { useState, type ComponentProps } from "react";
 import { PollCardHeader, PollCardHeaderSkeleton } from "./cardHeader";
 import { useIsMobile } from "@/utils/isMobile";
-import { pollDescriptionAuthorshipRegex, randomText } from "@/utils";
+import {
+  pollDescriptionAnonymousAuthorshipRegex,
+  pollDescriptionArtRegex,
+  pollDescriptionAuthorshipRegex,
+  randomText,
+} from "@/utils";
 
 const CardBox = styled(Flex)`
   width: 100%;
@@ -127,6 +132,8 @@ export function PollCard({
 
   const newDescription = poll.description
     ?.replace(pollDescriptionAuthorshipRegex, "")
+    .replace(pollDescriptionAnonymousAuthorshipRegex, "")
+    .replace(pollDescriptionArtRegex, "")
     .trim();
 
   return (

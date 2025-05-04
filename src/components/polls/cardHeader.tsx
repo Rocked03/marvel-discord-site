@@ -1,9 +1,13 @@
-import { getTagColors, pollDescriptionAuthorshipRegex } from "@/utils";
+import {
+  getTagColors,
+  pollDescriptionAnonymousAuthorshipRegex,
+  pollDescriptionArtRegex,
+  pollDescriptionAuthorshipRegex,
+} from "@/utils";
 import type { Poll, PollInfo, Tag } from "@jocasta-polls-api";
 import {
   Flex,
   HoverCard,
-  Inset,
   Link,
   Skeleton,
   Text,
@@ -14,7 +18,8 @@ import {
   ExternalLink,
   type LucideProps,
   MessagesSquare,
-  UserPen,
+  Palette,
+  PencilLine,
   Vote,
 } from "lucide-react";
 import {
@@ -115,17 +120,50 @@ function HeaderTextWithLink({
 }
 
 function PollAuthorship({ poll }: { poll: Poll }) {
+  let descriptor = "";
+  let author = "";
+
   const match = poll.description?.match(pollDescriptionAuthorshipRegex);
 
-  if (!match) {
-    return null;
+  if (match) {
+    descriptor = match[1].trim();
+    author = `@${match[2].trim()}`;
+  } else {
+    const match = poll.description?.match(
+      pollDescriptionAnonymousAuthorshipRegex
+    );
+    if (match) {
+      descriptor = match[1].trim();
+      author = "Anonymous";
+    } else {
+      return null;
+    }
   }
+  return (
+    <Tooltip content={`${descriptor} by`}>
+      <HeaderText icon={<PencilLine />}>{author}</HeaderText>
+    </Tooltip>
+  );
+}
 
-  const firstWord = match[1];
-  const username = match[2];
+function PollArtist({ poll }: { poll: Poll }) {
+  if (!poll.description) return null;
+
+  const matches = [...poll.description.matchAll(pollDescriptionArtRegex)];
 
   return (
-    <HeaderText icon={<UserPen />}>{`${firstWord} by @${username}`}</HeaderText>
+    <>
+      {matches.map((match, index) => {
+        return (
+          <Tooltip
+            key={`${index} ${match[1]} ${match[2]}`}
+            content={`${match[1].trim()} by`}
+          >
+            <HeaderText icon={<Palette />}>{match[2].trim()}</HeaderText>
+          </Tooltip>
+        );
+      })}
+    </>
   );
 }
 
@@ -201,6 +239,7 @@ export function PollCardHeader({
             {totalVotes} {totalVotes === 1 ? "Vote" : "Votes"}
           </HeaderText>
 
+          <PollArtist poll={poll} />
           <PollAuthorship poll={poll} />
         </Flex>
 

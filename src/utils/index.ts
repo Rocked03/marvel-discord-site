@@ -105,3 +105,8 @@ export function createCustomAvatarUrl(
 
 export const pollDescriptionAuthorshipRegex =
 	/\n?\s*(\w+)\s+by\s+@?(\w+)\s+\(<@\d+>\)/;
+
+export const pollDescriptionAnonymousAuthorshipRegex =
+	/\n?\s*(\w+)\s+by Anonymous/;
+
+export const pollDescriptionArtRegex = /((?:[\w]+ )*?[Aa]rt) by ([\w &-]+)\.?/g;
