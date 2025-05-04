@@ -10,14 +10,15 @@ import {
   Skeleton,
   Text,
   Link,
+  Tooltip,
 } from "@radix-ui/themes";
 import styled, { css, keyframes } from "styled-components";
-import { TitleText } from "../titleText";
 import { useIsMobile } from "@/utils/isMobile";
-import { CircleCheckBig } from "lucide-react";
+import { CircleCheckBig, Lock } from "lucide-react";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import config from "@/app/config/config";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const ChoiceLabelMap: Record<number, string> = {
   1: "A",
@@ -30,7 +31,9 @@ const ChoiceLabelMap: Record<number, string> = {
   8: "H",
 };
 
-const Container = styled(Box)`
+const Container = styled(Flex)``;
+
+const ChoiceContainerStyle = styled(Box)`
   border-color: var(--gray-a3);
   border-radius: var(--radius-3);
   border-style: solid;
@@ -118,8 +121,13 @@ const ChoiceCheck = styled(CircleCheckBig)<{ $isChecked: boolean }>`
       : "none"};
 `;
 
-const PercentLabel = styled(TitleText)`
+const PercentLabel = styled(Text)`
   color: var(--gray-a11);
+`;
+
+const ShowVotesButton = styled(Button)`
+  width: fit-content;
+  margin-inline: 0rem;
 `;
 
 function ChoiceContainer({
@@ -130,6 +138,7 @@ function ChoiceContainer({
   poll,
   percentageVotes,
   onClick,
+  showVotes,
 }: {
   index: number;
   tag: Tag;
@@ -138,6 +147,7 @@ function ChoiceContainer({
   poll: Poll;
   percentageVotes: number[];
   onClick: () => void;
+  showVotes?: boolean;
 }) {
   const isMobile = useIsMobile();
 
@@ -160,19 +170,24 @@ function ChoiceContainer({
               />
             </ChoiceText>
             <Spacer />
-            <PercentLabel
-              size="1"
-              title={`${poll.votes[index]} Vote${
-                poll.votes[index] > 1 ? "s" : ""
-              }`}
-            >
-              {percentageVotes[index].toFixed(0)}%
-            </PercentLabel>
+            {showVotes && (
+              <Tooltip
+                content={`${poll.votes[index]} Vote${
+                  poll.votes[index] > 1 ? "s" : ""
+                }`}
+              >
+                <PercentLabel size="1">
+                  {percentageVotes[index].toFixed(0)}%
+                </PercentLabel>
+              </Tooltip>
+            )}
           </Flex>
 
           <BarContainer>
             <BarLine
-              $percentage={relativePercentage(percentageVotes[index])}
+              $percentage={
+                showVotes ? relativePercentage(percentageVotes[index]) : 0
+              }
               $color={tag.colour ? intToColorHex(tag.colour) : undefined}
               $isChecked={userVote !== undefined && userVote === index}
             />
@@ -231,6 +246,10 @@ export function Choices({
   const { user } = useAuthContext();
   const router = useRouter();
 
+  const [showVotes, setShowVotes] = useState(
+    userVote !== undefined && poll.show_voting
+  );
+
   const inServer =
     user?.guilds?.some((guild) => guild.id === poll.guild_id.toString()) ||
     false;
@@ -273,51 +292,72 @@ export function Choices({
       userVote={userVote}
       poll={poll}
       percentageVotes={percentageVotes}
+      showVotes={showVotes && poll.show_voting}
     />
   ));
 
   return (
-    <Container>
-      {choiceComponents.map((choiceComponent, index) =>
-        user ? (
-          inServer ? (
-            choiceComponent
+    <Container gap="2" direction="column" width="100%" align="end">
+      <ChoiceContainerStyle>
+        {choiceComponents.map((choiceComponent, index) =>
+          user ? (
+            inServer ? (
+              choiceComponent
+            ) : (
+              <ChoiceAlert
+                key={ChoiceLabelMap[index + 1]}
+                trigger={choiceComponent}
+                title={"Not In Server"}
+                description={
+                  "You need to join the Marvel Discord server to be able to vote."
+                }
+                button={
+                  <Link href={"https://discord.gg/marvel"} target="_blank">
+                    <Button variant="ghost">Join Server</Button>
+                  </Link>
+                }
+              />
+            )
           ) : (
             <ChoiceAlert
               key={ChoiceLabelMap[index + 1]}
               trigger={choiceComponent}
-              title={"Not In Server"}
+              title={"Sign In Required"}
               description={
-                "You need to join the Marvel Discord server to be able to vote."
+                "You need to sign in with Discord to vote on this poll."
               }
               button={
-                <Link href={"https://discord.gg/marvel"} target="_blank">
-                  <Button variant="ghost">Join Server</Button>
-                </Link>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    router.push(`${config.apiUrlPolls}/auth`);
+                  }}
+                >
+                  Sign In
+                </Button>
               }
             />
           )
+        )}
+      </ChoiceContainerStyle>
+      <ShowVotesButton
+        variant="ghost"
+        color="gray"
+        size="1"
+        onClick={() => {
+          setShowVotes((prev) => !prev);
+        }}
+        disabled={!poll.show_voting}
+      >
+        {showVotes ? (
+          "Hide Votes"
         ) : (
-          <ChoiceAlert
-            key={ChoiceLabelMap[index + 1]}
-            trigger={choiceComponent}
-            title={"Sign In Required"}
-            description={
-              "You need to sign in with Discord to vote on this poll."
-            }
-            button={
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  router.push(`${config.apiUrlPolls}/auth`);
-                }}
-              >
-                Sign In
-              </Button>
-            }
-          />
-        )
-      )}
+          <>
+            {!poll.show_voting && <Lock size="0.8rem" />}
+            Show Votes
+          </>
+        )}
+      </ShowVotesButton>
     </Container>
   );
 }
@@ -326,7 +366,7 @@ export function ChoicesSkeleton() {
   const isMobile = useIsMobile();
 
   return (
-    <Container>
+    <ChoiceContainerStyle>
       {Array.from({ length: 4 }, (_, index) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: Skeletons
         <Flex key={index} gap="2" align="center">
@@ -353,6 +393,6 @@ export function ChoicesSkeleton() {
           </Flex>
         </Flex>
       ))}
-    </Container>
+    </ChoiceContainerStyle>
   );
 }

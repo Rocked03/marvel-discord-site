@@ -45,7 +45,6 @@ const PollImageSkeleton = styled(Skeleton)`
 `;
 
 const ImageContainer = styled(Container)`
-  margin-top: 1rem;
   max-width: var(--container-3);
   width: 100%;
 `;
