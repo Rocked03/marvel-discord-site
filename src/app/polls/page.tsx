@@ -148,7 +148,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
             if (!cancelled) {
               setPolls([poll]);
             }
-          } catch (err) {
+          } catch {
             setPolls([]);
           } finally {
             setMeta(null);
