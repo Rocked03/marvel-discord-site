@@ -18,7 +18,7 @@ import { CircleCheckBig, Lock } from "lucide-react";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import config from "@/app/config/config";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 
 const ChoiceLabelMap: Record<number, string> = {
   1: "A",
@@ -31,7 +31,12 @@ const ChoiceLabelMap: Record<number, string> = {
   8: "H",
 };
 
-const Container = styled(Flex)``;
+const Container = styled(Flex).attrs({
+  gap: "2",
+  direction: "column",
+  width: "100%",
+  align: "end",
+})``;
 
 const ChoiceContainerStyle = styled(Box)`
   border-color: var(--gray-a3);
@@ -125,7 +130,11 @@ const PercentLabel = styled(Text)`
   color: var(--gray-a11);
 `;
 
-const ShowVotesButton = styled(Button)`
+const ShowVotesButtonStyle = styled(Button).attrs({
+  variant: "ghost",
+  color: "gray",
+  size: "1",
+})`
   width: fit-content;
   margin-inline: 0rem;
 `;
@@ -228,6 +237,46 @@ function ChoiceAlert({
   );
 }
 
+function ShowVotesButton({
+  poll,
+  showVotes,
+  setShowVotes,
+}: {
+  poll: Poll;
+  showVotes: boolean;
+  setShowVotes: Dispatch<SetStateAction<boolean>>;
+}) {
+  const showVoting = poll?.show_voting;
+
+  return (
+    <ShowVotesButtonStyle
+      onClick={() => {
+        setShowVotes((prev) => !prev);
+      }}
+      disabled={!showVoting}
+    >
+      {showVotes ? (
+        "Hide Votes"
+      ) : (
+        <>
+          {!showVoting && <Lock size="0.8rem" />}
+          Show Votes
+        </>
+      )}
+    </ShowVotesButtonStyle>
+  );
+}
+
+function ShowVotesButtonSkeleton() {
+  return (
+    <ShowVotesButtonStyle disabled>
+      <Skeleton>
+        <Text size="1">Show Votes</Text>
+      </Skeleton>
+    </ShowVotesButtonStyle>
+  );
+}
+
 export function Choices({
   poll,
   tag,
@@ -297,7 +346,7 @@ export function Choices({
   ));
 
   return (
-    <Container gap="2" direction="column" width="100%" align="end">
+    <Container>
       <ChoiceContainerStyle>
         {choiceComponents.map((choiceComponent, index) =>
           user ? (
@@ -341,23 +390,10 @@ export function Choices({
         )}
       </ChoiceContainerStyle>
       <ShowVotesButton
-        variant="ghost"
-        color="gray"
-        size="1"
-        onClick={() => {
-          setShowVotes((prev) => !prev);
-        }}
-        disabled={!poll.show_voting}
-      >
-        {showVotes ? (
-          "Hide Votes"
-        ) : (
-          <>
-            {!poll.show_voting && <Lock size="0.8rem" />}
-            Show Votes
-          </>
-        )}
-      </ShowVotesButton>
+        poll={poll}
+        showVotes={showVotes}
+        setShowVotes={setShowVotes}
+      />
     </Container>
   );
 }
@@ -366,33 +402,36 @@ export function ChoicesSkeleton() {
   const isMobile = useIsMobile();
 
   return (
-    <ChoiceContainerStyle>
-      {Array.from({ length: 4 }, (_, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: Skeletons
-        <Flex key={index} gap="2" align="center">
-          <Skeleton>
-            <ChoiceLabel size="4">{ChoiceLabelMap[index + 1]}</ChoiceLabel>
-          </Skeleton>
+    <Container>
+      <ChoiceContainerStyle>
+        {Array.from({ length: 4 }, (_, index) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: Skeletons
+          <Flex key={index} gap="2" align="center">
+            <Skeleton>
+              <ChoiceLabel size="4">{ChoiceLabelMap[index + 1]}</ChoiceLabel>
+            </Skeleton>
 
-          <Flex gap="1" direction="column" width="100%">
-            <Flex width="100%" align="end">
+            <Flex gap="1" direction="column" width="100%">
+              <Flex width="100%" align="end">
+                <Skeleton>
+                  <Text size="2">{randomText(5, isMobile ? 20 : 50)}</Text>
+                </Skeleton>
+                <Spacer />
+                <Skeleton>
+                  <PercentLabel size="1" title="">
+                    50%
+                  </PercentLabel>
+                </Skeleton>
+              </Flex>
+
               <Skeleton>
-                <Text size="2">{randomText(5, isMobile ? 20 : 50)}</Text>
-              </Skeleton>
-              <Spacer />
-              <Skeleton>
-                <PercentLabel size="1" title="">
-                  50%
-                </PercentLabel>
+                <BarContainer />
               </Skeleton>
             </Flex>
-
-            <Skeleton>
-              <BarContainer />
-            </Skeleton>
           </Flex>
-        </Flex>
-      ))}
-    </ChoiceContainerStyle>
+        ))}
+      </ChoiceContainerStyle>
+      <ShowVotesButtonSkeleton />
+    </Container>
   );
 }
