@@ -8,7 +8,6 @@ import type { Poll, PollInfo, Tag } from "@jocasta-polls-api";
 import {
   Button,
   Dialog,
-  Em,
   Flex,
   HoverCard,
   Link,
