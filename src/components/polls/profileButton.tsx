@@ -43,7 +43,7 @@ function ProfileButton() {
 }
 
 function ProfileCard({ router }: { router: AppRouterInstance }) {
-  const { user, fetchUser, signOut } = useAuthContext();
+  const { user, signOut } = useAuthContext();
 
   const isMobile = useIsMobile();
 
