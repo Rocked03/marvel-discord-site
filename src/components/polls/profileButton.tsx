@@ -10,6 +10,7 @@ import {
   Flex,
   Heading,
   Text,
+  Tooltip,
 } from "@radix-ui/themes";
 import { LogIn } from "lucide-react";
 import Link from "next/link";
@@ -41,7 +42,7 @@ function ProfileButton() {
 }
 
 function ProfileCard() {
-  const { user, signOut } = useAuthContext();
+  const { user, fetchUser, signOut } = useAuthContext();
 
   const isMobile = useIsMobile();
 
@@ -92,6 +93,7 @@ function ProfileCard() {
       <DropdownMenu.Content>
         <DropdownMenu.Label>Signed in as @{user.username}</DropdownMenu.Label>
         <DropdownMenu.Separator />
+
         <DropdownMenu.Item disabled>
           My contributions (coming soon)
         </DropdownMenu.Item>
@@ -100,6 +102,7 @@ function ProfileCard() {
             Suggest a question
           </Link>
         </DropdownMenu.Item>
+
         {isInServer && (
           <>
             <DropdownMenu.Separator />
@@ -110,7 +113,17 @@ function ProfileCard() {
             </DropdownMenu.Item>
           </>
         )}
+
         <DropdownMenu.Separator />
+        <Tooltip
+          content="Refreshes your server memberships"
+          side="left"
+          delayDuration={10}
+        >
+          <DropdownMenu.Item onClick={fetchUser}>
+            Refresh user
+          </DropdownMenu.Item>
+        </Tooltip>
         <DropdownMenu.Item onClick={handleLogout}>Sign out</DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>
