@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then((userData) => {
         setUser(userData);
       })
-      .catch((_error) => {
+      .catch(() => {
         setUser(null);
       })
       .finally(() => {
