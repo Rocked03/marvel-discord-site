@@ -6,6 +6,9 @@ import {
 } from "@/utils";
 import type { Poll, PollInfo, Tag } from "@jocasta-polls-api";
 import {
+  Button,
+  Dialog,
+  Em,
   Flex,
   HoverCard,
   Link,
@@ -16,11 +19,14 @@ import {
 import {
   Calendar,
   ExternalLink,
+  Info,
   type LucideProps,
   MessagesSquare,
   Palette,
   PencilLine,
+  Tag as LucideTag,
   Vote,
+  Hash,
 } from "lucide-react";
 import {
   cloneElement,
@@ -71,13 +77,21 @@ const HeaderTextStyled = styled(TitleText).attrs({ size: "1" })`
   color: var(--gray-a11);
 `;
 
+const DialogTooltipText = styled(Text).attrs({
+  size: "1",
+  color: "gray",
+  trim: "both",
+})`
+  font-variation-settings: "slnt" -10;
+`;
+
 function HeaderText({
   icon,
   children,
   ...props
 }: {
   icon: React.ReactNode;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 } & ComponentProps<typeof Text>) {
   const styledIcon = isValidElement(icon)
     ? cloneElement(icon as ReactElement<LucideProps>, {
@@ -119,7 +133,7 @@ function HeaderTextWithLink({
   );
 }
 
-function PollAuthorship({ poll }: { poll: Poll }) {
+function PollAuthorshipData({ poll }: { poll: Poll }): InfoTag[] {
   let descriptor = "";
   let author = "";
 
@@ -136,34 +150,149 @@ function PollAuthorship({ poll }: { poll: Poll }) {
       descriptor = match[1].trim();
       author = "Anonymous";
     } else {
-      return null;
+      return [];
     }
   }
-  return (
-    <Tooltip content={`${descriptor} by`}>
-      <HeaderText icon={<PencilLine />}>{author}</HeaderText>
-    </Tooltip>
-  );
+  return [
+    {
+      text: author,
+      icon: <PencilLine />,
+      tooltip: `${descriptor} by`,
+    },
+  ];
 }
 
-function PollArtist({ poll }: { poll: Poll }) {
-  if (!poll.description) return null;
+function PollArtistData({ poll }: { poll: Poll }): InfoTag[] {
+  if (!poll.description) return [];
 
   const matches = [...poll.description.matchAll(pollDescriptionArtRegex)];
 
+  return matches.map((match) => ({
+    text: match[2].trim(),
+    icon: <Palette />,
+    tooltip: `${match[1].trim()} by`,
+  }));
+}
+
+interface InfoTag {
+  text: string;
+  icon: React.ReactNode;
+  tooltip?: string;
+  mobileOnly?: boolean;
+}
+
+function InfoTags({
+  poll,
+  tag,
+  totalVotes,
+}: {
+  poll: Poll;
+  tag: Tag;
+  totalVotes: number;
+}) {
+  const isMobile = useIsMobile();
+  const time = poll.time ? new Date(poll.time) : undefined;
+
+  const tags: InfoTag[] = [
+    {
+      text: tag.name,
+      icon: <LucideTag />,
+      tooltip: poll.num ? `#${poll.num}` : undefined,
+      mobileOnly: true,
+    },
+    {
+      text: time
+        ? isMobile
+          ? time.toLocaleDateString("en-US", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "2-digit",
+            })
+          : time.toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })
+        : "No date set.",
+      icon: <Calendar />,
+      tooltip: time
+        ? time.toLocaleDateString("en-US", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            minute: "2-digit",
+            hour: "2-digit",
+            timeZoneName: "short",
+          })
+        : "No date set.",
+    },
+    {
+      text: `${totalVotes} ${totalVotes === 1 ? "Vote" : "Votes"}`,
+      icon: <Vote />,
+    },
+    ...PollAuthorshipData({ poll }),
+    ...PollArtistData({ poll }),
+    {
+      text: poll.id.toString(),
+      icon: <Hash />,
+      mobileOnly: true,
+    },
+  ];
+
+  if (!isMobile) {
+    return (
+      <Flex gap="3" align="center" justify="between">
+        {tags.map((tag) => {
+          return tag.mobileOnly !== true && tag.tooltip ? (
+            <Tooltip key={tag.text} content={tag.tooltip}>
+              <HeaderText icon={tag.icon}>{tag.text}</HeaderText>
+            </Tooltip>
+          ) : (
+            <HeaderText key={tag.text} icon={tag.icon}>
+              {tag.text}
+            </HeaderText>
+          );
+        })}
+      </Flex>
+    );
+  }
+
   return (
-    <>
-      {matches.map((match, index) => {
-        return (
-          <Tooltip
-            key={`${index} ${match[1]} ${match[2]}`}
-            content={`${match[1].trim()} by`}
-          >
-            <HeaderText icon={<Palette />}>{match[2].trim()}</HeaderText>
-          </Tooltip>
-        );
-      })}
-    </>
+    <Dialog.Root>
+      <Dialog.Trigger>
+        <Button variant="ghost">
+          <HeaderText icon={<Info />} />
+        </Button>
+      </Dialog.Trigger>
+
+      <Dialog.Content maxWidth="450px">
+        <Dialog.Title>Poll Info</Dialog.Title>
+
+        <Flex gap="4" direction="column" align="start" justify="start">
+          {tags.map((tag) => {
+            const styledIcon = isValidElement(tag.icon)
+              ? cloneElement(tag.icon as ReactElement<LucideProps>, {
+                  size: 26,
+                  color: "var(--gray-a11)",
+                  strokeWidth: 2,
+                })
+              : tag.icon;
+
+            return (
+              <Flex gap="1" align="center" key={tag.text}>
+                {styledIcon}
+                <Flex gap="1" align="start" direction="column">
+                  <Text size="2">{tag.text}</Text>
+                  {tag.tooltip && (
+                    <DialogTooltipText>{tag.tooltip}</DialogTooltipText>
+                  )}
+                </Flex>
+              </Flex>
+            );
+          })}
+        </Flex>
+      </Dialog.Content>
+    </Dialog.Root>
   );
 }
 
@@ -203,45 +332,7 @@ export function PollCardHeader({
       </TagPill>
 
       <ScrollFlex gap="3" align="center" justify="between">
-        <Flex gap="3">
-          <Tooltip
-            content={
-              time
-                ? time.toLocaleDateString("en-US", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                    minute: "2-digit",
-                    hour: "2-digit",
-                    timeZoneName: "short",
-                  })
-                : "No date set."
-            }
-          >
-            <HeaderText icon={<Calendar />}>
-              {time
-                ? isMobile
-                  ? time.toLocaleDateString("en-US", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "2-digit",
-                    })
-                  : time.toLocaleDateString("en-US", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })
-                : "No date set."}
-            </HeaderText>
-          </Tooltip>
-
-          <HeaderText icon={<Vote />}>
-            {totalVotes} {totalVotes === 1 ? "Vote" : "Votes"}
-          </HeaderText>
-
-          <PollArtist poll={poll} />
-          <PollAuthorship poll={poll} />
-        </Flex>
+        <InfoTags poll={poll} tag={tag} totalVotes={totalVotes} />
 
         {poll.published && (
           <HeaderTextWithLink

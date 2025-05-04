@@ -296,7 +296,7 @@ export function Choices({
   const router = useRouter();
 
   const [showVotes, setShowVotes] = useState(
-    userVote !== undefined && poll.show_voting
+    (userVote !== undefined || !user) && poll.show_voting
   );
 
   const inServer =
@@ -389,11 +389,13 @@ export function Choices({
           )
         )}
       </ChoiceContainerStyle>
-      <ShowVotesButton
-        poll={poll}
-        showVotes={showVotes}
-        setShowVotes={setShowVotes}
-      />
+      {user && (
+        <ShowVotesButton
+          poll={poll}
+          showVotes={showVotes}
+          setShowVotes={setShowVotes}
+        />
+      )}
     </Container>
   );
 }
