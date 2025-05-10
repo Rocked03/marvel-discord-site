@@ -336,10 +336,6 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
                     poll={poll}
                     tag={tags[Number(poll.tag)]}
                     guild={guilds[poll.guild_id.toString()]}
-                    userVote={userVotes[poll.id]}
-                    setUserVote={(choice: number | undefined) =>
-                      setUserVote(poll.id, choice)
-                    }
                   />
                 ))}
               </PollCardContainer>

@@ -124,3 +124,10 @@ export function trimRunningStringSingleLine(str: string): string {
 export function trimRunningStringMultiLine(str: string): string {
 	return str.replace(/^[ \t]+/, "").replace(/^\n+/g, "");
 }
+
+export function cleanUrlSafeString(str: string): string {
+	return trimRunningStringSingleLine(str).replace(
+		/[^A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]/g,
+		"",
+	);
+}

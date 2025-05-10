@@ -7,7 +7,6 @@ import {
   Link,
   Skeleton,
   TextField,
-  TextArea,
 } from "@radix-ui/themes";
 import styled from "styled-components";
 import { Choices, ChoicesEditable, ChoicesSkeleton } from "./choices";
@@ -15,6 +14,7 @@ import { useState, type ComponentProps } from "react";
 import { PollCardHeader, PollCardHeaderSkeleton } from "./cardHeader";
 import { useIsMobile } from "@/utils/isMobile";
 import {
+  cleanUrlSafeString,
   pollDescriptionAnonymousAuthorshipRegex,
   pollDescriptionArtRegex,
   pollDescriptionAuthorshipRegex,
@@ -22,10 +22,8 @@ import {
   trimRunningStringMultiLine,
   trimRunningStringSingleLine,
 } from "@/utils";
-import {
-  AutoGrowingRadixTextArea,
-  AutoGrowingTextAreaStyled,
-} from "./textAreaAutoGrow";
+import { AutoGrowingTextAreaStyled } from "./textAreaAutoGrow";
+import { Image, ImageOff } from "lucide-react";
 
 const CardBox = styled(Flex)`
   width: 100%;
@@ -106,6 +104,14 @@ const DescriptionEditable = styled(AutoGrowingTextAreaStyled)`
   }
 `;
 
+function filterDescriptionWithRegex(description?: string | null) {
+  return description
+    ?.replace(pollDescriptionAuthorshipRegex, "")
+    .replace(pollDescriptionAnonymousAuthorshipRegex, "")
+    .replace(pollDescriptionArtRegex, "")
+    .trim();
+}
+
 function Description({
   text,
   ...props
@@ -165,11 +171,7 @@ export function PollCard({
 
   const [votes, setVotes] = useState(poll.votes);
 
-  const newDescription = poll.description
-    ?.replace(pollDescriptionAuthorshipRegex, "")
-    .replace(pollDescriptionAnonymousAuthorshipRegex, "")
-    .replace(pollDescriptionArtRegex, "")
-    .trim();
+  const filteredDescription = filterDescriptionWithRegex(poll.description);
 
   return (
     <CardBox direction="column" gap="3" align="center" justify="start">
@@ -177,8 +179,8 @@ export function PollCard({
 
       <CardTitleBlock direction="column" gap="1" align="start">
         <Question $isMobile={isMobile}>{poll.question}</Question>
-        {newDescription && (
-          <Description text={newDescription} size="2" align="left" />
+        {filteredDescription && (
+          <Description text={filteredDescription} size="2" align="left" />
         )}
       </CardTitleBlock>
 
@@ -204,23 +206,21 @@ export function PollCardEditable({
   poll,
   tag,
   guild,
-  userVote,
-  setUserVote,
 }: {
   poll: Poll;
   tag: Tag;
   guild: PollInfo;
-  userVote: number | undefined;
-  setUserVote: (vote: number | undefined) => void;
 }) {
   const isMobile = useIsMobile();
 
-  const [votes, setVotes] = useState(poll.votes);
+  const votes = poll.votes;
 
   const [questionText, setQuestionText] = useState(poll.question);
   const [descriptionText, setDescriptionText] = useState(
-    poll.description || ""
+    filterDescriptionWithRegex(poll.description) || ""
   );
+  const [imageUrl, setImageUrl] = useState(poll.image || "");
+  const [imageError, setImageError] = useState(false);
 
   function handleQuestionChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
     setQuestionText(trimRunningStringSingleLine(event.target.value));
@@ -230,6 +230,11 @@ export function PollCardEditable({
     event: React.ChangeEvent<HTMLTextAreaElement>
   ) {
     setDescriptionText(trimRunningStringMultiLine(event.target.value));
+  }
+
+  function handleImageUrlChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setImageUrl(cleanUrlSafeString(event.target.value));
+    setImageError(false);
   }
 
   return (
@@ -259,11 +264,32 @@ export function PollCardEditable({
 
       <ChoicesEditable poll={poll} tag={tag} votes={votes} />
 
-      {poll.image && (
+      {imageUrl && !imageError && (
         <ImageContainer>
-          <PollImage src={poll.image} alt={poll.question} />
+          <PollImage
+            src={imageUrl}
+            alt={poll.question}
+            onError={() => setImageError(true)}
+            onLoad={() => setImageError(false)}
+          />
         </ImageContainer>
       )}
+
+      <TextField.Root
+        type="text"
+        placeholder="Image URL"
+        size="2"
+        value={imageUrl}
+        style={{ minWidth: "50%" }}
+        onChange={handleImageUrlChange}
+        onBlur={(e) => {
+          setImageUrl(e.target.value.trim());
+        }}
+      >
+        <TextField.Slot>
+          {!imageError ? <Image /> : <ImageOff />}
+        </TextField.Slot>
+      </TextField.Root>
     </CardBox>
   );
 }
