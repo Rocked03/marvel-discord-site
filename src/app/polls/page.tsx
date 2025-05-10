@@ -4,7 +4,11 @@ import { getGuilds } from "@/api/polls/guilds";
 import { getPollById, getPolls } from "@/api/polls/polls";
 import { getTags } from "@/api/polls/tags";
 import { getUserVotes } from "@/api/polls/votes";
-import { PollCard, PollCardSkeleton } from "@/components/polls/poll";
+import {
+  PollCard,
+  PollCardEditable,
+  PollCardSkeleton,
+} from "@/components/polls/poll";
 import ScrollToTopButton from "@/components/polls/scrollToTop";
 import { PollsSearch } from "@/components/polls/search";
 import { PollSearchType, updateUrlParameters } from "@/utils";
@@ -251,7 +255,9 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
     }
 
     const fullValue = (
-      searchType === PollSearchType.ID ? `id: ${value}` : value
+      (newSearchType || searchType) === PollSearchType.ID
+        ? `id: ${value}`
+        : value
     ).trim();
     updateUrlParameters(router, searchParams, {
       search: fullValue !== "" ? fullValue : null,
@@ -325,7 +331,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
             >
               <PollCardContainer>
                 {polls.map((poll) => (
-                  <PollCard
+                  <PollCardEditable
                     key={poll.id}
                     poll={poll}
                     tag={tags[Number(poll.tag)]}

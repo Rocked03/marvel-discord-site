@@ -6,9 +6,11 @@ import {
   Text,
   Link,
   Skeleton,
+  TextField,
+  TextArea,
 } from "@radix-ui/themes";
 import styled from "styled-components";
-import { Choices, ChoicesSkeleton } from "./choices";
+import { Choices, ChoicesEditable, ChoicesSkeleton } from "./choices";
 import { useState, type ComponentProps } from "react";
 import { PollCardHeader, PollCardHeaderSkeleton } from "./cardHeader";
 import { useIsMobile } from "@/utils/isMobile";
@@ -17,7 +19,13 @@ import {
   pollDescriptionArtRegex,
   pollDescriptionAuthorshipRegex,
   randomText,
+  trimRunningStringMultiLine,
+  trimRunningStringSingleLine,
 } from "@/utils";
+import {
+  AutoGrowingRadixTextArea,
+  AutoGrowingTextAreaStyled,
+} from "./textAreaAutoGrow";
 
 const CardBox = styled(Flex)`
   width: 100%;
@@ -60,6 +68,27 @@ const Question = styled(Heading).attrs<{ $isMobile: boolean }>(
   })
 )``;
 
+const QuestionEditable = styled(AutoGrowingTextAreaStyled)<{
+  $isMobile: boolean;
+}>`
+  ${({ $isMobile }) =>
+    `
+      min-height: var(${
+        $isMobile ? "--heading-line-height-5" : "--heading-line-height-7"
+      });
+    `}
+
+  > textarea {
+    font-weight: var(--font-weight-medium);
+
+    ${({ $isMobile }) => `
+      font-size: var(${$isMobile ? "--font-size-5" : "--font-size-7"});
+      letter-spacing: calc(var(${
+        $isMobile ? "--letter-spacing-5" : "--letter-spacing-7"
+      }) + var(--heading-letter-spacing));
+      `}
+`;
+
 const DescriptionContainer = styled(Flex)`
   width: 100%;
 `;
@@ -67,6 +96,14 @@ const DescriptionContainer = styled(Flex)`
 const DescriptionStyled = styled(Text)`
   color: var(--gray-a12);
   letter-spacing: 0.02rem;
+`;
+
+const DescriptionEditable = styled(AutoGrowingTextAreaStyled)`
+  min-height: var(--line-height-2);
+
+  > textarea {
+    letter-spacing: 0.02rem;
+  }
 `;
 
 function Description({
@@ -140,18 +177,6 @@ export function PollCard({
 
       <CardTitleBlock direction="column" gap="1" align="start">
         <Question $isMobile={isMobile}>{poll.question}</Question>
-        {/* <TextField.Root
-          style={{
-            fontSize: "var(--font-size-7)",
-            fontWeight: "var(--font-weight-medium)",
-            padding: 0,
-            border: "none",
-            background: "transparent",
-            outline: "none",
-            width: "100%",
-          }}
-          // value={poll.question}
-        /> */}
         {newDescription && (
           <Description text={newDescription} size="2" align="left" />
         )}
@@ -165,6 +190,74 @@ export function PollCard({
         userVote={userVote}
         setUserVote={setUserVote}
       />
+
+      {poll.image && (
+        <ImageContainer>
+          <PollImage src={poll.image} alt={poll.question} />
+        </ImageContainer>
+      )}
+    </CardBox>
+  );
+}
+
+export function PollCardEditable({
+  poll,
+  tag,
+  guild,
+  userVote,
+  setUserVote,
+}: {
+  poll: Poll;
+  tag: Tag;
+  guild: PollInfo;
+  userVote: number | undefined;
+  setUserVote: (vote: number | undefined) => void;
+}) {
+  const isMobile = useIsMobile();
+
+  const [votes, setVotes] = useState(poll.votes);
+
+  const [questionText, setQuestionText] = useState(poll.question);
+  const [descriptionText, setDescriptionText] = useState(
+    poll.description || ""
+  );
+
+  function handleQuestionChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    setQuestionText(trimRunningStringSingleLine(event.target.value));
+  }
+
+  function handleDescriptionChange(
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) {
+    setDescriptionText(trimRunningStringMultiLine(event.target.value));
+  }
+
+  return (
+    <CardBox direction="column" gap="3" align="center" justify="start">
+      <PollCardHeader poll={poll} tag={tag} guild={guild} votes={votes} />
+
+      <CardTitleBlock direction="column" gap="1" align="start">
+        <QuestionEditable
+          $isMobile={isMobile}
+          placeholder="Question"
+          value={questionText}
+          onChange={handleQuestionChange}
+          onBlur={(e) => {
+            setQuestionText(e.target.value.trim());
+          }}
+        />
+
+        <DescriptionEditable
+          placeholder="Description"
+          value={descriptionText}
+          onChange={handleDescriptionChange}
+          onBlur={(e) => {
+            setDescriptionText(e.target.value.trim());
+          }}
+        />
+      </CardTitleBlock>
+
+      <ChoicesEditable poll={poll} tag={tag} votes={votes} />
 
       {poll.image && (
         <ImageContainer>

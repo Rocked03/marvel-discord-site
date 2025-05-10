@@ -1,4 +1,8 @@
-import { intToColorHex, randomText } from "@/utils";
+import {
+  intToColorHex,
+  randomText,
+  trimRunningStringSingleLine,
+} from "@/utils";
 import { Spacer } from "@/utils/styled";
 import type { Poll, Tag } from "@jocasta-polls-api";
 import {
@@ -14,11 +18,12 @@ import {
 } from "@radix-ui/themes";
 import styled, { css, keyframes } from "styled-components";
 import { useIsMobile } from "@/utils/isMobile";
-import { CircleCheckBig, Lock } from "lucide-react";
+import { CircleCheckBig, Lock, Plus, X } from "lucide-react";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import config from "@/app/config/config";
 import { useRouter } from "next/navigation";
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { AutoGrowingTextAreaStyled } from "./textAreaAutoGrow";
 
 const ChoiceLabelMap: Record<number, string> = {
   1: "A",
@@ -73,6 +78,7 @@ const BarLine = styled.div<{
   $percentage: number;
   $color?: string;
   $isChecked?: boolean;
+  $canHover?: boolean;
 }>`
   background-color: ${({ $color }) => $color || "var(--red-9)"};
   border-radius: 100rem;
@@ -82,17 +88,33 @@ const BarLine = styled.div<{
   width: ${({ $percentage }) => `${$percentage}%`};
 
   ${ChoiceContainerButton}:hover & {
-    opacity: 1;
+    ${({ $canHover = true }) => ($canHover ? "opacity: 1;" : "")}
   }
 `;
 
-const ChoiceLabel = styled(Heading)`
+const ChoiceLabelButton = styled.button<{ $isDisabled: boolean }>`
+  align-items: center;
+  background-color: transparent;
+  border: none;
+
+  ${({ $isDisabled }) =>
+    $isDisabled ? "pointer-events: none;" : "cursor: pointer;"}
+`;
+
+const ChoiceLabel = styled(Heading)<{ $canHover?: boolean }>`
   opacity: 0.4;
   transition: opacity 0.1s ease-in-out;
   width: 1rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
 
   ${ChoiceContainerButton}:hover & {
-    opacity: 1;
+    ${({ $canHover = true }) => ($canHover ? "opacity: 1;" : "")}
+  }
+
+  ${ChoiceLabelButton}:hover & {
+    ${({ $canHover = true }) => ($canHover ? "opacity: 1;" : "")}
   }
 `;
 
@@ -101,6 +123,17 @@ const ChoiceText = styled(Text)`
   gap: 0.5rem;
   align-items: center;
   text-align: left;
+`;
+
+const ChoiceTextEditable = styled(AutoGrowingTextAreaStyled)<{
+  $size: string;
+}>`
+  min-height: var(--line-height-${({ $size }) => $size});
+
+  > textarea {
+    font-size: var(--font-size-${({ $size }) => $size});
+    line-height: var(--line-height-${({ $size }) => $size});
+  }
 `;
 
 const scaleUpDown = keyframes`
@@ -204,6 +237,95 @@ function ChoiceContainer({
         </Flex>
       </ChoiceContainerInner>
     </ChoiceContainerButton>
+  );
+}
+
+function ChoiceContainerEditable({
+  index,
+  tag,
+  choiceText = "",
+  setChoiceText,
+  poll,
+  percentageVotes = [],
+  onDelete,
+  enticer = false,
+}: {
+  index: number;
+  tag?: Tag;
+  choiceText: string;
+  setChoiceText: (value: string) => void;
+  poll: Poll;
+  percentageVotes?: number[];
+  onDelete?: () => void;
+  enticer?: boolean;
+}) {
+  const isMobile = useIsMobile();
+
+  function relativePercentage(percentage: number) {
+    return percentage ? (percentage / Math.max(...percentageVotes)) * 100 : 0;
+  }
+
+  function handleChoiceTextChange(
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) {
+    setChoiceText(trimRunningStringSingleLine(event.target.value));
+  }
+
+  const canDelete =
+    choiceText.length === 0 && poll.choices.length > 1 && !poll.published;
+
+  return (
+    <ChoiceContainerInner>
+      <ChoiceLabelButton $isDisabled={!canDelete || enticer} onClick={onDelete}>
+        <ChoiceLabel size="4" $canHover={canDelete && !enticer}>
+          {!canDelete ? (
+            ChoiceLabelMap[index + 1]
+          ) : !enticer ? (
+            <X strokeWidth={3} />
+          ) : (
+            <Plus strokeWidth={3} />
+          )}
+        </ChoiceLabel>
+      </ChoiceLabelButton>
+
+      <Flex gap="1" direction="column" width="100%">
+        <Flex gap="1" width="100%" align="end">
+          <ChoiceTextEditable
+            $size={isMobile ? "2" : "3"}
+            onChange={handleChoiceTextChange}
+            onBlur={() => {
+              setChoiceText(choiceText.trim());
+            }}
+            placeholder={
+              !enticer
+                ? `Choice ${ChoiceLabelMap[index + 1]}`
+                : "Add new choice"
+            }
+            value={choiceText}
+          />
+          <Spacer />
+          {percentageVotes.length > index && (
+            <Tooltip
+              content={`${poll.votes[index]} Vote${
+                poll.votes[index] > 1 ? "s" : ""
+              }`}
+            >
+              <PercentLabel size="1">
+                {percentageVotes[index].toFixed(0)}%
+              </PercentLabel>
+            </Tooltip>
+          )}
+        </Flex>
+
+        <BarContainer>
+          <BarLine
+            $percentage={relativePercentage(percentageVotes[index])}
+            $color={tag?.colour ? intToColorHex(tag?.colour) : undefined}
+            $canHover={false}
+          />
+        </BarContainer>
+      </Flex>
+    </ChoiceContainerInner>
   );
 }
 
@@ -396,6 +518,84 @@ export function Choices({
           setShowVotes={setShowVotes}
         />
       )}
+    </Container>
+  );
+}
+
+export function ChoicesEditable({
+  poll,
+  tag,
+  votes,
+}: {
+  poll: Poll;
+  tag?: Tag;
+  votes?: Poll["votes"];
+}) {
+  const [choices, setChoices] = useState(
+    poll.choices.length < 8 && !poll.published
+      ? [...poll.choices, ""]
+      : poll.choices
+  );
+
+  const totalVotes = votes
+    ? votes.reduce((acc, vote) => acc + vote, 0)
+    : undefined;
+
+  const percentageVotes =
+    votes && totalVotes
+      ? votes.map((vote) => {
+          if (totalVotes === 0) return 0;
+          return Number((vote / totalVotes) * 100);
+        })
+      : [];
+
+  function handleChoiceTextChange(index: number, value: string) {
+    const updatedChoices = [...choices];
+    updatedChoices[index] = value;
+    handleSetChoices(updatedChoices);
+  }
+
+  function handleChoiceDelete(index: number) {
+    const updatedChoices = [...choices];
+    updatedChoices.splice(index, 1);
+    handleSetChoices(updatedChoices);
+  }
+
+  function handleSetChoices(newChoices: string[]) {
+    if (!poll.published) {
+      const last = newChoices.at(-1);
+      const secondLast = newChoices.at(-2);
+
+      if (
+        (newChoices.length >= 1 && last !== "" && newChoices.length < 8) ||
+        newChoices.length === 0
+      ) {
+        newChoices.push("");
+      } else if (newChoices.length >= 2 && secondLast === "") {
+        newChoices.pop();
+      }
+    }
+
+    setChoices(newChoices);
+  }
+
+  const choiceComponents = choices.map((choice, index) => (
+    <ChoiceContainerEditable
+      key={ChoiceLabelMap[index + 1]}
+      index={index}
+      tag={tag}
+      choiceText={choice}
+      setChoiceText={(event) => handleChoiceTextChange(index, event)}
+      poll={poll}
+      percentageVotes={percentageVotes}
+      onDelete={() => handleChoiceDelete(index)}
+      enticer={index === choices.length - 1 && !poll.published}
+    />
+  ));
+
+  return (
+    <Container>
+      <ChoiceContainerStyle>{choiceComponents}</ChoiceContainerStyle>
     </Container>
   );
 }

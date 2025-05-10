@@ -116,3 +116,11 @@ export enum PollSearchType {
 	ID = "id",
 	SEARCH = "search",
 }
+
+export function trimRunningStringSingleLine(str: string): string {
+	return str.replace(/^[ \t]+/, "").replace(/^\n+|\n+$/g, "");
+}
+
+export function trimRunningStringMultiLine(str: string): string {
+	return str.replace(/^[ \t]+/, "").replace(/^\n+/g, "");
+}

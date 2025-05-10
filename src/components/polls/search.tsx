@@ -138,6 +138,7 @@ export function PollsSearch({
   return (
     <SearchContainer gap="2" align="center">
       <SearchBar
+        type={isIdSearch ? "number" : "text"}
         placeholder={!isIdSearch ? "Search polls" : "Search by ID"}
         size="3"
         value={searchValue}
