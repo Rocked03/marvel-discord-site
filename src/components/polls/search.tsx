@@ -102,8 +102,6 @@ export function PollsSearch({
   searchValue = "",
   selectedTag = null,
   meta = null,
-  tags = {},
-  tagsOrder = [],
   disabled = false,
   hasVoted = undefined,
   setHasVoted = () => {},
@@ -115,8 +113,6 @@ export function PollsSearch({
   searchValue?: string;
   selectedTag?: number | null;
   meta?: Meta | null;
-  tags?: Record<number, Tag>;
-  tagsOrder?: number[];
   disabled?: boolean;
   hasVoted?: boolean | undefined;
   setHasVoted?: (value: boolean | undefined) => void;
@@ -179,8 +175,6 @@ export function PollsSearch({
       <TagSelect
         selectedTag={selectedTag}
         handleTagSelect={handleTagSelect}
-        tags={tags}
-        tagsOrder={tagsOrder}
         disabled={disabled}
       />
     </SearchContainer>

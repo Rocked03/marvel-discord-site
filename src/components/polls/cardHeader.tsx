@@ -11,6 +11,7 @@ import {
   Flex,
   HoverCard,
   Link,
+  Select,
   Skeleton,
   Text,
   Tooltip,
@@ -32,10 +33,12 @@ import {
   type ComponentProps,
   isValidElement,
   type ReactElement,
+  useState,
 } from "react";
 import styled from "styled-components";
 import { TitleText } from "../titleText";
 import { useIsMobile } from "@/utils/isMobile";
+import { useTagContext } from "@/contexts/TagContext";
 
 const Header = styled(Flex)`
   flex-wrap: wrap;
@@ -54,6 +57,23 @@ const TagPill = styled(Pill)<{ $tag?: Tag }>`
     const { backgroundColor, textColor } = getTagColors($tag);
     return `
       background-color: ${backgroundColor ?? "var(--red-9)"};
+      color: ${textColor ?? "#fff"};
+    `;
+  }}
+`;
+
+const SelectTriggerPill = styled(Select.Trigger).attrs({
+  className: "rt-r-lt-both",
+})<{ $tag?: Tag }>`
+  border-radius: 100rem;
+  font-weight: 500;
+  padding-block: 0.3rem;
+  padding-inline: 0.5rem;
+
+  ${({ $tag }) => {
+    const { backgroundColor, textColor } = getTagColors($tag);
+    return `
+      background-color: ${backgroundColor ?? "var(--gray-6)"};
       color: ${textColor ?? "#fff"};
     `;
   }}
@@ -298,6 +318,132 @@ function InfoTags({
   );
 }
 
+function InfoTagsEditable({
+  poll,
+  tag,
+  totalVotes,
+}: {
+  poll: Poll;
+  tag?: Tag;
+  totalVotes?: number;
+}) {
+  const isMobile = useIsMobile();
+  const time = poll.time ? new Date(poll.time) : undefined;
+
+  const tags: InfoTag[] = [
+    ...(tag
+      ? [
+          {
+            text: tag.name,
+            icon: <LucideTag />,
+            tooltip: poll.num ? `#${poll.num}` : undefined,
+            mobileOnly: true,
+          },
+        ]
+      : []),
+    {
+      text: time
+        ? isMobile
+          ? time.toLocaleDateString("en-US", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "2-digit",
+            })
+          : time.toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })
+        : "No date set.",
+      icon: <Calendar />,
+      tooltip: time
+        ? time.toLocaleDateString("en-US", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            minute: "2-digit",
+            hour: "2-digit",
+            timeZoneName: "short",
+          })
+        : "No date set.",
+    },
+    ...(totalVotes
+      ? [
+          {
+            text: `${totalVotes} ${totalVotes === 1 ? "Vote" : "Votes"}`,
+            icon: <Vote />,
+          },
+        ]
+      : []),
+    ...PollAuthorshipData({ poll }),
+    ...PollArtistData({ poll }),
+    {
+      text: poll.id.toString(),
+      icon: <Hash />,
+      mobileOnly: true,
+    },
+  ];
+
+  if (!isMobile) {
+    return (
+      <Flex gap="3" align="center" justify="between">
+        {tags.map((tag) => {
+          return (
+            tag.mobileOnly !== true &&
+            (tag.tooltip ? (
+              <Tooltip key={tag.text} content={tag.tooltip}>
+                <HeaderText icon={tag.icon}>{tag.text}</HeaderText>
+              </Tooltip>
+            ) : (
+              <HeaderText key={tag.text} icon={tag.icon}>
+                {tag.text}
+              </HeaderText>
+            ))
+          );
+        })}
+      </Flex>
+    );
+  }
+
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger>
+        <Button variant="ghost">
+          <HeaderText icon={<Info />} />
+        </Button>
+      </Dialog.Trigger>
+
+      <Dialog.Content maxWidth="450px">
+        <Dialog.Title>Poll Info</Dialog.Title>
+
+        <Flex gap="4" direction="column" align="start" justify="start">
+          {tags.map((tag) => {
+            const styledIcon = isValidElement(tag.icon)
+              ? cloneElement(tag.icon as ReactElement<LucideProps>, {
+                  size: 26,
+                  color: "var(--gray-a11)",
+                  strokeWidth: 2,
+                })
+              : tag.icon;
+
+            return (
+              <Flex gap="1" align="center" key={tag.text}>
+                {styledIcon}
+                <Flex gap="1" align="start" direction="column">
+                  <Text size="2">{tag.text}</Text>
+                  {tag.tooltip && (
+                    <DialogTooltipText>{tag.tooltip}</DialogTooltipText>
+                  )}
+                </Flex>
+              </Flex>
+            );
+          })}
+        </Flex>
+      </Dialog.Content>
+    </Dialog.Root>
+  );
+}
+
 export function PollCardHeader({
   poll,
   tag,
@@ -335,6 +481,100 @@ export function PollCardHeader({
 
       <ScrollFlex gap="3" align="center" justify="between">
         <InfoTags poll={poll} tag={tag} totalVotes={totalVotes} />
+
+        {poll.published && (
+          <HeaderTextWithLink
+            icon={<ExternalLink />}
+            href={pollLink}
+            rel="noopener noreferrer"
+          >
+            {isMobile ? undefined : poll.thread_question ? (
+              poll.thread_question !== "def" ? (
+                <HoverCard.Root>
+                  <HoverCard.Trigger>
+                    <Text>Discuss in Discord</Text>
+                  </HoverCard.Trigger>
+                  <HoverCard.Content side="bottom" align="end">
+                    <Link
+                      href={pollLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      color="gray"
+                      underline="none"
+                    >
+                      <Flex gap="2" align="center">
+                        <Text size="2">{poll.thread_question}</Text>
+                        <MessagesSquare size="1.5rem" />
+                      </Flex>
+                    </Link>
+                  </HoverCard.Content>
+                </HoverCard.Root>
+              ) : (
+                "Discuss in Discord"
+              )
+            ) : (
+              "Open in Discord"
+            )}
+          </HeaderTextWithLink>
+        )}
+      </ScrollFlex>
+    </Header>
+  );
+}
+
+export function PollCardHeaderEditable({
+  poll,
+  tag,
+  setTag: setCurrentTag,
+  guild,
+  votes,
+}: {
+  poll: Poll;
+  tag?: Tag;
+  setTag: (tag: Tag) => void;
+  guild: PollInfo;
+  votes?: Poll["votes"];
+}) {
+  const isMobile = useIsMobile();
+  const { tags, tagsOrder } = useTagContext();
+
+  const totalVotes = votes?.reduce((acc, vote) => acc + vote, 0);
+
+  const pollLink =
+    poll.message_id && poll.published && tag
+      ? `https://discord.com/channels/${guild.guild_id}/${
+          poll.fallback ? guild.fallback_channel_id : tag.channel_id
+        }/${poll.message_id}`
+      : "";
+
+  return (
+    <Header align="center" justify="start" gap="3">
+      <Select.Root
+        size="1"
+        defaultValue={tag ? tag.name : "Select tag"}
+        onValueChange={(value) => {
+          setCurrentTag(tags[Number(value)]);
+        }}
+      >
+        <SelectTriggerPill $tag={tag}>
+          {tag ? tag.name : "Select tag"}
+          {poll.num && ` • #${poll.num}`}
+        </SelectTriggerPill>
+        <Select.Content>
+          {tagsOrder.map((tagId) => {
+            const tag = tags[tagId];
+            if (!tag) return null;
+            return (
+              <Select.Item key={tag.tag} value={tag.tag.toString()}>
+                {tag.name}
+              </Select.Item>
+            );
+          })}
+        </Select.Content>
+      </Select.Root>
+
+      <ScrollFlex gap="3" align="center" justify="between">
+        <InfoTagsEditable poll={poll} tag={tag} totalVotes={totalVotes} />
 
         {poll.published && (
           <HeaderTextWithLink

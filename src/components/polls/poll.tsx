@@ -11,7 +11,11 @@ import {
 import styled from "styled-components";
 import { Choices, ChoicesEditable, ChoicesSkeleton } from "./choices";
 import { useState, type ComponentProps } from "react";
-import { PollCardHeader, PollCardHeaderSkeleton } from "./cardHeader";
+import {
+  PollCardHeader,
+  PollCardHeaderEditable,
+  PollCardHeaderSkeleton,
+} from "./cardHeader";
 import { useIsMobile } from "@/utils/isMobile";
 import {
   cleanUrlSafeString,
@@ -208,7 +212,7 @@ export function PollCardEditable({
   guild,
 }: {
   poll: Poll;
-  tag: Tag;
+  tag?: Tag;
   guild: PollInfo;
 }) {
   const isMobile = useIsMobile();
@@ -221,6 +225,7 @@ export function PollCardEditable({
   );
   const [imageUrl, setImageUrl] = useState(poll.image || "");
   const [imageError, setImageError] = useState(false);
+  const [currentTag, setCurrentTag] = useState(tag);
 
   function handleQuestionChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
     setQuestionText(trimRunningStringSingleLine(event.target.value));
@@ -239,7 +244,13 @@ export function PollCardEditable({
 
   return (
     <CardBox direction="column" gap="3" align="center" justify="start">
-      <PollCardHeader poll={poll} tag={tag} guild={guild} votes={votes} />
+      <PollCardHeaderEditable
+        poll={poll}
+        tag={currentTag}
+        setTag={setCurrentTag}
+        guild={guild}
+        votes={votes}
+      />
 
       <CardTitleBlock direction="column" gap="1" align="start">
         <QuestionEditable
@@ -262,7 +273,7 @@ export function PollCardEditable({
         />
       </CardTitleBlock>
 
-      <ChoicesEditable poll={poll} tag={tag} votes={votes} />
+      <ChoicesEditable poll={poll} tag={currentTag} votes={votes} />
 
       {imageUrl && !imageError && (
         <ImageContainer>

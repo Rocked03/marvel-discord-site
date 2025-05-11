@@ -1,3 +1,4 @@
+import { useTagContext } from "@/contexts/TagContext";
 import { getTagColors } from "@/utils";
 import { useIsMobile } from "@/utils/isMobile";
 import type { Tag } from "@jocasta-polls-api";
@@ -45,17 +46,14 @@ const TagSelectItem = styled(Select.Item)<{
 export function TagSelect({
   selectedTag,
   handleTagSelect,
-  tags,
-  tagsOrder,
   disabled = false,
 }: {
   selectedTag: number | null;
   handleTagSelect: (tag: string) => void;
-  tags: Record<number, Tag>;
-  tagsOrder: number[];
   disabled?: boolean;
 }) {
   const isMobile = useIsMobile();
+  const { tags, tagsOrder } = useTagContext();
 
   const {
     backgroundColor: selectedTagBackgroundColor,

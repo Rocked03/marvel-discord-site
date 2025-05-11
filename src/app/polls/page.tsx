@@ -21,6 +21,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import styled from "styled-components";
 import { useAuthContext } from "@/contexts/AuthProvider";
+import { useTagContext } from "@/contexts/TagContext";
 
 const BodyContainer = styled(Flex).attrs({
   direction: "column",
@@ -88,8 +89,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
 
   const [polls, setPolls] = useState<Poll[]>([]);
   const [meta, setMeta] = useState<Meta | null>(null);
-  const [tags, setTags] = useState<Record<number, Tag>>({});
-  const [tagsOrder, setTagsOrder] = useState<number[]>([]);
+  const { tags } = useTagContext();
   const [guilds, setGuilds] = useState<Record<string, PollInfo>>({});
   const [userVotes, setUserVotes] = useState<Record<number, number>>({});
 
@@ -173,24 +173,6 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
       controller.abort();
     };
   }, [debouncedSearchValue, page, selectedTag, hasVoted, user, searchType]);
-
-  useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        const response = await getTags();
-        const tags: Record<number, Tag> = Object.fromEntries(
-          response.map((tag) => [tag.tag, tag])
-        );
-        const tagsOrder: number[] = response.map((tag) => tag.tag);
-        setTags(tags);
-        setTagsOrder(tagsOrder);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchTags();
-  }, []);
 
   useEffect(() => {
     const fetchGuilds = async () => {
@@ -308,8 +290,6 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
           handleTagSelect={handleTagSelect}
           searchValue={searchValue}
           meta={meta}
-          tags={tags}
-          tagsOrder={tagsOrder}
           selectedTag={selectedTag}
           hasVoted={hasVoted}
           setHasVoted={setHasVoted}
@@ -330,6 +310,30 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
               loader={<LoadingText>Loading...</LoadingText>}
             >
               <PollCardContainer>
+                <PollCardEditable
+                  poll={{
+                    id: 0,
+                    question: "",
+                    description: "",
+                    image: "",
+                    votes: [],
+                    tag: 0,
+                    guild_id: BigInt("281648235557421056"),
+                    published: false,
+                    active: false,
+                    choices: [],
+                    time: new Date(),
+                    num: null,
+                    message_id: null,
+                    crosspost_message_ids: [],
+                    thread_question: "",
+                    show_question: true,
+                    show_options: true,
+                    show_voting: true,
+                    fallback: false,
+                  }}
+                  guild={guilds["281648235557421056"]}
+                />
                 {polls.map((poll) => (
                   <PollCardEditable
                     key={poll.id}
