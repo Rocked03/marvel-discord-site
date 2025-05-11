@@ -8,6 +8,7 @@ import type { Poll, PollInfo, Tag } from "@jocasta-polls-api";
 import {
   Button,
   Dialog,
+  DropdownMenu,
   Flex,
   HoverCard,
   Link,
@@ -27,8 +28,10 @@ import {
   Tag as LucideTag,
   Vote,
   Hash,
+  Plus,
+  Pencil,
 } from "lucide-react";
-import {
+import React, {
   cloneElement,
   type ComponentProps,
   isValidElement,
@@ -104,6 +107,42 @@ const DialogTooltipText = styled(Text).attrs({
   font-variation-settings: "slnt" -10;
 `;
 
+const InfoTagEditDialogTrigger = styled(Dialog.Trigger)`
+  --button-ghost-padding-x: 0.1rem;
+  --button-ghost-padding-y: 0rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--gray-a3);
+  }
+
+  &:where([data-state="open"]) {
+    background-color: transparent;
+  }
+
+  > div {
+    padding-inline: 0.2rem;
+  }
+`;
+
+const InfoTagAddDropdownTrigger = styled(DropdownMenu.Trigger)`
+  --button-ghost-padding-x: 0.1rem;
+  --button-ghost-padding-y: 0rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--gray-a3);
+  }
+
+  &:where([data-state="open"]) {
+    background-color: transparent;
+  }
+
+  > div {
+    padding-right: 0.2rem;
+  }
+`;
+
 function HeaderText({
   icon,
   children,
@@ -177,6 +216,7 @@ function PollAuthorshipData({ poll }: { poll: Poll }): InfoTag[] {
       text: author,
       icon: <PencilLine />,
       tooltip: `${descriptor} by`,
+      editable: true,
     },
   ];
 }
@@ -190,6 +230,7 @@ function PollArtistData({ poll }: { poll: Poll }): InfoTag[] {
     text: match[2].trim(),
     icon: <Palette />,
     tooltip: `${match[1].trim()} by`,
+    editable: true,
   }));
 }
 
@@ -198,6 +239,7 @@ interface InfoTag {
   icon: React.ReactNode;
   tooltip?: string;
   mobileOnly?: boolean;
+  editable?: boolean;
 }
 
 function InfoTags({
@@ -211,6 +253,8 @@ function InfoTags({
 }) {
   const isMobile = useIsMobile();
   const time = poll.time ? new Date(poll.time) : undefined;
+
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const tags: InfoTag[] = [
     {
@@ -280,41 +324,17 @@ function InfoTags({
   }
 
   return (
-    <Dialog.Root>
-      <Dialog.Trigger>
-        <Button variant="ghost">
-          <HeaderText icon={<Info />} />
-        </Button>
-      </Dialog.Trigger>
-
-      <Dialog.Content maxWidth="450px">
-        <Dialog.Title>Poll Info</Dialog.Title>
-
-        <Flex gap="4" direction="column" align="start" justify="start">
-          {tags.map((tag) => {
-            const styledIcon = isValidElement(tag.icon)
-              ? cloneElement(tag.icon as ReactElement<LucideProps>, {
-                  size: 26,
-                  color: "var(--gray-a11)",
-                  strokeWidth: 2,
-                })
-              : tag.icon;
-
-            return (
-              <Flex gap="1" align="center" key={tag.text}>
-                {styledIcon}
-                <Flex gap="1" align="start" direction="column">
-                  <Text size="2">{tag.text}</Text>
-                  {tag.tooltip && (
-                    <DialogTooltipText>{tag.tooltip}</DialogTooltipText>
-                  )}
-                </Flex>
-              </Flex>
-            );
-          })}
-        </Flex>
-      </Dialog.Content>
-    </Dialog.Root>
+    <>
+      <Button variant="ghost" onClick={() => setDialogOpen(true)}>
+        <HeaderText icon={<Info />} />
+      </Button>
+      <InfoTagDialog
+        tags={tags}
+        open={dialogOpen}
+        mobile={isMobile}
+        editable={false}
+      />
+    </>
   );
 }
 
@@ -330,6 +350,8 @@ function InfoTagsEditable({
   const isMobile = useIsMobile();
   const time = poll.time ? new Date(poll.time) : undefined;
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   const tags: InfoTag[] = [
     ...(tag
       ? [
@@ -338,6 +360,7 @@ function InfoTagsEditable({
             icon: <LucideTag />,
             tooltip: poll.num ? `#${poll.num}` : undefined,
             mobileOnly: true,
+            editable: false,
           },
         ]
       : []),
@@ -366,12 +389,14 @@ function InfoTagsEditable({
             timeZoneName: "short",
           })
         : "No date set.",
+      editable: false,
     },
     ...(totalVotes
       ? [
           {
             text: `${totalVotes} ${totalVotes === 1 ? "Vote" : "Votes"}`,
             icon: <Vote />,
+            editable: false,
           },
         ]
       : []),
@@ -381,43 +406,76 @@ function InfoTagsEditable({
       text: poll.id.toString(),
       icon: <Hash />,
       mobileOnly: true,
+      editable: false,
     },
   ];
 
-  if (!isMobile) {
-    return (
-      <Flex gap="3" align="center" justify="between">
-        {tags.map((tag) => {
-          return (
-            tag.mobileOnly !== true &&
-            (tag.tooltip ? (
-              <Tooltip key={tag.text} content={tag.tooltip}>
-                <HeaderText icon={tag.icon}>{tag.text}</HeaderText>
-              </Tooltip>
-            ) : (
-              <HeaderText key={tag.text} icon={tag.icon}>
-                {tag.text}
-              </HeaderText>
-            ))
-          );
-        })}
-      </Flex>
-    );
-  }
+  const hasExistingEditableTags = tags.some((tag) => tag.editable);
 
   return (
-    <Dialog.Root>
-      <Dialog.Trigger>
-        <Button variant="ghost">
-          <HeaderText icon={<Info />} />
-        </Button>
-      </Dialog.Trigger>
+    <>
+      <Flex gap="3" align="center" justify="between">
+        {!isMobile &&
+          tags.map((tag) => {
+            return (
+              tag.mobileOnly !== true &&
+              (tag.tooltip ? (
+                <Tooltip key={tag.text} content={tag.tooltip}>
+                  <HeaderText icon={tag.icon}>{tag.text}</HeaderText>
+                </Tooltip>
+              ) : (
+                <HeaderText key={tag.text} icon={tag.icon}>
+                  {tag.text}
+                </HeaderText>
+              ))
+            );
+          })}
+        <InfoTagDialog
+          tags={tags}
+          mobile={isMobile}
+          editable={true}
+          trigger={
+            <InfoTagEditDialogTrigger>
+              <Button variant="ghost">
+                {hasExistingEditableTags ? (
+                  <HeaderText icon={<Pencil />}>Edit info</HeaderText>
+                ) : (
+                  <HeaderText icon={<Plus />}>Add info</HeaderText>
+                )}
+              </Button>
+            </InfoTagEditDialogTrigger>
+          }
+        />
+      </Flex>
+    </>
+  );
+}
+
+function InfoTagDialog({
+  tags,
+  open,
+  mobile = false,
+  editable = false,
+  trigger,
+}: {
+  tags: InfoTag[];
+  open?: boolean;
+  mobile?: boolean;
+  editable?: boolean;
+  trigger?: React.ReactNode;
+}) {
+  return (
+    <Dialog.Root open={open}>
+      {trigger}
 
       <Dialog.Content maxWidth="450px">
         <Dialog.Title>Poll Info</Dialog.Title>
 
         <Flex gap="4" direction="column" align="start" justify="start">
           {tags.map((tag) => {
+            if (tag.mobileOnly && !mobile) return null;
+            if (editable && !tag.editable) return null;
+
             const styledIcon = isValidElement(tag.icon)
               ? cloneElement(tag.icon as ReactElement<LucideProps>, {
                   size: 26,
@@ -441,6 +499,33 @@ function InfoTagsEditable({
         </Flex>
       </Dialog.Content>
     </Dialog.Root>
+  );
+}
+
+function InfoTagAddDropdown() {
+  const [openArtist, setOpenArtist] = React.useState(false);
+  const [openAuthor, setOpenAuthor] = React.useState(false);
+
+  return (
+    <>
+      <DropdownMenu.Root>
+        <InfoTagAddDropdownTrigger>
+          <Button variant="ghost">
+            <HeaderText icon={<Plus />}>Add info</HeaderText>
+          </Button>
+        </InfoTagAddDropdownTrigger>
+        <DropdownMenu.Content size="1" align="start" variant="soft">
+          <DropdownMenu.Item onClick={() => setOpenArtist(true)}>
+            <Palette size="18" />
+            Artist
+          </DropdownMenu.Item>
+          <DropdownMenu.Item onClick={() => setOpenAuthor(true)}>
+            <PencilLine size="18" />
+            Poll Author
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+    </>
   );
 }
 
@@ -549,29 +634,36 @@ export function PollCardHeaderEditable({
 
   return (
     <Header align="center" justify="start" gap="3">
-      <Select.Root
-        size="1"
-        defaultValue={tag ? tag.name : "Select tag"}
-        onValueChange={(value) => {
-          setCurrentTag(tags[Number(value)]);
-        }}
-      >
-        <SelectTriggerPill $tag={tag}>
-          {tag ? tag.name : "Select tag"}
+      {!poll.published || !tag ? (
+        <Select.Root
+          size="1"
+          defaultValue={tag ? tag.name : "Select tag"}
+          onValueChange={(value) => {
+            setCurrentTag(tags[Number(value)]);
+          }}
+        >
+          <SelectTriggerPill $tag={tag}>
+            {tag ? tag.name : "Select tag"}
+            {poll.num && ` • #${poll.num}`}
+          </SelectTriggerPill>
+          <Select.Content>
+            {tagsOrder.map((tagId) => {
+              const tag = tags[tagId];
+              if (!tag) return null;
+              return (
+                <Select.Item key={tag.tag} value={tag.tag.toString()}>
+                  {tag.name}
+                </Select.Item>
+              );
+            })}
+          </Select.Content>
+        </Select.Root>
+      ) : (
+        <TagPill $tag={tag}>
+          {tag.name}
           {poll.num && ` • #${poll.num}`}
-        </SelectTriggerPill>
-        <Select.Content>
-          {tagsOrder.map((tagId) => {
-            const tag = tags[tagId];
-            if (!tag) return null;
-            return (
-              <Select.Item key={tag.tag} value={tag.tag.toString()}>
-                {tag.name}
-              </Select.Item>
-            );
-          })}
-        </Select.Content>
-      </Select.Root>
+        </TagPill>
+      )}
 
       <ScrollFlex gap="3" align="center" justify="between">
         <InfoTagsEditable poll={poll} tag={tag} totalVotes={totalVotes} />

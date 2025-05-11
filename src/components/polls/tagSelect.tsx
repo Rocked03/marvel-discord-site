@@ -1,7 +1,6 @@
 import { useTagContext } from "@/contexts/TagContext";
 import { getTagColors } from "@/utils";
 import { useIsMobile } from "@/utils/isMobile";
-import type { Tag } from "@jocasta-polls-api";
 import { Box, Select } from "@radix-ui/themes";
 import { Tag as LucideTag } from "lucide-react";
 import styled from "styled-components";

@@ -2,10 +2,8 @@
 
 import { getGuilds } from "@/api/polls/guilds";
 import { getPollById, getPolls } from "@/api/polls/polls";
-import { getTags } from "@/api/polls/tags";
 import { getUserVotes } from "@/api/polls/votes";
 import {
-  PollCard,
   PollCardEditable,
   PollCardSkeleton,
 } from "@/components/polls/poll";
@@ -13,7 +11,7 @@ import ScrollToTopButton from "@/components/polls/scrollToTop";
 import { PollsSearch } from "@/components/polls/search";
 import { PollSearchType, updateUrlParameters } from "@/utils";
 import { useDebounce } from "@/utils/debouncer";
-import type { Meta, Poll, PollInfo, Tag } from "@jocasta-polls-api";
+import type { Meta, Poll, PollInfo } from "@jocasta-polls-api";
 import { Flex } from "@radix-ui/themes";
 import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";

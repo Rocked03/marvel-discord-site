@@ -22,7 +22,7 @@ import { CircleCheckBig, Lock, Plus, X } from "lucide-react";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import config from "@/app/config/config";
 import { useRouter } from "next/navigation";
-import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 import { AutoGrowingTextAreaStyled } from "./textAreaAutoGrow";
 
 const ChoiceLabelMap: Record<number, string> = {

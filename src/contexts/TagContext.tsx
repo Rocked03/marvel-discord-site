@@ -1,6 +1,6 @@
 import { getTags } from "@/api/polls/tags";
 import type { Tag } from "@jocasta-polls-api";
-import { createContext, use, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 interface TagContextType {
   tags: Record<number, Tag>;
