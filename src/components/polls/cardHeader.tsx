@@ -1,4 +1,5 @@
 import {
+  filterDescriptionWithRegex,
   getTagColors,
   pollDescriptionAnonymousAuthorshipRegex,
   pollDescriptionArtRegex,
@@ -15,6 +16,7 @@ import {
   Select,
   Skeleton,
   Text,
+  TextField,
   Tooltip,
 } from "@radix-ui/themes";
 import {
@@ -31,11 +33,13 @@ import {
   Plus,
   Pencil,
 } from "lucide-react";
-import React, {
+import {
   cloneElement,
   type ComponentProps,
+  type Dispatch,
   isValidElement,
   type ReactElement,
+  useEffect,
   useState,
 } from "react";
 import styled from "styled-components";
@@ -112,22 +116,12 @@ const InfoTagEditDialogTrigger = styled(Dialog.Trigger)`
   --button-ghost-padding-y: 0rem;
   cursor: pointer;
 
-  &:hover {
-    background-color: var(--gray-a3);
-  }
-
-  &:where([data-state="open"]) {
-    background-color: transparent;
-  }
-
   > div {
     padding-inline: 0.2rem;
   }
 `;
 
 const InfoTagAddDropdownTrigger = styled(DropdownMenu.Trigger)`
-  --button-ghost-padding-x: 0.1rem;
-  --button-ghost-padding-y: 0rem;
   cursor: pointer;
 
   &:hover {
@@ -137,10 +131,13 @@ const InfoTagAddDropdownTrigger = styled(DropdownMenu.Trigger)`
   &:where([data-state="open"]) {
     background-color: transparent;
   }
+`;
 
-  > div {
-    padding-right: 0.2rem;
-  }
+const InfoTagTextField = styled(TextField.Root).attrs({
+  size: "1",
+})`
+  border: none;
+  font-size: var(--font-size-2);
 `;
 
 function HeaderText({
@@ -191,19 +188,22 @@ function HeaderTextWithLink({
   );
 }
 
-function PollAuthorshipData({ poll }: { poll: Poll }): InfoTag[] {
+function PollAuthorshipData(description: string | null): InfoTag[] {
+  if (!description) return [];
+
   let descriptor = "";
   let author = "";
+  let authorId = "";
 
-  const match = poll.description?.match(pollDescriptionAuthorshipRegex);
+  pollDescriptionAuthorshipRegex.lastIndex = 0;
+  const match = description?.match(pollDescriptionAuthorshipRegex);
 
   if (match) {
     descriptor = match[1].trim();
     author = `@${match[2].trim()}`;
+    authorId = match[3].trim();
   } else {
-    const match = poll.description?.match(
-      pollDescriptionAnonymousAuthorshipRegex
-    );
+    const match = description?.match(pollDescriptionAnonymousAuthorshipRegex);
     if (match) {
       descriptor = match[1].trim();
       author = "Anonymous";
@@ -214,33 +214,68 @@ function PollAuthorshipData({ poll }: { poll: Poll }): InfoTag[] {
   return [
     {
       text: author,
-      icon: <PencilLine />,
+      additionalContent: {
+        authorId: authorId,
+      },
+      type: InfoTagType.AUTHOR,
       tooltip: `${descriptor} by`,
       editable: true,
+      id: "author",
     },
   ];
 }
 
-function PollArtistData({ poll }: { poll: Poll }): InfoTag[] {
-  if (!poll.description) return [];
+function PollArtistData(description: string | null): InfoTag[] {
+  if (!description) return [];
 
-  const matches = [...poll.description.matchAll(pollDescriptionArtRegex)];
+  pollDescriptionArtRegex.lastIndex = 0;
+  const matches = [...description.matchAll(pollDescriptionArtRegex)];
 
-  return matches.map((match) => ({
+  return matches.map((match, index) => ({
     text: match[2].trim(),
-    icon: <Palette />,
+    type: InfoTagType.ARTIST,
     tooltip: `${match[1].trim()} by`,
     editable: true,
+    id: `artist-${index}`,
   }));
 }
 
 interface InfoTag {
   text: string;
-  icon: React.ReactNode;
+  additionalContent?: Record<string, string>;
+  type: InfoTagType;
   tooltip?: string;
   mobileOnly?: boolean;
   editable?: boolean;
+  id: string;
 }
+
+enum InfoTagType {
+  ARTIST = "artist",
+  AUTHOR = "author",
+  DATE = "date",
+  ID = "id",
+  TAG = "tag",
+  VOTES = "votes",
+}
+
+const InfoTagIconMap: Record<InfoTagType, React.ReactNode> = {
+  [InfoTagType.ARTIST]: <Palette />,
+  [InfoTagType.AUTHOR]: <PencilLine />,
+  [InfoTagType.DATE]: <Calendar />,
+  [InfoTagType.ID]: <Hash />,
+  [InfoTagType.TAG]: <LucideTag />,
+  [InfoTagType.VOTES]: <Vote />,
+};
+
+const InfoTagTypeOrder: InfoTagType[] = [
+  InfoTagType.TAG,
+  InfoTagType.DATE,
+  InfoTagType.VOTES,
+  InfoTagType.ARTIST,
+  InfoTagType.AUTHOR,
+  InfoTagType.ID,
+];
 
 function InfoTags({
   poll,
@@ -259,9 +294,10 @@ function InfoTags({
   const tags: InfoTag[] = [
     {
       text: tag.name,
-      icon: <LucideTag />,
+      type: InfoTagType.TAG,
       tooltip: poll.num ? `#${poll.num}` : undefined,
       mobileOnly: true,
+      id: "tag",
     },
     {
       text: time
@@ -277,7 +313,7 @@ function InfoTags({
               year: "numeric",
             })
         : "No date set.",
-      icon: <Calendar />,
+      type: InfoTagType.DATE,
       tooltip: time
         ? time.toLocaleDateString("en-US", {
             day: "numeric",
@@ -288,17 +324,20 @@ function InfoTags({
             timeZoneName: "short",
           })
         : "No date set.",
+      id: "date",
     },
     {
       text: `${totalVotes} ${totalVotes === 1 ? "Vote" : "Votes"}`,
-      icon: <Vote />,
+      type: InfoTagType.VOTES,
+      id: "votes",
     },
-    ...PollAuthorshipData({ poll }),
-    ...PollArtistData({ poll }),
+    ...PollAuthorshipData(poll.description),
+    ...PollArtistData(poll.description),
     {
       text: poll.id.toString(),
-      icon: <Hash />,
+      type: InfoTagType.ID,
       mobileOnly: true,
+      id: "pollId",
     },
   ];
 
@@ -310,10 +349,12 @@ function InfoTags({
             tag.mobileOnly !== true &&
             (tag.tooltip ? (
               <Tooltip key={tag.text} content={tag.tooltip}>
-                <HeaderText icon={tag.icon}>{tag.text}</HeaderText>
+                <HeaderText icon={InfoTagIconMap[tag.type]}>
+                  {tag.text}
+                </HeaderText>
               </Tooltip>
             ) : (
-              <HeaderText key={tag.text} icon={tag.icon}>
+              <HeaderText key={tag.text} icon={InfoTagIconMap[tag.type]}>
                 {tag.text}
               </HeaderText>
             ))
@@ -342,25 +383,28 @@ function InfoTagsEditable({
   poll,
   tag,
   totalVotes,
+  description,
+  setDescription,
 }: {
   poll: Poll;
   tag?: Tag;
   totalVotes?: number;
+  description: string | null;
+  setDescription: (description: string) => void;
 }) {
   const isMobile = useIsMobile();
   const time = poll.time ? new Date(poll.time) : undefined;
-
-  const [dialogOpen, setDialogOpen] = useState(false);
 
   const tags: InfoTag[] = [
     ...(tag
       ? [
           {
             text: tag.name,
-            icon: <LucideTag />,
+            type: InfoTagType.TAG,
             tooltip: poll.num ? `#${poll.num}` : undefined,
             mobileOnly: true,
             editable: false,
+            id: "tag",
           },
         ]
       : []),
@@ -378,7 +422,7 @@ function InfoTagsEditable({
               year: "numeric",
             })
         : "No date set.",
-      icon: <Calendar />,
+      type: InfoTagType.DATE,
       tooltip: time
         ? time.toLocaleDateString("en-US", {
             day: "numeric",
@@ -390,53 +434,107 @@ function InfoTagsEditable({
           })
         : "No date set.",
       editable: false,
+      id: "date",
     },
     ...(totalVotes
       ? [
           {
             text: `${totalVotes} ${totalVotes === 1 ? "Vote" : "Votes"}`,
-            icon: <Vote />,
+            type: InfoTagType.VOTES,
             editable: false,
+            id: "votes",
           },
         ]
       : []),
-    ...PollAuthorshipData({ poll }),
-    ...PollArtistData({ poll }),
+    ...PollAuthorshipData(description),
+    ...PollArtistData(description),
     {
       text: poll.id.toString(),
-      icon: <Hash />,
+      type: InfoTagType.ID,
       mobileOnly: true,
       editable: false,
+      id: "pollId",
     },
   ];
 
-  const hasExistingEditableTags = tags.some((tag) => tag.editable);
+  const [editableTags, setEditableTags] = useState<InfoTag[]>(
+    tags.filter((tag) => tag.editable)
+  );
+
+  const hasExistingEditableTags = editableTags.length > 0;
+
+  function onDialogOpenChange(open: boolean) {
+    if (open) {
+      return;
+    }
+
+    const filteredDescription = filterDescriptionWithRegex(description);
+
+    const additionalInfo = [];
+    for (const tag of editableTags) {
+      if (tag.type === InfoTagType.ARTIST) {
+        additionalInfo.push(`${tag.tooltip} ${tag.text}.`);
+      } else if (tag.type === InfoTagType.AUTHOR) {
+        additionalInfo.push(
+          `${tag.tooltip} @${tag.text} (<@${
+            tag.additionalContent?.authorId || 0
+          }>).`
+        );
+      }
+    }
+
+    const newDescription = filteredDescription
+      ? `${filteredDescription} ${additionalInfo.join(" ")}`
+      : additionalInfo.join(" ");
+    setDescription(newDescription);
+  }
 
   return (
     <>
       <Flex gap="3" align="center" justify="between">
         {!isMobile &&
           tags.map((tag) => {
-            return (
+            const component =
               tag.mobileOnly !== true &&
               (tag.tooltip ? (
                 <Tooltip key={tag.text} content={tag.tooltip}>
-                  <HeaderText icon={tag.icon}>{tag.text}</HeaderText>
+                  <HeaderText icon={InfoTagIconMap[tag.type]}>
+                    {tag.text}
+                  </HeaderText>
                 </Tooltip>
               ) : (
-                <HeaderText key={tag.text} icon={tag.icon}>
+                <HeaderText key={tag.text} icon={InfoTagIconMap[tag.type]}>
                   {tag.text}
                 </HeaderText>
-              ))
+              ));
+
+            return tag.editable ? (
+              <InfoTagDialog
+                key={tag.text}
+                tags={editableTags}
+                setTags={setEditableTags}
+                mobile={isMobile}
+                editable={true}
+                trigger={
+                  <InfoTagEditDialogTrigger>
+                    <Button variant="ghost" color="gray">
+                      {component}
+                    </Button>
+                  </InfoTagEditDialogTrigger>
+                }
+              />
+            ) : (
+              component
             );
           })}
         <InfoTagDialog
-          tags={tags}
+          tags={editableTags}
+          setTags={setEditableTags}
           mobile={isMobile}
           editable={true}
           trigger={
             <InfoTagEditDialogTrigger>
-              <Button variant="ghost">
+              <Button variant="ghost" color="gray">
                 {hasExistingEditableTags ? (
                   <HeaderText icon={<Pencil />}>Edit info</HeaderText>
                 ) : (
@@ -445,84 +543,266 @@ function InfoTagsEditable({
               </Button>
             </InfoTagEditDialogTrigger>
           }
+          onDialogOpenChange={onDialogOpenChange}
         />
       </Flex>
     </>
   );
 }
 
+type RegexGroupRule = {
+  regex: RegExp;
+  group: number;
+  wrapper?: (value: string) => string;
+};
+
 function InfoTagDialog({
   tags,
+  setTags,
   open,
   mobile = false,
   editable = false,
   trigger,
+  onDialogOpenChange,
 }: {
   tags: InfoTag[];
+  setTags?: Dispatch<React.SetStateAction<InfoTag[]>>;
   open?: boolean;
   mobile?: boolean;
   editable?: boolean;
   trigger?: React.ReactNode;
+  onDialogOpenChange?: (open: boolean) => void;
 }) {
+  const sortedTags = tags.sort((a, b) => {
+    const indexA = InfoTagTypeOrder.indexOf(a.type);
+    const indexB = InfoTagTypeOrder.indexOf(b.type);
+    return indexA - indexB;
+  });
+
+  const handleTagEdit = (
+    index: number,
+    {
+      text,
+      tooltip,
+      additionalContent,
+      rules = [],
+    }: {
+      text?: string;
+      tooltip?: string;
+      additionalContent?: {
+        key: string;
+        value: string;
+      };
+      rules?: RegexGroupRule[];
+    }
+  ) => {
+    const newValue = text || tooltip || additionalContent?.value || "";
+
+    const isValid =
+      rules.length > 0 && newValue !== ""
+        ? rules.some(({ regex, group, wrapper }) => {
+            regex.lastIndex = 0;
+            const match = regex.exec(wrapper ? wrapper(newValue) : newValue);
+            return match && newValue === match[group];
+          })
+        : true;
+
+    if (!isValid) {
+      return;
+    }
+
+    if (setTags) {
+      const newTags = [...tags];
+      if (text !== undefined) {
+        newTags[index].text = text;
+      }
+      if (tooltip !== undefined) {
+        newTags[index].tooltip = tooltip;
+      }
+      if (additionalContent) {
+        newTags[index].additionalContent = {
+          ...newTags[index].additionalContent,
+          [additionalContent.key]: additionalContent.value,
+        };
+      }
+      setTags(newTags);
+    }
+  };
+
   return (
-    <Dialog.Root open={open}>
+    <Dialog.Root open={open} onOpenChange={onDialogOpenChange}>
       {trigger}
 
       <Dialog.Content maxWidth="450px">
         <Dialog.Title>Poll Info</Dialog.Title>
 
         <Flex gap="4" direction="column" align="start" justify="start">
-          {tags.map((tag) => {
+          {sortedTags.map((tag, index) => {
             if (tag.mobileOnly && !mobile) return null;
             if (editable && !tag.editable) return null;
 
-            const styledIcon = isValidElement(tag.icon)
-              ? cloneElement(tag.icon as ReactElement<LucideProps>, {
+            const icon = InfoTagIconMap[tag.type];
+            const styledIcon = isValidElement(icon)
+              ? cloneElement(icon as ReactElement<LucideProps>, {
                   size: 26,
                   color: "var(--gray-a11)",
                   strokeWidth: 2,
                 })
-              : tag.icon;
+              : icon;
+
+            let content = (
+              <Flex gap="1" align="start" direction="column">
+                <Text size="2">{tag.text}</Text>
+                {tag.tooltip && (
+                  <DialogTooltipText>{tag.tooltip}</DialogTooltipText>
+                )}
+              </Flex>
+            );
+
+            if (tag.editable) {
+              if (tag.type === InfoTagType.ARTIST) {
+                content = (
+                  <Flex gap="1" align="start" direction="column">
+                    <InfoTagTextField
+                      value={tag.text}
+                      onChange={(e) => {
+                        handleTagEdit(index, {
+                          text: e.target.value,
+                          rules: [
+                            {
+                              regex: pollDescriptionArtRegex,
+                              group: 2,
+                              wrapper: (value) => `Art by ${value}`,
+                            },
+                          ],
+                        });
+                      }}
+                      placeholder="Artist name"
+                    />
+                    <DialogTooltipText>
+                      {tag.tooltip ?? "Art by"}
+                    </DialogTooltipText>
+                  </Flex>
+                );
+              } else if (tag.type === InfoTagType.AUTHOR) {
+                content = (
+                  <Flex gap="1" align="start" direction="column">
+                    <Flex gap="1" align="start" direction="row">
+                      <InfoTagTextField
+                        value={tag.text.replace(/^@/, "")}
+                        onChange={(e) => {
+                          handleTagEdit(index, {
+                            text: e.target.value,
+                            rules: [
+                              {
+                                regex: pollDescriptionAuthorshipRegex,
+                                group: 2,
+                                wrapper: (value) =>
+                                  `Submitted by @${value} (<@0>)`,
+                              },
+                            ],
+                          });
+                        }}
+                        placeholder="Anonymous"
+                      />
+                      <InfoTagTextField
+                        value={tag.additionalContent?.authorId}
+                        onChange={(e) => {
+                          handleTagEdit(index, {
+                            additionalContent: {
+                              key: "authorId",
+                              value: e.target.value,
+                            },
+                            rules: [
+                              {
+                                regex: pollDescriptionAuthorshipRegex,
+                                group: 3,
+                                wrapper: (value) =>
+                                  `Submitted by @username (<@${value}>)`,
+                              },
+                            ],
+                          });
+                        }}
+                        placeholder="User ID"
+                      />
+                    </Flex>
+                    <DialogTooltipText>
+                      {tag.tooltip ?? "Submitted by"}
+                    </DialogTooltipText>
+                  </Flex>
+                );
+              }
+            }
 
             return (
-              <Flex gap="1" align="center" key={tag.text}>
+              <Flex gap="1" align="center" key={tag.id}>
                 {styledIcon}
-                <Flex gap="1" align="start" direction="column">
-                  <Text size="2">{tag.text}</Text>
-                  {tag.tooltip && (
-                    <DialogTooltipText>{tag.tooltip}</DialogTooltipText>
-                  )}
-                </Flex>
+                {content}
               </Flex>
             );
           })}
+
+          {setTags && <InfoTagAddDropdown tags={tags} setTags={setTags} />}
         </Flex>
       </Dialog.Content>
     </Dialog.Root>
   );
 }
 
-function InfoTagAddDropdown() {
-  const [openArtist, setOpenArtist] = React.useState(false);
-  const [openAuthor, setOpenAuthor] = React.useState(false);
+function InfoTagAddDropdown({
+  tags,
+  setTags,
+}: {
+  tags: InfoTag[];
+  setTags: Dispatch<React.SetStateAction<InfoTag[]>>;
+}) {
+  function handleAddTag(tag: InfoTag) {
+    setTags([...tags, tag]);
+  }
 
   return (
     <>
       <DropdownMenu.Root>
         <InfoTagAddDropdownTrigger>
-          <Button variant="ghost">
+          <Button variant="surface" color="gray">
             <HeaderText icon={<Plus />}>Add info</HeaderText>
           </Button>
         </InfoTagAddDropdownTrigger>
         <DropdownMenu.Content size="1" align="start" variant="soft">
-          <DropdownMenu.Item onClick={() => setOpenArtist(true)}>
+          <DropdownMenu.Item
+            onClick={() => {
+              handleAddTag({
+                text: "",
+                type: InfoTagType.ARTIST,
+                tooltip: "Art by",
+                editable: true,
+                id: `artist-${tags
+                  .filter((tag) => tag.id.startsWith("artist"))
+                  .length.toString()}`,
+              });
+            }}
+          >
             <Palette size="18" />
             Artist
           </DropdownMenu.Item>
-          <DropdownMenu.Item onClick={() => setOpenAuthor(true)}>
-            <PencilLine size="18" />
-            Poll Author
-          </DropdownMenu.Item>
+          {!tags.some((tag) => tag.type === InfoTagType.AUTHOR) && (
+            <DropdownMenu.Item
+              onClick={() => {
+                handleAddTag({
+                  text: "",
+                  type: InfoTagType.AUTHOR,
+                  tooltip: "Submitted by",
+                  editable: true,
+                  id: `author-${tags
+                    .filter((tag) => tag.id.startsWith("author"))
+                    .length.toString()}`,
+                });
+              }}
+            >
+              <PencilLine size="18" />
+              Poll Author
+            </DropdownMenu.Item>
+          )}
         </DropdownMenu.Content>
       </DropdownMenu.Root>
     </>
@@ -622,6 +902,7 @@ export function PollCardHeaderEditable({
 }) {
   const isMobile = useIsMobile();
   const { tags, tagsOrder } = useTagContext();
+  const [description, setDescription] = useState(poll.description);
 
   const totalVotes = votes?.reduce((acc, vote) => acc + vote, 0);
 
@@ -666,7 +947,13 @@ export function PollCardHeaderEditable({
       )}
 
       <ScrollFlex gap="3" align="center" justify="between">
-        <InfoTagsEditable poll={poll} tag={tag} totalVotes={totalVotes} />
+        <InfoTagsEditable
+          poll={poll}
+          tag={tag}
+          totalVotes={totalVotes}
+          description={description}
+          setDescription={setDescription}
+        />
 
         {poll.published && (
           <HeaderTextWithLink

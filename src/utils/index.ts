@@ -104,13 +104,21 @@ export function createCustomAvatarUrl(
 }
 
 export const pollDescriptionAuthorshipRegex =
-	/\n?\s*(\w+)\s+by\s+@?(\w+)\s+\(<@\d+>\)/;
+	/\n?\s*(\w+)\s+by\s+@?(\w+)\s+\(<@(\d+)>\)/;
 
 export const pollDescriptionAnonymousAuthorshipRegex =
 	/\n?\s*(\w+)\s+by Anonymous/;
 
 export const pollDescriptionArtRegex =
 	/((?:[\w]+ )*?[Aa]rt) by (((\w\.?\w*)[ &-]*)+)\.?/g;
+
+export function filterDescriptionWithRegex(description?: string | null) {
+	return description
+		?.replace(pollDescriptionAuthorshipRegex, "")
+		.replace(pollDescriptionAnonymousAuthorshipRegex, "")
+		.replace(pollDescriptionArtRegex, "")
+		.trim();
+}
 
 export enum PollSearchType {
 	ID = "id",

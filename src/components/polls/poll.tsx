@@ -19,6 +19,7 @@ import {
 import { useIsMobile } from "@/utils/isMobile";
 import {
   cleanUrlSafeString,
+  filterDescriptionWithRegex,
   pollDescriptionAnonymousAuthorshipRegex,
   pollDescriptionArtRegex,
   pollDescriptionAuthorshipRegex,
@@ -26,7 +27,7 @@ import {
   trimRunningStringMultiLine,
   trimRunningStringSingleLine,
 } from "@/utils";
-import { AutoGrowingTextAreaStyled } from "./textAreaAutoGrow";
+import { AutoGrowingTextAreaStyled } from "./autoGrowingRadixTextArea";
 import { Image, ImageOff } from "lucide-react";
 
 const CardBox = styled(Flex)`
@@ -107,14 +108,6 @@ const DescriptionEditable = styled(AutoGrowingTextAreaStyled)`
     letter-spacing: 0.02rem;
   }
 `;
-
-function filterDescriptionWithRegex(description?: string | null) {
-  return description
-    ?.replace(pollDescriptionAuthorshipRegex, "")
-    .replace(pollDescriptionAnonymousAuthorshipRegex, "")
-    .replace(pollDescriptionArtRegex, "")
-    .trim();
-}
 
 function Description({
   text,
