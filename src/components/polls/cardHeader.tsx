@@ -32,6 +32,7 @@ import {
   Hash,
   Plus,
   Pencil,
+  X,
 } from "lucide-react";
 import {
   cloneElement,
@@ -39,13 +40,13 @@ import {
   type Dispatch,
   isValidElement,
   type ReactElement,
-  useEffect,
   useState,
 } from "react";
 import styled from "styled-components";
 import { TitleText } from "../titleText";
 import { useIsMobile } from "@/utils/isMobile";
 import { useTagContext } from "@/contexts/TagContext";
+import { Trigger } from "@radix-ui/themes/components/alert-dialog";
 
 const Header = styled(Flex)`
   flex-wrap: wrap;
@@ -137,7 +138,24 @@ const InfoTagTextField = styled(TextField.Root).attrs({
   size: "1",
 })`
   border: none;
+  height: auto;
   font-size: var(--font-size-2);
+`;
+
+const InfoTagTextFieldTooltip = styled(InfoTagTextField)`
+  font-size: var(--font-size-1);
+
+  > input,
+  div {
+    font-variation-settings: "slnt" -10;
+  }
+`;
+
+const InfoTagDeleteButton = styled(Button).attrs({
+  variant: "ghost",
+})`
+  padding: var(--button-ghost-padding-y);
+  margin-left: 0;
 `;
 
 function HeaderText({
@@ -218,7 +236,7 @@ function PollAuthorshipData(description: string | null): InfoTag[] {
         authorId: authorId,
       },
       type: InfoTagType.AUTHOR,
-      tooltip: `${descriptor} by`,
+      tooltip: `${descriptor}`,
       editable: true,
       id: "author",
     },
@@ -473,10 +491,10 @@ function InfoTagsEditable({
     const additionalInfo = [];
     for (const tag of editableTags) {
       if (tag.type === InfoTagType.ARTIST) {
-        additionalInfo.push(`${tag.tooltip} ${tag.text}.`);
+        additionalInfo.push(`${tag.tooltip?.trim()} by ${tag.text}.`);
       } else if (tag.type === InfoTagType.AUTHOR) {
         additionalInfo.push(
-          `${tag.tooltip} @${tag.text} (<@${
+          `${tag.tooltip?.trim()} by @${tag.text} (<@${
             tag.additionalContent?.authorId || 0
           }>).`
         );
@@ -586,6 +604,8 @@ function InfoTagDialog({
       tooltip,
       additionalContent,
       rules = [],
+      allowTrim = false,
+      allowEmpty = true,
     }: {
       text?: string;
       tooltip?: string;
@@ -594,12 +614,17 @@ function InfoTagDialog({
         value: string;
       };
       rules?: RegexGroupRule[];
+      allowTrim?: boolean;
+      allowEmpty?: boolean;
     }
   ) => {
-    const newValue = text || tooltip || additionalContent?.value || "";
+    let newValue = text || tooltip || additionalContent?.value || "";
+    if (allowTrim) {
+      newValue = newValue.trim();
+    }
 
     const isValid =
-      rules.length > 0 && newValue !== ""
+      rules.length > 0 && (!allowEmpty || newValue !== "")
         ? rules.some(({ regex, group, wrapper }) => {
             regex.lastIndex = 0;
             const match = regex.exec(wrapper ? wrapper(newValue) : newValue);
@@ -679,9 +704,26 @@ function InfoTagDialog({
                       }}
                       placeholder="Artist name"
                     />
-                    <DialogTooltipText>
-                      {tag.tooltip ?? "Art by"}
-                    </DialogTooltipText>
+                    <InfoTagTextFieldTooltip
+                      value={tag.tooltip}
+                      onChange={(e) => {
+                        handleTagEdit(index, {
+                          tooltip: e.target.value,
+                          rules: [
+                            {
+                              regex: pollDescriptionArtRegex,
+                              group: 1,
+                              wrapper: (value) => `${value} by Artist`,
+                            },
+                          ],
+                          allowTrim: true,
+                          allowEmpty: false,
+                        });
+                      }}
+                      placeholder="Art by"
+                    >
+                      <TextField.Slot side="right">by</TextField.Slot>
+                    </InfoTagTextFieldTooltip>
                   </Flex>
                 );
               } else if (tag.type === InfoTagType.AUTHOR) {
@@ -726,9 +768,25 @@ function InfoTagDialog({
                         placeholder="User ID"
                       />
                     </Flex>
-                    <DialogTooltipText>
-                      {tag.tooltip ?? "Submitted by"}
-                    </DialogTooltipText>
+                    <InfoTagTextFieldTooltip
+                      value={tag.tooltip}
+                      onChange={(e) => {
+                        handleTagEdit(index, {
+                          tooltip: e.target.value,
+                          rules: [
+                            {
+                              regex: pollDescriptionAuthorshipRegex,
+                              group: 1,
+                              wrapper: (value) =>
+                                `${value} by @username (<@0>)`,
+                            },
+                          ],
+                        });
+                      }}
+                      placeholder="Submitted"
+                    >
+                      <TextField.Slot side="right">by</TextField.Slot>
+                    </InfoTagTextFieldTooltip>
                   </Flex>
                 );
               }
@@ -738,6 +796,15 @@ function InfoTagDialog({
               <Flex gap="1" align="center" key={tag.id}>
                 {styledIcon}
                 {content}
+                {editable && (
+                  <InfoTagDeleteButton
+                    onClick={() =>
+                      setTags?.(tags.filter((_, i) => i !== index))
+                    }
+                  >
+                    <X />
+                  </InfoTagDeleteButton>
+                )}
               </Flex>
             );
           })}
@@ -774,7 +841,7 @@ function InfoTagAddDropdown({
               handleAddTag({
                 text: "",
                 type: InfoTagType.ARTIST,
-                tooltip: "Art by",
+                tooltip: "Art",
                 editable: true,
                 id: `artist-${tags
                   .filter((tag) => tag.id.startsWith("artist"))
@@ -791,7 +858,7 @@ function InfoTagAddDropdown({
                 handleAddTag({
                   text: "",
                   type: InfoTagType.AUTHOR,
-                  tooltip: "Submitted by",
+                  tooltip: "Submitted",
                   editable: true,
                   id: `author-${tags
                     .filter((tag) => tag.id.startsWith("author"))
