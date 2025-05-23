@@ -82,7 +82,7 @@ const SelectTriggerPill = styled(Select.Trigger).attrs({
     const { backgroundColor, textColor } = getTagColors($tag);
     return `
       background-color: ${backgroundColor ?? "var(--gray-6)"};
-      color: ${textColor ?? "#fff"};
+      color: ${textColor ?? "inherit"};
     `;
   }}
 `;

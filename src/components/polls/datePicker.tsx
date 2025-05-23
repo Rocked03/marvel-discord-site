@@ -107,6 +107,7 @@ const StyledDatePicker = styled(CustomDatePicker)`
   background-color: var(--gray-6);
   border-radius: 0.5rem;
   border: none;
+  color: inherit;
   font-family: inherit;
   height: 100%;
   padding: 0.25rem;

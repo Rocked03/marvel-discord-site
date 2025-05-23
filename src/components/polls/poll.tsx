@@ -109,6 +109,11 @@ const DescriptionEditable = styled(AutoGrowingTextAreaStyled)`
   }
 `;
 
+const ImageUrlInput = styled(TextField.Root)`
+  min-width: 50%;
+  background-color: var(--gray-a2);
+`;
+
 function Description({
   text,
   ...props
@@ -279,12 +284,11 @@ export function PollCardEditable({
         </ImageContainer>
       )}
 
-      <TextField.Root
+      <ImageUrlInput
         type="text"
         placeholder="Image URL"
         size="2"
         value={imageUrl}
-        style={{ minWidth: "50%" }}
         onChange={handleImageUrlChange}
         onBlur={(e) => {
           setImageUrl(e.target.value.trim());
@@ -293,7 +297,7 @@ export function PollCardEditable({
         <TextField.Slot>
           {!imageError ? <Image /> : <ImageOff />}
         </TextField.Slot>
-      </TextField.Root>
+      </ImageUrlInput>
     </CardBox>
   );
 }
