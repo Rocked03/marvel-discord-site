@@ -46,7 +46,7 @@ import styled from "styled-components";
 import { TitleText } from "../titleText";
 import { useIsMobile } from "@/utils/isMobile";
 import { useTagContext } from "@/contexts/TagContext";
-import { Trigger } from "@radix-ui/themes/components/alert-dialog";
+import DatePickerComponent from "./datePicker";
 
 const Header = styled(Flex)`
   flex-wrap: wrap;
@@ -97,6 +97,7 @@ const ScrollFlex = styled(Flex)`
   flex-wrap: nowrap;
   flex: 1;
   overflow-x: auto;
+  overflow: visible;
   white-space: nowrap;
 `;
 
@@ -236,7 +237,7 @@ function PollAuthorshipData(description: string | null): InfoTag[] {
         authorId: authorId,
       },
       type: InfoTagType.AUTHOR,
-      tooltip: `${descriptor}`,
+      tooltip: `${descriptor} by`,
       editable: true,
       id: "author",
     },
@@ -262,6 +263,7 @@ interface InfoTag {
   text: string;
   additionalContent?: Record<string, string>;
   type: InfoTagType;
+  node?: React.ReactNode;
   tooltip?: string;
   mobileOnly?: boolean;
   editable?: boolean;
@@ -411,7 +413,9 @@ function InfoTagsEditable({
   setDescription: (description: string) => void;
 }) {
   const isMobile = useIsMobile();
-  const time = poll.time ? new Date(poll.time) : undefined;
+  const [dateTime, setDateTime] = useState<Date | null>(
+    poll.time ? new Date(poll.time) : null
+  );
 
   const tags: InfoTag[] = [
     ...(tag
@@ -427,22 +431,16 @@ function InfoTagsEditable({
         ]
       : []),
     {
-      text: time
-        ? isMobile
-          ? time.toLocaleDateString("en-US", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "2-digit",
-            })
-          : time.toLocaleDateString("en-US", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })
+      text: dateTime
+        ? dateTime.toLocaleDateString("en-US", {
+            day: isMobile ? "2-digit" : "numeric",
+            month: isMobile ? "2-digit" : "long",
+            year: isMobile ? "2-digit" : "numeric",
+          })
         : "No date set.",
       type: InfoTagType.DATE,
-      tooltip: time
-        ? time.toLocaleDateString("en-US", {
+      tooltip: dateTime
+        ? dateTime.toLocaleDateString("en-US", {
             day: "numeric",
             month: "long",
             year: "numeric",
@@ -452,6 +450,14 @@ function InfoTagsEditable({
           })
         : "No date set.",
       editable: false,
+      node: !poll.published ? (
+        <DatePickerComponent
+          selected={dateTime ?? null}
+          onChange={(date) => {
+            setDateTime(date);
+          }}
+        />
+      ) : undefined,
       id: "date",
     },
     ...(totalVotes
@@ -475,9 +481,7 @@ function InfoTagsEditable({
     },
   ];
 
-  const [editableTags, setEditableTags] = useState<InfoTag[]>(
-    tags.filter((tag) => tag.editable)
-  );
+  const [editableTags, setEditableTags] = useState<InfoTag[]>(tags);
 
   const hasExistingEditableTags = editableTags.length > 0;
 
@@ -491,10 +495,12 @@ function InfoTagsEditable({
     const additionalInfo = [];
     for (const tag of editableTags) {
       if (tag.type === InfoTagType.ARTIST) {
-        additionalInfo.push(`${tag.tooltip?.trim()} by ${tag.text}.`);
+        additionalInfo.push(
+          `${tag.tooltip?.replace(/\s*by\s*$/, "").trim()} by ${tag.text}.`
+        );
       } else if (tag.type === InfoTagType.AUTHOR) {
         additionalInfo.push(
-          `${tag.tooltip?.trim()} by @${tag.text} (<@${
+          `${tag.tooltip?.replace(/\s*by\s*$/, "").trim()} by @${tag.text} (<@${
             tag.additionalContent?.authorId || 0
           }>).`
         );
@@ -509,26 +515,26 @@ function InfoTagsEditable({
 
   return (
     <>
-      <Flex gap="3" align="center" justify="between">
+      <Flex gap="3" align="center" justify="between" overflow="visible">
         {!isMobile &&
           tags.map((tag) => {
             const component =
               tag.mobileOnly !== true &&
               (tag.tooltip ? (
-                <Tooltip key={tag.text} content={tag.tooltip}>
+                <Tooltip key={tag.id} content={tag.tooltip}>
                   <HeaderText icon={InfoTagIconMap[tag.type]}>
-                    {tag.text}
+                    {tag.node ?? tag.text}
                   </HeaderText>
                 </Tooltip>
               ) : (
-                <HeaderText key={tag.text} icon={InfoTagIconMap[tag.type]}>
-                  {tag.text}
+                <HeaderText key={tag.id} icon={InfoTagIconMap[tag.type]}>
+                  {tag.node ?? tag.text}
                 </HeaderText>
               ));
 
             return tag.editable ? (
               <InfoTagDialog
-                key={tag.text}
+                key={tag.id}
                 tags={editableTags}
                 setTags={setEditableTags}
                 mobile={isMobile}
@@ -664,7 +670,7 @@ function InfoTagDialog({
         <Flex gap="4" direction="column" align="start" justify="start">
           {sortedTags.map((tag, index) => {
             if (tag.mobileOnly && !mobile) return null;
-            if (editable && !tag.editable) return null;
+            if (!mobile && editable && !tag.editable) return null;
 
             const icon = InfoTagIconMap[tag.type];
             const styledIcon = isValidElement(icon)
@@ -677,7 +683,7 @@ function InfoTagDialog({
 
             let content = (
               <Flex gap="1" align="start" direction="column">
-                <Text size="2">{tag.text}</Text>
+                <Text size="2">{tag.node ?? tag.text}</Text>
                 {tag.tooltip && (
                   <DialogTooltipText>{tag.tooltip}</DialogTooltipText>
                 )}
@@ -705,10 +711,14 @@ function InfoTagDialog({
                       placeholder="Artist name"
                     />
                     <InfoTagTextFieldTooltip
-                      value={tag.tooltip}
+                      value={tag.tooltip?.replace(/\s*by\s*$/, "")}
                       onChange={(e) => {
+                        const trimmedValue = e.target.value.replace(
+                          /\s*by\s*$/,
+                          ""
+                        );
                         handleTagEdit(index, {
-                          tooltip: e.target.value,
+                          tooltip: trimmedValue,
                           rules: [
                             {
                               regex: pollDescriptionArtRegex,
@@ -769,10 +779,14 @@ function InfoTagDialog({
                       />
                     </Flex>
                     <InfoTagTextFieldTooltip
-                      value={tag.tooltip}
+                      value={tag.tooltip?.replace(/\s*by\s*$/, "")}
                       onChange={(e) => {
+                        const trimmedValue = e.target.value.replace(
+                          /\s*by\s*$/,
+                          ""
+                        );
                         handleTagEdit(index, {
-                          tooltip: e.target.value,
+                          tooltip: trimmedValue,
                           rules: [
                             {
                               regex: pollDescriptionAuthorshipRegex,
@@ -796,7 +810,7 @@ function InfoTagDialog({
               <Flex gap="1" align="center" key={tag.id}>
                 {styledIcon}
                 {content}
-                {editable && (
+                {editable && tag.editable && (
                   <InfoTagDeleteButton
                     onClick={() =>
                       setTags?.(tags.filter((_, i) => i !== index))

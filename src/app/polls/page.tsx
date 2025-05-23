@@ -3,10 +3,7 @@
 import { getGuilds } from "@/api/polls/guilds";
 import { getPollById, getPolls } from "@/api/polls/polls";
 import { getUserVotes } from "@/api/polls/votes";
-import {
-  PollCardEditable,
-  PollCardSkeleton,
-} from "@/components/polls/poll";
+import { PollCardEditable, PollCardSkeleton } from "@/components/polls/poll";
 import ScrollToTopButton from "@/components/polls/scrollToTop";
 import { PollsSearch } from "@/components/polls/search";
 import { PollSearchType, updateUrlParameters } from "@/utils";
@@ -320,7 +317,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
                     published: false,
                     active: false,
                     choices: [],
-                    time: new Date(),
+                    time: null,
                     num: null,
                     message_id: null,
                     crosspost_message_ids: [],
