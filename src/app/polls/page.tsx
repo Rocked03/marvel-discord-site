@@ -336,7 +336,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
                     poll={poll}
                     tag={tags[Number(poll.tag)]}
                     guild={guilds[poll.guild_id.toString()]}
-                    editable
+                    // editable
                   />
                 ))}
               </PollCardContainer>

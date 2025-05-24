@@ -63,7 +63,9 @@ const ChoiceContainerStyle = styled(Box)`
   width: 100%;
 `;
 
-const ChoiceContainerButton = styled.button`
+const ChoiceContainerButton = styled.button.attrs({
+  type: "button",
+})`
   align-items: center;
   background-color: transparent;
   border: none;
@@ -180,113 +182,61 @@ const ShowVotesButtonStyle = styled(Button).attrs({
   margin-inline: 0rem;
 `;
 
-function ChoiceContainer({
-  index,
-  tag,
-  choice,
-  userVote,
-  poll,
-  percentageVotes,
-  onClick,
-  showVotes,
-}: {
-  index: number;
-  tag?: Tag;
+type ChoiceContainerProps = {
   choice: string;
-  userVote?: number | undefined;
-  poll: Poll;
-  percentageVotes: number[];
-  onClick: () => void;
-  showVotes?: boolean;
-}) {
-  const isMobile = useIsMobile();
-
-  function relativePercentage(percentage: number) {
-    return (percentage / Math.max(...percentageVotes)) * 100;
-  }
-
-  return (
-    <ChoiceContainerButton onClick={onClick}>
-      <ChoiceContainerInner>
-        <ChoiceLabel size="4">{ChoiceLabelMap[index + 1]}</ChoiceLabel>
-
-        <Flex gap="1" direction="column" width="100%">
-          <Flex gap="1" width="100%" align="end">
-            <ChoiceText size={isMobile ? "2" : "3"}>
-              {choice}
-              <ChoiceCheck
-                size="20"
-                $isChecked={userVote !== undefined && userVote === index}
-              />
-            </ChoiceText>
-            <Spacer />
-            {showVotes && (
-              <Tooltip
-                content={`${poll.votes[index]} Vote${
-                  poll.votes[index] > 1 ? "s" : ""
-                }`}
-              >
-                <PercentLabel size="1">
-                  {percentageVotes[index].toFixed(0)}%
-                </PercentLabel>
-              </Tooltip>
-            )}
-          </Flex>
-
-          <BarContainer>
-            <BarLine
-              $percentage={
-                showVotes ? relativePercentage(percentageVotes[index]) : 0
-              }
-              $color={tag?.colour ? intToColorHex(tag.colour) : undefined}
-              $isChecked={userVote !== undefined && userVote === index}
-            />
-          </BarContainer>
-        </Flex>
-      </ChoiceContainerInner>
-    </ChoiceContainerButton>
-  );
-}
-
-function ChoiceContainerEditable({
-  index,
-  tag,
-  choiceText = "",
-  setChoiceText,
-  poll,
-  percentageVotes = [],
-  onDelete,
-  enticer = false,
-}: {
-  index: number;
-  tag?: Tag;
-  choiceText: string;
-  setChoiceText: (value: string) => void;
-  poll: Poll;
-  percentageVotes?: number[];
-  onDelete?: () => void;
+  editable?: boolean;
   enticer?: boolean;
-}) {
+  index: number;
+  onDelete?: () => void;
+  onVote?: () => void;
+  percentageVotes?: number[];
+  poll: Poll;
+  setChoice?: (value: string) => void;
+  showVotes?: boolean;
+  tag?: Tag;
+  userVote?: number;
+};
+
+export function ChoiceContainer({
+  choice,
+  editable = false,
+  enticer = false,
+  index,
+  onDelete,
+  percentageVotes = [],
+  poll,
+  setChoice,
+  showVotes = false,
+  tag,
+  userVote,
+}: ChoiceContainerProps) {
   const isMobile = useIsMobile();
 
-  function relativePercentage(percentage: number) {
-    return percentage ? (percentage / Math.max(...percentageVotes)) * 100 : 0;
-  }
+  const relativePercentage = (percentage: number) =>
+    percentage ? (percentage / Math.max(...percentageVotes)) * 100 : 0;
 
-  function handleChoiceTextChange(
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) {
-    setChoiceText(trimRunningStringSingleLine(event.target.value));
-  }
+  const tagColor = tag?.colour ? intToColorHex(tag.colour) : undefined;
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setChoice?.(trimRunningStringSingleLine(e.target.value));
+  };
 
   const canDelete =
-    choiceText.length === 0 && poll.choices.length > 1 && !poll.published;
+    editable &&
+    choice.length === 0 &&
+    poll.choices.length > 1 &&
+    !poll.published;
 
   return (
     <ChoiceContainerInner>
-      <ChoiceLabelButton $isDisabled={!canDelete || enticer} onClick={onDelete}>
+      <ChoiceLabelButton
+        $isDisabled={!canDelete || enticer}
+        onClick={editable ? onDelete : undefined}
+      >
         <ChoiceLabel size="4" $canHover={canDelete && !enticer}>
-          {!canDelete ? (
+          {!editable ? (
+            ChoiceLabelMap[index + 1]
+          ) : !canDelete ? (
             ChoiceLabelMap[index + 1]
           ) : !enticer ? (
             <X strokeWidth={3} />
@@ -298,21 +248,29 @@ function ChoiceContainerEditable({
 
       <Flex gap="1" direction="column" width="100%">
         <Flex gap="1" width="100%" align="end">
-          <ChoiceTextEditable
-            $size={isMobile ? "2" : "3"}
-            onChange={handleChoiceTextChange}
-            onBlur={() => {
-              setChoiceText(choiceText.trim());
-            }}
-            placeholder={
-              !enticer
-                ? `Choice ${ChoiceLabelMap[index + 1]}`
-                : "Add new choice"
-            }
-            value={choiceText}
-          />
+          {editable ? (
+            <ChoiceTextEditable
+              $size={isMobile ? "2" : "3"}
+              onChange={handleChange}
+              onBlur={() => setChoice?.(choice.trim())}
+              placeholder={
+                !enticer
+                  ? `Choice ${ChoiceLabelMap[index + 1]}`
+                  : "Add new choice"
+              }
+              value={choice}
+            />
+          ) : (
+            <ChoiceText size={isMobile ? "2" : "3"}>
+              {choice}
+              <ChoiceCheck
+                size="20"
+                $isChecked={userVote !== undefined && userVote === index}
+              />
+            </ChoiceText>
+          )}
           <Spacer />
-          {percentageVotes.length > index && (
+          {(editable ? percentageVotes.length > index : showVotes) && (
             <Tooltip
               content={`${poll.votes[index]} Vote${
                 poll.votes[index] > 1 ? "s" : ""
@@ -327,9 +285,14 @@ function ChoiceContainerEditable({
 
         <BarContainer>
           <BarLine
-            $percentage={relativePercentage(percentageVotes[index])}
-            $color={tag?.colour ? intToColorHex(tag?.colour) : undefined}
-            $canHover={false}
+            $percentage={
+              editable || showVotes
+                ? relativePercentage(percentageVotes[index])
+                : 0
+            }
+            $color={tagColor}
+            $isChecked={!editable && userVote === index}
+            $canHover={!editable}
           />
         </BarContainer>
       </Flex>
@@ -417,42 +380,48 @@ function ShowVotesButtonSkeleton() {
     </ShowVotesButtonStyle>
   );
 }
+type ChoicesProps = {
+  editable?: boolean;
+  poll: Poll;
+  setUserVote?: (vote: number | undefined) => void;
+  setVotes?: (votes: Poll["votes"]) => void;
+  tag?: Tag;
+  userVote?: number;
+  votes?: Poll["votes"];
+};
 
 export function Choices({
+  editable = false,
   poll,
-  tag,
-  votes,
-  setVotes,
-  userVote,
   setUserVote = () => {},
-}: {
-  poll: Poll;
-  tag?: Tag;
-  votes: Poll["votes"];
-  setVotes: (votes: Poll["votes"]) => void;
-  userVote: number | undefined;
-  setUserVote?: (vote: number | undefined) => void;
-}) {
+  setVotes = () => {},
+  tag,
+  userVote,
+  votes = [],
+}: ChoicesProps) {
   const { user } = useAuthContext();
   const router = useRouter();
 
-  const [showVotes, setShowVotes] = useState(
-    (userVote !== undefined || !user) && poll.show_voting
+  const [choices, setChoices] = useState(() =>
+    editable && poll.choices.length < 8 && !poll.published
+      ? [...poll.choices, ""]
+      : poll.choices
   );
 
-  const inServer =
-    user?.guilds?.some((guild) => guild.id === poll.guild_id.toString()) ||
-    false;
+  const [showVotes, setShowVotes] = useState(
+    editable
+      ? poll.show_voting
+      : (userVote !== undefined || !user) && poll.show_voting
+  );
 
   const totalVotes = votes.reduce((acc, vote) => acc + vote, 0);
 
-  const percentageVotes = votes.map((vote) => {
-    if (totalVotes === 0) return 0;
-    return Number((vote / totalVotes) * 100);
-  });
+  const percentageVotes = votes.map((vote) =>
+    totalVotes === 0 ? 0 : Number((vote / totalVotes) * 100)
+  );
 
   function handleVote(index: number) {
-    if (!user) return;
+    if (!user || editable) return;
 
     let choice: number | undefined = index;
     if (userVote === index) {
@@ -472,111 +441,15 @@ export function Choices({
     setUserVote(choice);
   }
 
-  const choiceComponents = poll.choices.map((choice, index) => (
-    <ChoiceContainer
-      key={ChoiceLabelMap[index + 1]}
-      index={index}
-      onClick={() => handleVote(index)}
-      tag={tag}
-      choice={choice}
-      userVote={userVote}
-      poll={poll}
-      percentageVotes={percentageVotes}
-      showVotes={showVotes && poll.show_voting}
-    />
-  ));
-
-  return (
-    <Container>
-      <ChoiceContainerStyle>
-        {choiceComponents.map((choiceComponent, index) =>
-          user ? (
-            inServer ? (
-              choiceComponent
-            ) : (
-              <ChoiceAlert
-                key={ChoiceLabelMap[index + 1]}
-                trigger={choiceComponent}
-                title={"Not In Server"}
-                description={
-                  "You need to join the Marvel Discord server to be able to vote."
-                }
-                button={
-                  <Link href={"https://discord.gg/marvel"} target="_blank">
-                    <Button variant="ghost">Join Server</Button>
-                  </Link>
-                }
-              />
-            )
-          ) : (
-            <ChoiceAlert
-              key={ChoiceLabelMap[index + 1]}
-              trigger={choiceComponent}
-              title={"Sign In Required"}
-              description={
-                "You need to sign in with Discord to vote on this poll."
-              }
-              button={
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    router.push(`${config.apiUrlPolls}/auth`);
-                  }}
-                >
-                  Sign In
-                </Button>
-              }
-            />
-          )
-        )}
-      </ChoiceContainerStyle>
-      {user && (
-        <ShowVotesButton
-          poll={poll}
-          showVotes={showVotes}
-          setShowVotes={setShowVotes}
-        />
-      )}
-    </Container>
-  );
-}
-
-export function ChoicesEditable({
-  poll,
-  tag,
-  votes,
-}: {
-  poll: Poll;
-  tag?: Tag;
-  votes?: Poll["votes"];
-}) {
-  const [choices, setChoices] = useState(
-    poll.choices.length < 8 && !poll.published
-      ? [...poll.choices, ""]
-      : poll.choices
-  );
-
-  const [showVotes, setShowVotes] = useState(poll.show_voting);
-
-  const totalVotes = votes
-    ? votes.reduce((acc, vote) => acc + vote, 0)
-    : undefined;
-
-  const percentageVotes =
-    votes && totalVotes
-      ? votes.map((vote) => {
-          if (totalVotes === 0) return 0;
-          return Number((vote / totalVotes) * 100);
-        })
-      : [];
-
   function handleChoiceTextChange(index: number, value: string) {
+    if (!editable) return;
     const updatedChoices = [...choices];
     updatedChoices[index] = value;
     handleSetChoices(updatedChoices);
   }
 
   function handleChoiceDelete(index: number) {
+    if (!editable) return;
     const updatedChoices = [...choices];
     updatedChoices.splice(index, 1);
     handleSetChoices(updatedChoices);
@@ -600,19 +473,82 @@ export function ChoicesEditable({
     setChoices(newChoices);
   }
 
-  const choiceComponents = choices.map((choice, index) => (
-    <ChoiceContainerEditable
-      key={ChoiceLabelMap[index + 1]}
-      index={index}
-      tag={tag}
-      choiceText={choice}
-      setChoiceText={(event) => handleChoiceTextChange(index, event)}
-      poll={poll}
-      percentageVotes={percentageVotes}
-      onDelete={() => handleChoiceDelete(index)}
-      enticer={index === choices.length - 1 && !poll.published}
-    />
-  ));
+  const choiceComponents = choices.map((choice, index) => {
+    const choiceElement = (
+      <ChoiceContainer
+        key={ChoiceLabelMap[index + 1]}
+        index={index}
+        tag={tag}
+        choice={choice}
+        setChoice={
+          editable ? (val) => handleChoiceTextChange(index, val) : undefined
+        }
+        poll={poll}
+        percentageVotes={percentageVotes}
+        onDelete={editable ? () => handleChoiceDelete(index) : undefined}
+        enticer={editable && index === choices.length - 1 && !poll.published}
+        editable={editable}
+        userVote={userVote}
+        showVotes={showVotes && poll.show_voting}
+      />
+    );
+
+    if (!editable) {
+      const choiceButton = (
+        <ChoiceContainerButton
+          onClick={() => handleVote(index)}
+          key={ChoiceLabelMap[index + 1]}
+        >
+          {choiceElement}
+        </ChoiceContainerButton>
+      );
+
+      if (!user) {
+        return (
+          <ChoiceAlert
+            key={ChoiceLabelMap[index + 1]}
+            trigger={choiceButton}
+            title="Sign In Required"
+            description="You need to sign in with Discord to vote on this poll."
+            button={
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  router.push(`${config.apiUrlPolls}/auth`);
+                }}
+              >
+                Sign In
+              </Button>
+            }
+          />
+        );
+      }
+
+      const inServer = user?.guilds?.some(
+        (guild) => guild.id === poll.guild_id.toString()
+      );
+
+      if (!inServer) {
+        return (
+          <ChoiceAlert
+            key={ChoiceLabelMap[index + 1]}
+            trigger={choiceButton}
+            title="Not In Server"
+            description="You need to join the Marvel Discord server to be able to vote."
+            button={
+              <Link href="https://discord.gg/marvel" target="_blank">
+                <Button variant="ghost">Join Server</Button>
+              </Link>
+            }
+          />
+        );
+      }
+
+      return choiceButton;
+    }
+
+    return choiceElement;
+  });
 
   return (
     <Container>
@@ -621,7 +557,7 @@ export function ChoicesEditable({
         poll={poll}
         showVotes={showVotes}
         setShowVotes={setShowVotes}
-        // editing={true}
+        editing={editable}
       />
     </Container>
   );

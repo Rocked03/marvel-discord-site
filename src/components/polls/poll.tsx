@@ -9,7 +9,7 @@ import {
   TextField,
 } from "@radix-ui/themes";
 import styled from "styled-components";
-import { Choices, ChoicesEditable, ChoicesSkeleton } from "./choices";
+import { Choices, ChoicesSkeleton } from "./choices";
 import { useState, type ComponentProps } from "react";
 import {
   PollCardHeader,
@@ -240,18 +240,15 @@ export function PollCard({
         )}
       </CardTitleBlock>
 
-      {editable ? (
-        <ChoicesEditable poll={poll} tag={currentTag} votes={votes} />
-      ) : (
-        <Choices
-          poll={poll}
-          tag={tag}
-          votes={votes}
-          setVotes={setVotes}
-          userVote={userVote}
-          setUserVote={setUserVote}
-        />
-      )}
+      <Choices
+        poll={poll}
+        tag={editable ? currentTag : tag}
+        votes={votes}
+        setVotes={editable ? undefined : setVotes}
+        userVote={editable ? undefined : userVote}
+        setUserVote={editable ? undefined : setUserVote}
+        editable={editable}
+      />
 
       {imageUrl && !imageError && (
         <ImageContainer>
@@ -281,7 +278,6 @@ export function PollCard({
     </CardBox>
   );
 }
-
 
 export function PollCardSkeleton() {
   const isMobile = useIsMobile();
