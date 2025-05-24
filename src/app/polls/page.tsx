@@ -113,6 +113,10 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
   const debouncedSearchValue = useDebounce(searchValue, 500);
 
   useEffect(() => {
+    setEditModeEnabled(false);
+  }, []);
+
+  useEffect(() => {
     const controller = new AbortController();
 
     let cancelled = false;
