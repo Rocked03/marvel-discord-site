@@ -18,7 +18,15 @@ import {
 } from "@radix-ui/themes";
 import styled, { css, keyframes } from "styled-components";
 import { useIsMobile } from "@/utils/isMobile";
-import { CircleCheckBig, Lock, Plus, X } from "lucide-react";
+import {
+  CircleCheckBig,
+  Eye,
+  EyeClosed,
+  Lock,
+  LockOpen,
+  Plus,
+  X,
+} from "lucide-react";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import config from "@/app/config/config";
 import { useRouter } from "next/navigation";
@@ -360,13 +368,15 @@ function ChoiceAlert({
 }
 
 function ShowVotesButton({
+  editing = false,
   poll,
-  showVotes,
   setShowVotes,
+  showVotes,
 }: {
+  editing?: boolean;
   poll: Poll;
-  showVotes: boolean;
   setShowVotes: Dispatch<SetStateAction<boolean>>;
+  showVotes: boolean;
 }) {
   const showVoting = poll?.show_voting;
 
@@ -378,11 +388,20 @@ function ShowVotesButton({
       disabled={!showVoting}
     >
       {showVotes ? (
-        "Hide Votes"
+        <>
+          Hide Votes
+          {editing ? <Lock size="0.8rem" /> : <Eye size="0.8rem" />}
+        </>
       ) : (
         <>
-          {!showVoting && <Lock size="0.8rem" />}
           Show Votes
+          {editing ? (
+            <LockOpen size="0.8rem" />
+          ) : !showVoting ? (
+            <Lock size="0.8rem" />
+          ) : (
+            <EyeClosed size="0.8rem" />
+          )}
         </>
       )}
     </ShowVotesButtonStyle>
@@ -537,6 +556,8 @@ export function ChoicesEditable({
       : poll.choices
   );
 
+  const [showVotes, setShowVotes] = useState(poll.show_voting);
+
   const totalVotes = votes
     ? votes.reduce((acc, vote) => acc + vote, 0)
     : undefined;
@@ -596,6 +617,12 @@ export function ChoicesEditable({
   return (
     <Container>
       <ChoiceContainerStyle>{choiceComponents}</ChoiceContainerStyle>
+      <ShowVotesButton
+        poll={poll}
+        showVotes={showVotes}
+        setShowVotes={setShowVotes}
+        // editing={true}
+      />
     </Container>
   );
 }
