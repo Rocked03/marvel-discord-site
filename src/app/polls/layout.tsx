@@ -1,7 +1,7 @@
 "use client";
 
 import { Navbar } from "@/components";
-import { Container, Portal, Theme } from "@radix-ui/themes";
+import { Container, Theme } from "@radix-ui/themes";
 import { ThemeProvider } from "next-themes";
 
 import styled from "styled-components";

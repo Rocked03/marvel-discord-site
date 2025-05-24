@@ -42,6 +42,8 @@ export const AutoGrowingRadixTextArea = forwardRef<
   );
 });
 
+AutoGrowingRadixTextArea.displayName = "AutoGrowingRadixTextArea";
+
 export const AutoGrowingTextAreaStyled = styled(AutoGrowingRadixTextArea)`
   background: transparent;
   border: none;

@@ -57,6 +57,8 @@ export const AutoGrowingRadixInput = forwardRef<HTMLInputElement, RootProps>(
   }
 );
 
+AutoGrowingRadixInput.displayName = "AutoGrowingRadixInput";
+
 const Wrapper = styled.div`
   position: relative;
   display: inline-block;

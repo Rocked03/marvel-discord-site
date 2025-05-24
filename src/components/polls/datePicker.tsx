@@ -3,7 +3,7 @@ import { forwardRef } from "react";
 import DatePicker, { type DatePickerProps } from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
-import styled, { createGlobalStyle } from "styled-components";
+import styled from "styled-components";
 
 const DatePickerContainer = styled.div`
   align-items: center;
@@ -16,6 +16,8 @@ const DatePickerContainer = styled.div`
 const CustomDatePicker = forwardRef<DatePicker, DatePickerProps>(
   (props, ref) => <DatePicker ref={ref} {...props} />
 );
+
+CustomDatePicker.displayName = "CustomDatePicker";
 
 const DatePickerWrapper = styled.div`
   align-items: center;
