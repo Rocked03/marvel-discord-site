@@ -82,6 +82,8 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const [editModeEnabled, setEditModeEnabled] = useState<boolean>(false);
+
   const [polls, setPolls] = useState<Poll[]>([]);
   const [meta, setMeta] = useState<Meta | null>(null);
   const { tags } = useTagContext();
@@ -305,38 +307,46 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
               loader={<LoadingText>Loading...</LoadingText>}
             >
               <PollCardContainer>
-                <PollCard
-                  poll={{
-                    id: 0,
-                    question: "",
-                    description: "",
-                    image: "",
-                    votes: [],
-                    tag: 0,
-                    guild_id: BigInt("281648235557421056"),
-                    published: false,
-                    active: false,
-                    choices: [],
-                    time: null,
-                    num: null,
-                    message_id: null,
-                    crosspost_message_ids: [],
-                    thread_question: "",
-                    show_question: true,
-                    show_options: true,
-                    show_voting: true,
-                    fallback: false,
-                  }}
-                  guild={guilds["281648235557421056"]}
-                  editable
-                />
+                {editModeEnabled && (
+                  <PollCard
+                    poll={{
+                      id: 0,
+                      question: "",
+                      description: "",
+                      image: "",
+                      votes: [],
+                      tag: 0,
+                      guild_id: BigInt("281648235557421056"),
+                      published: false,
+                      active: false,
+                      choices: [],
+                      time: null,
+                      num: null,
+                      message_id: null,
+                      crosspost_message_ids: [],
+                      thread_question: "",
+                      show_question: true,
+                      show_options: true,
+                      show_voting: true,
+                      fallback: false,
+                    }}
+                    guild={guilds["281648235557421056"]}
+                    editable
+                  />
+                )}
                 {polls.map((poll) => (
                   <PollCard
                     key={poll.id}
                     poll={poll}
                     tag={tags[Number(poll.tag)]}
                     guild={guilds[poll.guild_id.toString()]}
-                    // editable
+                    userVote={userVotes[poll.id]}
+                    setUserVote={(choice) =>
+                      !editModeEnabled
+                        ? setUserVote(poll.id, choice)
+                        : undefined
+                    }
+                    editable={editModeEnabled}
                   />
                 ))}
               </PollCardContainer>
