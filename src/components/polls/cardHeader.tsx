@@ -40,6 +40,8 @@ import {
   type Dispatch,
   isValidElement,
   type ReactElement,
+  useEffect,
+  useMemo,
   useState,
 } from "react";
 import styled from "styled-components";
@@ -159,14 +161,18 @@ const InfoTagDeleteButton = styled(Button).attrs({
   margin-left: 0;
 `;
 
-function HeaderText({
-  icon,
-  children,
-  ...props
-}: {
+type HeaderTextProps = {
   icon: React.ReactNode;
   children?: React.ReactNode;
-} & ComponentProps<typeof Text>) {
+  href?: string;
+} & ComponentProps<typeof Text>;
+
+export function HeaderText({
+  icon,
+  children,
+  href,
+  ...props
+}: HeaderTextProps) {
   const styledIcon = isValidElement(icon)
     ? cloneElement(icon as ReactElement<LucideProps>, {
         size: 16,
@@ -175,35 +181,24 @@ function HeaderText({
       })
     : icon;
 
-  return (
+  const content = (
     <Flex gap="1" align="center">
       {styledIcon}
       {children && <HeaderTextStyled {...props}>{children}</HeaderTextStyled>}
     </Flex>
   );
-}
 
-function HeaderTextWithLink({
-  icon,
-  children,
-  href,
-  ...props
-}: {
-  icon: React.ReactNode;
-  children: React.ReactNode;
-  href: string;
-} & ComponentProps<typeof Text>) {
-  return (
+  return href ? (
     <Link
       href={href}
       underline="hover"
       target="_blank"
       rel="noopener noreferrer"
     >
-      <HeaderText icon={icon} {...props}>
-        {children}
-      </HeaderText>
+      {content}
     </Link>
+  ) : (
+    content
   );
 }
 
@@ -297,140 +292,81 @@ const InfoTagTypeOrder: InfoTagType[] = [
   InfoTagType.ID,
 ];
 
-function InfoTags({
-  poll,
-  tag,
-  totalVotes,
-}: {
-  poll: Poll;
-  tag?: Tag;
-  totalVotes: number;
-}) {
-  const isMobile = useIsMobile();
-  const time = poll.time ? new Date(poll.time) : undefined;
+function renderTagContent(tag: InfoTag, isMobile: boolean) {
+  const shouldRender =
+    tag.mobileOnly !== true && (!isMobile || tag.type === InfoTagType.DATE);
 
-  const [dialogOpen, setDialogOpen] = useState(false);
+  if (!shouldRender) return null;
 
-  const tags: InfoTag[] = [
-    {
-      text: tag?.name ?? "No tag",
-      type: InfoTagType.TAG,
-      tooltip: poll.num ? `#${poll.num}` : undefined,
-      mobileOnly: true,
-      id: "tag",
-    },
-    {
-      text: time
-        ? isMobile
-          ? time.toLocaleDateString("en-US", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "2-digit",
-            })
-          : time.toLocaleDateString("en-US", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })
-        : "No date set.",
-      type: InfoTagType.DATE,
-      tooltip: time
-        ? time.toLocaleDateString("en-US", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-            minute: "2-digit",
-            hour: "2-digit",
-            timeZoneName: "short",
-          })
-        : "No date set.",
-      id: "date",
-    },
-    {
-      text: `${totalVotes} ${totalVotes === 1 ? "Vote" : "Votes"}`,
-      type: InfoTagType.VOTES,
-      id: "votes",
-    },
-    ...PollAuthorshipData(poll.description),
-    ...PollArtistData(poll.description),
-    {
-      text: poll.id.toString(),
-      type: InfoTagType.ID,
-      mobileOnly: true,
-      id: "pollId",
-    },
-  ];
+  const content = (
+    <HeaderText icon={InfoTagIconMap[tag.type]}>
+      {tag.node ?? tag.text}
+    </HeaderText>
+  );
 
-  if (!isMobile) {
-    return (
-      <Flex gap="3" align="center" justify="between">
-        {tags.map((tag) => {
-          return (
-            tag.mobileOnly !== true &&
-            (tag.tooltip ? (
-              <Tooltip key={tag.text} content={tag.tooltip}>
-                <HeaderText icon={InfoTagIconMap[tag.type]}>
-                  {tag.text}
-                </HeaderText>
-              </Tooltip>
-            ) : (
-              <HeaderText key={tag.text} icon={InfoTagIconMap[tag.type]}>
-                {tag.text}
-              </HeaderText>
-            ))
-          );
-        })}
-      </Flex>
-    );
-  }
-
-  return (
-    <>
-      <Button variant="ghost" onClick={() => setDialogOpen(true)}>
-        <HeaderText icon={<Info />} />
-      </Button>
-      <InfoTagDialog
-        tags={tags}
-        open={dialogOpen}
-        mobile={isMobile}
-        editable={false}
-      />
-    </>
+  return tag.tooltip ? (
+    <Tooltip key={tag.id} content={tag.tooltip}>
+      {content}
+    </Tooltip>
+  ) : (
+    <div key={tag.id}>{content}</div>
   );
 }
 
-function InfoTagsEditable({
+function renderEditableTag(
+  tag: InfoTag,
+  editableTags: InfoTag[],
+  setEditableTags: Dispatch<React.SetStateAction<InfoTag[]>>,
+  isMobile: boolean
+) {
+  const content = renderTagContent(tag, isMobile);
+
+  return tag.editable ? (
+    <InfoTagDialog
+      key={tag.id}
+      tags={editableTags}
+      setTags={setEditableTags}
+      mobile={isMobile}
+      editable={true}
+      trigger={
+        <InfoTagEditDialogTrigger>
+          <Button variant="ghost" color="gray">
+            {content}
+          </Button>
+        </InfoTagEditDialogTrigger>
+      }
+    />
+  ) : (
+    content
+  );
+}
+
+function InfoTags({
   poll,
   tag,
   totalVotes,
   description,
   setDescription,
+  editable = false,
 }: {
   poll: Poll;
   tag?: Tag;
   totalVotes?: number;
-  description: string | null;
-  setDescription: (description: string) => void;
+  description?: string | null;
+  setDescription?: (description: string) => void;
+  editable?: boolean;
 }) {
   const isMobile = useIsMobile();
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [dateTime, setDateTime] = useState<Date | null>(
     poll.time ? new Date(poll.time) : null
   );
 
-  const tags: InfoTag[] = [
-    ...(tag
-      ? [
-          {
-            text: tag.name,
-            type: InfoTagType.TAG,
-            tooltip: poll.num ? `#${poll.num}` : undefined,
-            mobileOnly: true,
-            editable: false,
-            id: "tag",
-          },
-        ]
-      : []),
-    {
+  const computedTags = useMemo(() => {
+    const dateTag: InfoTag = {
+      id: "date",
+      type: InfoTagType.DATE,
+      editable: false,
       text: dateTime
         ? dateTime.toLocaleDateString("en-US", {
             day: isMobile ? "2-digit" : "numeric",
@@ -438,7 +374,6 @@ function InfoTagsEditable({
             year: isMobile ? "2-digit" : "numeric",
           })
         : "No date set.",
-      type: InfoTagType.DATE,
       tooltip: dateTime
         ? dateTime.toLocaleDateString("en-US", {
             day: "numeric",
@@ -449,128 +384,134 @@ function InfoTagsEditable({
             timeZoneName: "short",
           })
         : "No date set.",
-      editable: false,
-      node: !poll.published ? (
-        <DatePickerComponent
-          selected={dateTime ?? null}
-          onChange={(date) => {
-            setDateTime(date);
-          }}
-        />
-      ) : undefined,
-      id: "date",
-    },
-    ...(totalVotes
-      ? [
-          {
-            text: `${totalVotes} ${totalVotes === 1 ? "Vote" : "Votes"}`,
-            type: InfoTagType.VOTES,
-            editable: false,
-            id: "votes",
-          },
-        ]
-      : []),
-    ...PollAuthorshipData(description),
-    ...PollArtistData(description),
-    {
-      text: poll.id.toString(),
-      type: InfoTagType.ID,
-      mobileOnly: true,
-      editable: false,
-      id: "pollId",
-    },
-  ];
+      node:
+        editable && !poll.published ? (
+          <DatePickerComponent
+            selected={dateTime}
+            onChange={(date) => setDateTime(date)}
+          />
+        ) : undefined,
+    };
 
-  const [editableTags, setEditableTags] = useState<InfoTag[]>(tags);
+    const base: InfoTag[] = [
+      {
+        id: "tag",
+        text: tag ? tag.name : "No tag",
+        type: InfoTagType.TAG,
+        tooltip: poll.num ? `#${poll.num}` : undefined,
+        mobileOnly: true,
+        editable: false,
+      },
+      dateTag,
+      ...(totalVotes !== undefined
+        ? [
+            {
+              id: "votes",
+              text: `${totalVotes} ${totalVotes === 1 ? "Vote" : "Votes"}`,
+              type: InfoTagType.VOTES,
+              editable: false,
+            },
+          ]
+        : []),
+      ...(description
+        ? [...PollAuthorshipData(description), ...PollArtistData(description)]
+        : []),
+      {
+        id: "pollId",
+        text: poll.id.toString(),
+        type: InfoTagType.ID,
+        mobileOnly: true,
+        editable: false,
+      },
+    ];
+
+    return base;
+  }, [tag, poll, totalVotes, description, dateTime, isMobile, editable]);
+
+  const [editableTags, setEditableTags] = useState<InfoTag[]>(computedTags);
+
+  useEffect(() => {
+    if (editable) {
+      setEditableTags(computedTags);
+    }
+  }, [computedTags, editable]);
 
   const hasExistingEditableTags = editableTags.length > 0;
 
   function onDialogOpenChange(open: boolean) {
-    if (open) {
-      return;
-    }
+    if (!open && description && setDescription) {
+      const filteredDescription = filterDescriptionWithRegex(description);
+      const additionalInfo: string[] = [];
 
-    const filteredDescription = filterDescriptionWithRegex(description);
-
-    const additionalInfo = [];
-    for (const tag of editableTags) {
-      if (tag.type === InfoTagType.ARTIST) {
-        additionalInfo.push(
-          `${tag.tooltip?.replace(/\s*by\s*$/, "").trim()} by ${tag.text}.`
-        );
-      } else if (tag.type === InfoTagType.AUTHOR) {
-        additionalInfo.push(
-          `${tag.tooltip?.replace(/\s*by\s*$/, "").trim()} by @${tag.text} (<@${
-            tag.additionalContent?.authorId || 0
-          }>).`
-        );
+      for (const tag of editableTags) {
+        if (tag.type === InfoTagType.ARTIST) {
+          additionalInfo.push(
+            `${tag.tooltip?.replace(/\s*by\s*$/, "").trim()} by ${tag.text}.`
+          );
+        } else if (tag.type === InfoTagType.AUTHOR) {
+          additionalInfo.push(
+            `${tag.tooltip?.replace(/\s*by\s*$/, "").trim()} by @${
+              tag.text
+            } (<@${tag.additionalContent?.authorId || 0}>).`
+          );
+        }
       }
-    }
 
-    const newDescription = filteredDescription
-      ? `${filteredDescription} ${additionalInfo.join(" ")}`
-      : additionalInfo.join(" ");
-    setDescription(newDescription);
+      const newDescription = filteredDescription
+        ? `${filteredDescription} ${additionalInfo.join(" ")}`
+        : additionalInfo.join(" ");
+
+      setDescription(newDescription);
+    }
+  }
+
+  if (!editable) {
+    if (!isMobile) {
+      return (
+        <Flex gap="3" align="center" justify="between">
+          {computedTags.map((tag) => renderTagContent(tag, isMobile))}
+        </Flex>
+      );
+    }
+    return (
+      <>
+        <Button variant="ghost" onClick={() => setDialogOpen(true)}>
+          <HeaderText icon={<Info />} />
+        </Button>
+        <InfoTagDialog
+          tags={computedTags}
+          open={dialogOpen}
+          mobile={isMobile}
+          editable={false}
+        />
+      </>
+    );
   }
 
   return (
-    <>
-      <Flex gap="3" align="center" justify="between" overflow="visible">
-        {tags.map((tag) => {
-          const component =
-            tag.mobileOnly !== true &&
-            (!isMobile || tag.type === InfoTagType.DATE) &&
-            (tag.tooltip ? (
-              <Tooltip key={tag.id} content={tag.tooltip}>
-                <HeaderText icon={InfoTagIconMap[tag.type]}>
-                  {tag.node ?? tag.text}
-                </HeaderText>
-              </Tooltip>
-            ) : (
-              <HeaderText key={tag.id} icon={InfoTagIconMap[tag.type]}>
-                {tag.node ?? tag.text}
-              </HeaderText>
-            ));
-
-          return tag.editable ? (
-            <InfoTagDialog
-              key={tag.id}
-              tags={editableTags}
-              setTags={setEditableTags}
-              mobile={isMobile}
-              editable={true}
-              trigger={
-                <InfoTagEditDialogTrigger>
-                  <Button variant="ghost" color="gray">
-                    {component}
-                  </Button>
-                </InfoTagEditDialogTrigger>
-              }
-            />
-          ) : (
-            component
-          );
-        })}
-        <InfoTagDialog
-          tags={editableTags}
-          setTags={setEditableTags}
-          mobile={isMobile}
-          editable={true}
-          trigger={
-            <InfoTagEditDialogTrigger>
-              <Button variant="ghost" color="gray">
-                {hasExistingEditableTags ? (
-                  <HeaderText icon={<Pencil />}>Edit info</HeaderText>
-                ) : (
-                  <HeaderText icon={<Plus />}>Add info</HeaderText>
-                )}
-              </Button>
-            </InfoTagEditDialogTrigger>
-          }
-          onDialogOpenChange={onDialogOpenChange}
-        />
-      </Flex>
-    </>
+    <Flex gap="3" align="center" justify="between" overflow="visible">
+      {editableTags.map((tag) =>
+        renderEditableTag(tag, editableTags, setEditableTags, isMobile)
+      )}
+      <InfoTagDialog
+        tags={editableTags}
+        setTags={setEditableTags}
+        mobile={isMobile}
+        editable={true}
+        trigger={
+          <InfoTagEditDialogTrigger>
+            <Button variant="ghost" color="gray">
+              {hasExistingEditableTags ? (
+                <HeaderText icon={<Pencil />}>Edit info</HeaderText>
+              ) : (
+                <HeaderText icon={<Plus />}>Add info</HeaderText>
+              )}
+            </Button>
+          </InfoTagEditDialogTrigger>
+        }
+        onDialogOpenChange={onDialogOpenChange}
+      />
+    </Flex>
   );
 }
 
@@ -893,100 +834,24 @@ function InfoTagAddDropdown({
 export function PollCardHeader({
   poll,
   tag,
+  setTag,
   guild,
   votes,
+  editable = false,
 }: {
   poll: Poll;
   tag?: Tag;
-  guild: PollInfo;
-  votes: Poll["votes"];
-}) {
-  const isMobile = useIsMobile();
-
-  const totalVotes = votes.reduce((acc, vote) => acc + vote, 0);
-
-  const time = poll.time ? new Date(poll.time) : undefined;
-  const isNew = time
-    ? time.getTime() > Date.now() - 1000 * 60 * 60 * 24 * 2 // 2 days
-    : false;
-
-  const pollLink = poll.message_id
-    ? `https://discord.com/channels/${guild.guild_id}/${
-        poll.fallback ? guild.fallback_channel_id : tag?.channel_id
-      }/${poll.message_id}`
-    : "";
-
-  return (
-    <Header align="center" justify="start" gap="3">
-      {isNew && <NewPill>NEW</NewPill>}
-
-      <TagPill $tag={tag}>
-        {tag?.name ?? "No tag"}
-        {poll.num && ` • #${poll.num}`}
-      </TagPill>
-
-      <ScrollFlex gap="3" align="center" justify="between">
-        <InfoTags poll={poll} tag={tag} totalVotes={totalVotes} />
-
-        {poll.published && (
-          <HeaderTextWithLink
-            icon={<ExternalLink />}
-            href={pollLink}
-            rel="noopener noreferrer"
-          >
-            {isMobile ? undefined : poll.thread_question ? (
-              poll.thread_question !== "def" ? (
-                <HoverCard.Root>
-                  <HoverCard.Trigger>
-                    <Text>Discuss in Discord</Text>
-                  </HoverCard.Trigger>
-                  <HoverCard.Content side="bottom" align="end">
-                    <Link
-                      href={pollLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      color="gray"
-                      underline="none"
-                    >
-                      <Flex gap="2" align="center">
-                        <Text size="2">{poll.thread_question}</Text>
-                        <MessagesSquare size="1.5rem" />
-                      </Flex>
-                    </Link>
-                  </HoverCard.Content>
-                </HoverCard.Root>
-              ) : (
-                "Discuss in Discord"
-              )
-            ) : (
-              "Open in Discord"
-            )}
-          </HeaderTextWithLink>
-        )}
-      </ScrollFlex>
-    </Header>
-  );
-}
-
-export function PollCardHeaderEditable({
-  poll,
-  tag,
-  setTag: setCurrentTag,
-  guild,
-  votes,
-}: {
-  poll: Poll;
-  tag?: Tag;
-  setTag: (tag: Tag) => void;
+  setTag?: (tag: Tag) => void;
   guild: PollInfo;
   votes?: Poll["votes"];
+  editable?: boolean;
 }) {
   const isMobile = useIsMobile();
-  const { tags, tagsOrder } = useTagContext();
-  const [description, setDescription] = useState(poll.description);
-
   const totalVotes = votes?.reduce((acc, vote) => acc + vote, 0);
-
+  const time = poll.time ? new Date(poll.time) : undefined;
+  const isNew = time
+    ? time.getTime() > Date.now() - 1000 * 60 * 60 * 24 * 2
+    : false;
   const pollLink =
     poll.message_id && poll.published && tag
       ? `https://discord.com/channels/${guild.guild_id}/${
@@ -994,15 +859,18 @@ export function PollCardHeaderEditable({
         }/${poll.message_id}`
       : "";
 
+  const { tags, tagsOrder } = useTagContext();
+  const [description, setDescription] = useState(poll.description);
+
   return (
     <Header align="center" justify="start" gap="3">
-      {!poll.published || !tag ? (
+      {!editable && isNew && <NewPill>NEW</NewPill>}
+
+      {editable && (!poll.published || !tag) && setTag ? (
         <Select.Root
           size="1"
           defaultValue={tag ? tag.name : "Select tag"}
-          onValueChange={(value) => {
-            setCurrentTag(tags[Number(value)]);
-          }}
+          onValueChange={(value) => setTag(tags[Number(value)])}
         >
           <SelectTriggerPill $tag={tag}>
             {tag ? tag.name : "Select tag"}
@@ -1022,22 +890,23 @@ export function PollCardHeaderEditable({
         </Select.Root>
       ) : (
         <TagPill $tag={tag}>
-          {tag.name}
+          {tag?.name ?? "No tag"}
           {poll.num && ` • #${poll.num}`}
         </TagPill>
       )}
 
       <ScrollFlex gap="3" align="center" justify="between">
-        <InfoTagsEditable
+        <InfoTags
           poll={poll}
           tag={tag}
           totalVotes={totalVotes}
           description={description}
-          setDescription={setDescription}
+          setDescription={editable ? setDescription : undefined}
+          editable={editable}
         />
 
         {poll.published && (
-          <HeaderTextWithLink
+          <HeaderText
             icon={<ExternalLink />}
             href={pollLink}
             rel="noopener noreferrer"
@@ -1069,7 +938,7 @@ export function PollCardHeaderEditable({
             ) : (
               "Open in Discord"
             )}
-          </HeaderTextWithLink>
+          </HeaderText>
         )}
       </ScrollFlex>
     </Header>

@@ -11,18 +11,11 @@ import {
 import styled from "styled-components";
 import { Choices, ChoicesSkeleton } from "./choices";
 import { useState, type ComponentProps } from "react";
-import {
-  PollCardHeader,
-  PollCardHeaderEditable,
-  PollCardHeaderSkeleton,
-} from "./cardHeader";
+import { PollCardHeader, PollCardHeaderSkeleton } from "./cardHeader";
 import { useIsMobile } from "@/utils/isMobile";
 import {
   cleanUrlSafeString,
   filterDescriptionWithRegex,
-  pollDescriptionAnonymousAuthorshipRegex,
-  pollDescriptionArtRegex,
-  pollDescriptionAuthorshipRegex,
   randomText,
   trimRunningStringMultiLine,
   trimRunningStringSingleLine,
@@ -201,17 +194,14 @@ export function PollCard({
 
   return (
     <CardBox direction="column" gap="3" align="center" justify="start">
-      {editable ? (
-        <PollCardHeaderEditable
-          poll={poll}
-          tag={currentTag}
-          setTag={setCurrentTag}
-          guild={guild}
-          votes={votes}
-        />
-      ) : (
-        <PollCardHeader poll={poll} tag={tag} guild={guild} votes={votes} />
-      )}
+      <PollCardHeader
+        poll={poll}
+        tag={editable ? currentTag : tag}
+        setTag={editable ? setCurrentTag : undefined}
+        guild={guild}
+        votes={votes}
+        editable={editable}
+      />
 
       <CardTitleBlock direction="column" gap="1" align="start">
         {editable ? (
