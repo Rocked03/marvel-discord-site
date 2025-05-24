@@ -516,41 +516,41 @@ function InfoTagsEditable({
   return (
     <>
       <Flex gap="3" align="center" justify="between" overflow="visible">
-        {!isMobile &&
-          tags.map((tag) => {
-            const component =
-              tag.mobileOnly !== true &&
-              (tag.tooltip ? (
-                <Tooltip key={tag.id} content={tag.tooltip}>
-                  <HeaderText icon={InfoTagIconMap[tag.type]}>
-                    {tag.node ?? tag.text}
-                  </HeaderText>
-                </Tooltip>
-              ) : (
-                <HeaderText key={tag.id} icon={InfoTagIconMap[tag.type]}>
+        {tags.map((tag) => {
+          const component =
+            tag.mobileOnly !== true &&
+            (!isMobile || tag.type === InfoTagType.DATE) &&
+            (tag.tooltip ? (
+              <Tooltip key={tag.id} content={tag.tooltip}>
+                <HeaderText icon={InfoTagIconMap[tag.type]}>
                   {tag.node ?? tag.text}
                 </HeaderText>
-              ));
-
-            return tag.editable ? (
-              <InfoTagDialog
-                key={tag.id}
-                tags={editableTags}
-                setTags={setEditableTags}
-                mobile={isMobile}
-                editable={true}
-                trigger={
-                  <InfoTagEditDialogTrigger>
-                    <Button variant="ghost" color="gray">
-                      {component}
-                    </Button>
-                  </InfoTagEditDialogTrigger>
-                }
-              />
+              </Tooltip>
             ) : (
-              component
-            );
-          })}
+              <HeaderText key={tag.id} icon={InfoTagIconMap[tag.type]}>
+                {tag.node ?? tag.text}
+              </HeaderText>
+            ));
+
+          return tag.editable ? (
+            <InfoTagDialog
+              key={tag.id}
+              tags={editableTags}
+              setTags={setEditableTags}
+              mobile={isMobile}
+              editable={true}
+              trigger={
+                <InfoTagEditDialogTrigger>
+                  <Button variant="ghost" color="gray">
+                    {component}
+                  </Button>
+                </InfoTagEditDialogTrigger>
+              }
+            />
+          ) : (
+            component
+          );
+        })}
         <InfoTagDialog
           tags={editableTags}
           setTags={setEditableTags}
@@ -683,7 +683,7 @@ function InfoTagDialog({
 
             let content = (
               <Flex gap="1" align="start" direction="column">
-                <Text size="2">{tag.node ?? tag.text}</Text>
+                <Text size="2">{tag.text}</Text>
                 {tag.tooltip && (
                   <DialogTooltipText>{tag.tooltip}</DialogTooltipText>
                 )}

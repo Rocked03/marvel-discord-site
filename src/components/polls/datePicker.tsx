@@ -1,3 +1,4 @@
+import { useIsMobile } from "@/utils/isMobile";
 import { forwardRef } from "react";
 import DatePicker, { type DatePickerProps } from "react-datepicker";
 
@@ -22,11 +23,8 @@ const DatePickerWrapper = styled.div`
   flex-direction: row;
   justify-content: center;
   overflow: visible;
-`;
 
-export const GlobalDataPickerStyles = createGlobalStyle`
   .react-datepicker-popper {
-
     .react-datepicker {
       background-color: var(--color-background);
       border-radius: 0.5rem;
@@ -103,7 +101,7 @@ export const GlobalDataPickerStyles = createGlobalStyle`
   }
 `;
 
-const StyledDatePicker = styled(CustomDatePicker)`
+const StyledDatePicker = styled(CustomDatePicker)<{ $isMobile?: boolean }>`
   background-color: var(--gray-6);
   border-radius: 0.5rem;
   border: none;
@@ -111,7 +109,7 @@ const StyledDatePicker = styled(CustomDatePicker)`
   font-family: inherit;
   height: 100%;
   padding: 0.25rem;
-  width: 12rem;
+  width: ${({ $isMobile }) => ($isMobile ? "9rem" : "12rem")};
 
   &:focus-visible,
   &:focus {
@@ -135,6 +133,8 @@ export default function DatePickerComponent({
   selected: Date | null;
   onChange: (date: Date | null) => void;
 }) {
+  const isMobile = useIsMobile();
+
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZoneName: "short",
   }).formatToParts(new Date(selected ?? Date.now()));
@@ -145,7 +145,9 @@ export default function DatePickerComponent({
     <DatePickerContainer>
       <DatePickerWrapper>
         <StyledDatePicker
-          dateFormat="MMMM d, yyyy, h:mm aa"
+          dateFormat={
+            !isMobile ? "MMMM d, yyyy, h:mm aa" : "dd/MM/yyyy h:mm aa"
+          }
           minDate={new Date()}
           minTime={
             selected && isToday(selected)
@@ -154,9 +156,9 @@ export default function DatePickerComponent({
           }
           onChange={onChange}
           placeholderText="Select a date"
-          portalId="datepicker-portal"
           selected={selected ?? undefined}
           showTimeInput
+          $isMobile={isMobile}
         />
       </DatePickerWrapper>
       ({timeZone})
