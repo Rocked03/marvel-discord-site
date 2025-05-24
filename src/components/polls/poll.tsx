@@ -27,11 +27,21 @@ const CardBox = styled(Flex)<{ $color?: string }>`
   background-color: var(--gray-a3);
   border-radius: var(--radius-3);
   padding: 1.5rem;
-  transition: box-shadow 0.3s ease;
+  transition: box-shadow 0.2s ease-in-out;
+  transition: outline 0.2s ease-in-out;
   width: 100%;
+  ${({ $color }) =>
+    `outline: 0.2rem solid ${
+      $color ? `rgba(${$color}, 0)` : "var(--color-background)"
+    };`}
 
   &:hover {
-    ${({ $color }) => `box-shadow: 0 0 2rem rgba(${$color}, 0.1);`}
+    ${({ $color }) =>
+      $color &&
+      `
+        box-shadow: 0 0 3rem rgba(${$color}, 0.1);
+        outline: 0.2rem solid rgba(${$color}, 1);
+      `}
   }
 `;
 
@@ -197,11 +207,11 @@ export function PollCard({
     setImageError(false);
   }
 
-  const colorRgb = tag?.colour
+  const colorRgb = currentTag?.colour
     ? [
-        (tag.colour >> 16) & 0xff, // Red
-        (tag.colour >> 8) & 0xff, // Green
-        tag.colour & 0xff, // Blue
+        (currentTag.colour >> 16) & 0xff, // Red
+        (currentTag.colour >> 8) & 0xff, // Green
+        currentTag.colour & 0xff, // Blue
       ].join(", ")
     : undefined;
 
