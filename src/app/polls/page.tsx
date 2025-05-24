@@ -309,6 +309,9 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
               }}
               hasMore={meta ? meta.page < meta.totalPages : false}
               loader={<LoadingText>Loading...</LoadingText>}
+              style={{
+                overflow: "visible",
+              }}
             >
               <PollCardContainer>
                 {editModeEnabled && (

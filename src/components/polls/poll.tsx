@@ -23,11 +23,16 @@ import {
 import { AutoGrowingTextAreaStyled } from "./autoGrowingRadixTextArea";
 import { Image, ImageOff } from "lucide-react";
 
-const CardBox = styled(Flex)`
-  width: 100%;
-  padding: 1.5rem;
-  border-radius: var(--radius-3);
+const CardBox = styled(Flex)<{ $color?: string }>`
   background-color: var(--gray-a3);
+  border-radius: var(--radius-3);
+  padding: 1.5rem;
+  transition: box-shadow 0.3s ease;
+  width: 100%;
+
+  &:hover {
+    ${({ $color }) => `box-shadow: 0 0 2rem rgba(${$color}, 0.1);`}
+  }
 `;
 
 const PollImage = styled.img`
@@ -192,8 +197,22 @@ export function PollCard({
     setImageError(false);
   }
 
+  const colorRgb = tag?.colour
+    ? [
+        (tag.colour >> 16) & 0xff, // Red
+        (tag.colour >> 8) & 0xff, // Green
+        tag.colour & 0xff, // Blue
+      ].join(", ")
+    : undefined;
+
   return (
-    <CardBox direction="column" gap="3" align="center" justify="start">
+    <CardBox
+      direction="column"
+      gap="3"
+      align="center"
+      justify="start"
+      $color={colorRgb}
+    >
       <PollCardHeader
         poll={poll}
         tag={editable ? currentTag : tag}
