@@ -162,60 +162,17 @@ export function PollCard({
   guild,
   userVote,
   setUserVote,
-}: {
-  poll: Poll;
-  tag: Tag;
-  guild: PollInfo;
-  userVote: number | undefined;
-  setUserVote: (vote: number | undefined) => void;
-}) {
-  const isMobile = useIsMobile();
-
-  const [votes, setVotes] = useState(poll.votes);
-
-  const filteredDescription = filterDescriptionWithRegex(poll.description);
-
-  return (
-    <CardBox direction="column" gap="3" align="center" justify="start">
-      <PollCardHeader poll={poll} tag={tag} guild={guild} votes={votes} />
-
-      <CardTitleBlock direction="column" gap="1" align="start">
-        <Question $isMobile={isMobile}>{poll.question}</Question>
-        {filteredDescription && (
-          <Description text={filteredDescription} size="2" align="left" />
-        )}
-      </CardTitleBlock>
-
-      <Choices
-        poll={poll}
-        tag={tag}
-        votes={votes}
-        setVotes={setVotes}
-        userVote={userVote}
-        setUserVote={setUserVote}
-      />
-
-      {poll.image && (
-        <ImageContainer>
-          <PollImage src={poll.image} alt={poll.question} />
-        </ImageContainer>
-      )}
-    </CardBox>
-  );
-}
-
-export function PollCardEditable({
-  poll,
-  tag,
-  guild,
+  editable = false,
 }: {
   poll: Poll;
   tag?: Tag;
   guild: PollInfo;
+  userVote?: number;
+  setUserVote?: (vote: number | undefined) => void;
+  editable?: boolean;
 }) {
   const isMobile = useIsMobile();
-
-  const votes = poll.votes;
+  const [votes, setVotes] = useState(poll.votes);
 
   const [questionText, setQuestionText] = useState(poll.question);
   const [descriptionText, setDescriptionText] = useState(
@@ -224,6 +181,8 @@ export function PollCardEditable({
   const [imageUrl, setImageUrl] = useState(poll.image || "");
   const [imageError, setImageError] = useState(false);
   const [currentTag, setCurrentTag] = useState(tag);
+
+  const filteredDescription = filterDescriptionWithRegex(poll.description);
 
   function handleQuestionChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
     setQuestionText(trimRunningStringSingleLine(event.target.value));
@@ -242,65 +201,87 @@ export function PollCardEditable({
 
   return (
     <CardBox direction="column" gap="3" align="center" justify="start">
-      <PollCardHeaderEditable
-        poll={poll}
-        tag={currentTag}
-        setTag={setCurrentTag}
-        guild={guild}
-        votes={votes}
-      />
+      {editable ? (
+        <PollCardHeaderEditable
+          poll={poll}
+          tag={currentTag}
+          setTag={setCurrentTag}
+          guild={guild}
+          votes={votes}
+        />
+      ) : (
+        <PollCardHeader poll={poll} tag={tag} guild={guild} votes={votes} />
+      )}
 
       <CardTitleBlock direction="column" gap="1" align="start">
-        <QuestionEditable
-          $isMobile={isMobile}
-          placeholder="Question"
-          value={questionText}
-          onChange={handleQuestionChange}
-          onBlur={(e) => {
-            setQuestionText(e.target.value.trim());
-          }}
-        />
-
-        <DescriptionEditable
-          placeholder="Description"
-          value={descriptionText}
-          onChange={handleDescriptionChange}
-          onBlur={(e) => {
-            setDescriptionText(e.target.value.trim());
-          }}
-        />
+        {editable ? (
+          <>
+            <QuestionEditable
+              $isMobile={isMobile}
+              placeholder="Question"
+              value={questionText}
+              onChange={handleQuestionChange}
+              onBlur={(e) => setQuestionText(e.target.value.trim())}
+            />
+            <DescriptionEditable
+              placeholder="Description"
+              value={descriptionText}
+              onChange={handleDescriptionChange}
+              onBlur={(e) => setDescriptionText(e.target.value.trim())}
+            />
+          </>
+        ) : (
+          <>
+            <Question $isMobile={isMobile}>{poll.question}</Question>
+            {filteredDescription && (
+              <Description text={filteredDescription} size="2" align="left" />
+            )}
+          </>
+        )}
       </CardTitleBlock>
 
-      <ChoicesEditable poll={poll} tag={currentTag} votes={votes} />
+      {editable ? (
+        <ChoicesEditable poll={poll} tag={currentTag} votes={votes} />
+      ) : (
+        <Choices
+          poll={poll}
+          tag={tag}
+          votes={votes}
+          setVotes={setVotes}
+          userVote={userVote}
+          setUserVote={setUserVote}
+        />
+      )}
 
       {imageUrl && !imageError && (
         <ImageContainer>
           <PollImage
             src={imageUrl}
             alt={poll.question}
-            onError={() => setImageError(true)}
-            onLoad={() => setImageError(false)}
+            onError={editable ? () => setImageError(true) : undefined}
+            onLoad={editable ? () => setImageError(false) : undefined}
           />
         </ImageContainer>
       )}
 
-      <ImageUrlInput
-        type="text"
-        placeholder="Image URL"
-        size="2"
-        value={imageUrl}
-        onChange={handleImageUrlChange}
-        onBlur={(e) => {
-          setImageUrl(e.target.value.trim());
-        }}
-      >
-        <TextField.Slot>
-          {!imageError ? <Image /> : <ImageOff />}
-        </TextField.Slot>
-      </ImageUrlInput>
+      {editable && (
+        <ImageUrlInput
+          type="text"
+          placeholder="Image URL"
+          size="2"
+          value={imageUrl}
+          onChange={handleImageUrlChange}
+          onBlur={(e) => setImageUrl(e.target.value.trim())}
+        >
+          <TextField.Slot>
+            {!imageError ? <Image /> : <ImageOff />}
+          </TextField.Slot>
+        </ImageUrlInput>
+      )}
     </CardBox>
   );
 }
+
 
 export function PollCardSkeleton() {
   const isMobile = useIsMobile();

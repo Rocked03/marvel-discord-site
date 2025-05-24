@@ -191,7 +191,7 @@ function ChoiceContainer({
   showVotes,
 }: {
   index: number;
-  tag: Tag;
+  tag?: Tag;
   choice: string;
   userVote?: number | undefined;
   poll: Poll;
@@ -238,7 +238,7 @@ function ChoiceContainer({
               $percentage={
                 showVotes ? relativePercentage(percentageVotes[index]) : 0
               }
-              $color={tag.colour ? intToColorHex(tag.colour) : undefined}
+              $color={tag?.colour ? intToColorHex(tag.colour) : undefined}
               $isChecked={userVote !== undefined && userVote === index}
             />
           </BarContainer>
@@ -424,14 +424,14 @@ export function Choices({
   votes,
   setVotes,
   userVote,
-  setUserVote,
+  setUserVote = () => {},
 }: {
   poll: Poll;
-  tag: Tag;
+  tag?: Tag;
   votes: Poll["votes"];
   setVotes: (votes: Poll["votes"]) => void;
   userVote: number | undefined;
-  setUserVote: (vote: number | undefined) => void;
+  setUserVote?: (vote: number | undefined) => void;
 }) {
   const { user } = useAuthContext();
   const router = useRouter();

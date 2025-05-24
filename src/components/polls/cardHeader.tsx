@@ -303,7 +303,7 @@ function InfoTags({
   totalVotes,
 }: {
   poll: Poll;
-  tag: Tag;
+  tag?: Tag;
   totalVotes: number;
 }) {
   const isMobile = useIsMobile();
@@ -313,7 +313,7 @@ function InfoTags({
 
   const tags: InfoTag[] = [
     {
-      text: tag.name,
+      text: tag?.name ?? "No tag",
       type: InfoTagType.TAG,
       tooltip: poll.num ? `#${poll.num}` : undefined,
       mobileOnly: true,
@@ -897,7 +897,7 @@ export function PollCardHeader({
   votes,
 }: {
   poll: Poll;
-  tag: Tag;
+  tag?: Tag;
   guild: PollInfo;
   votes: Poll["votes"];
 }) {
@@ -912,7 +912,7 @@ export function PollCardHeader({
 
   const pollLink = poll.message_id
     ? `https://discord.com/channels/${guild.guild_id}/${
-        poll.fallback ? guild.fallback_channel_id : tag.channel_id
+        poll.fallback ? guild.fallback_channel_id : tag?.channel_id
       }/${poll.message_id}`
     : "";
 
@@ -921,7 +921,7 @@ export function PollCardHeader({
       {isNew && <NewPill>NEW</NewPill>}
 
       <TagPill $tag={tag}>
-        {tag.name}
+        {tag?.name ?? "No tag"}
         {poll.num && ` • #${poll.num}`}
       </TagPill>
 
