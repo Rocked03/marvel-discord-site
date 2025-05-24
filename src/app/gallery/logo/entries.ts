@@ -515,4 +515,16 @@ export const galleryEntries: GalleryEntry[] = [
 		date: new Date("2025-03-04"),
 		creator: "Rocked03",
 	},
+	{
+		title: "Thunderbolts*",
+		description: "Logo and banner for the Thunderbolts* film.",
+		imageUrls: [
+			"/img/gallery/logo/Thunderbolts.gif",
+			"/img/gallery/logo/Thunderbolts.png",
+			"/img/gallery/banner/Thunderbolts.png",
+		],
+		previewImageIndex: 1,
+		date: new Date("2025-05-02"),
+		creator: "Rocked03",
+	},
 ];
