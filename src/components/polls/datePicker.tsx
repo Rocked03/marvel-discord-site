@@ -135,8 +135,6 @@ export default function DatePickerComponent({
   selected: Date | null;
   onChange: (date: Date | null) => void;
 }) {
-  console.log("DatePickerComponent re-rendered", { selected });
-
   const isMobile = useIsMobile();
 
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -158,10 +156,7 @@ export default function DatePickerComponent({
               ? new Date()
               : new Date(new Date().setHours(0, 0, 0, 0))
           }
-          onChange={(date) => {
-            console.log("Selected raw", date);
-            onChange(date);
-          }}
+          onChange={onChange}
           placeholderText="Select a date"
           selected={selected ?? undefined}
           showTimeInput

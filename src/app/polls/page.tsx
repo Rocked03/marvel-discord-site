@@ -50,6 +50,11 @@ const LoadingText = styled.h4`
   padding-block: 1rem;
 `;
 
+interface EditablePoll {
+  poll: Poll;
+  isEdited: boolean;
+}
+
 export default function PollsHome() {
   const skeletons = useMemo(
     () =>
@@ -93,6 +98,9 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
   const { tags } = useTagContext();
   const [guilds, setGuilds] = useState<Record<string, PollInfo>>({});
   const [userVotes, setUserVotes] = useState<Record<number, number>>({});
+
+  const [editablePolls, setEditablePolls] = useState<Poll[]>([]);
+  const [editedPolls, setEditedPolls] = useState<Poll[]>([]);
 
   const { user } = useAuthContext();
 
@@ -220,6 +228,21 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
     fetchUserVotes();
   }, [user]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only needs to update when polls or edit mode changes
+  useEffect(() => {
+    if (!editModeEnabled) {
+      setEditedPolls([]);
+      return;
+    }
+
+    const newPolls = polls.filter(
+      (poll) => !editedPolls.some((editablePoll) => editablePoll.id === poll.id)
+    );
+
+    const newEditablePolls = [...editedPolls, ...newPolls];
+    setEditablePolls(newEditablePolls);
+  }, [editModeEnabled, polls]);
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: Reset whenever they change
   useEffect(() => {
     setPage(1);
@@ -326,14 +349,14 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
               }}
             >
               <PollCardContainer>
-                {editModeEnabled && (
+                {/* {editModeEnabled && (
                   <PollCard
                     poll={emptyPoll()}
                     guild={guilds["281648235557421056"]}
                     editable
                   />
-                )}
-                {polls.map((poll) => (
+                )} */}
+                {(!editModeEnabled ? polls : editablePolls).map((poll) => (
                   <PollCard
                     key={poll.id}
                     poll={poll}
@@ -346,6 +369,15 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
                         : undefined
                     }
                     editable={editModeEnabled}
+                    updatePoll={(updatedPoll) => {
+                      setEditedPolls((prev) => {
+                        return prev.some((p) => p.id === updatedPoll.id)
+                          ? prev.map((p) =>
+                              p.id === updatedPoll.id ? updatedPoll : p
+                            )
+                          : [...prev, updatedPoll];
+                      });
+                    }}
                   />
                 ))}
               </PollCardContainer>

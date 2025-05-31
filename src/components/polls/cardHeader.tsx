@@ -49,6 +49,7 @@ import { TitleText } from "../titleText";
 import { useIsMobile } from "@/utils/isMobile";
 import { useTagContext } from "@/contexts/TagContext";
 import DatePickerComponent from "./datePicker";
+import { useFirstRenderResetOnCondition } from "@/utils/useFirstRender";
 
 const Header = styled(Flex)`
   flex-wrap: wrap;
@@ -348,6 +349,8 @@ function InfoTags({
   description,
   setDescription,
   editable = false,
+  dateTime,
+  setDateTime,
 }: {
   poll: Poll;
   tag?: Tag;
@@ -355,12 +358,11 @@ function InfoTags({
   description?: string | null;
   setDescription?: (description: string) => void;
   editable?: boolean;
+  dateTime: Date | null;
+  setDateTime: (date: Date | null) => void;
 }) {
   const isMobile = useIsMobile();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dateTime, setDateTime] = useState<Date | null>(
-    poll.time ? new Date(poll.time) : null
-  );
 
   const computedTags = useMemo(() => {
     const dateTag: InfoTag = {
@@ -426,7 +428,16 @@ function InfoTags({
     ];
 
     return base;
-  }, [tag, poll, totalVotes, description, dateTime, isMobile, editable]);
+  }, [
+    tag,
+    poll,
+    totalVotes,
+    description,
+    dateTime,
+    isMobile,
+    editable,
+    setDateTime,
+  ]);
 
   const [editableTags, setEditableTags] = useState<InfoTag[]>(computedTags);
 
@@ -439,7 +450,7 @@ function InfoTags({
   const hasExistingEditableTags = editableTags.length > 0;
 
   function onDialogOpenChange(open: boolean) {
-    if (!open && description && setDescription) {
+    if (!open && setDescription) {
       const filteredDescription = filterDescriptionWithRegex(description);
       const additionalInfo: string[] = [];
 
@@ -838,6 +849,9 @@ export function PollCardHeader({
   guild,
   votes,
   editable = false,
+  handleTimeChange = () => {},
+  description = null,
+  handleDescriptionChange = () => {},
 }: {
   poll: Poll;
   tag?: Tag;
@@ -845,12 +859,17 @@ export function PollCardHeader({
   guild: PollInfo;
   votes?: Poll["votes"];
   editable?: boolean;
+  handleTimeChange?: (time: Date | null) => void;
+  description?: string | null;
+  handleDescriptionChange?: (description: string) => void;
 }) {
   const isMobile = useIsMobile();
   const totalVotes = votes?.reduce((acc, vote) => acc + vote, 0);
-  const time = poll.time ? new Date(poll.time) : undefined;
-  const isNew = time
-    ? time.getTime() > Date.now() - 1000 * 60 * 60 * 24 * 2
+  const [dateTime, setDateTime] = useState<Date | null>(
+    poll.time ? new Date(poll.time) : null
+  );
+  const isNew = dateTime
+    ? dateTime.getTime() > Date.now() - 1000 * 60 * 60 * 24 * 2
     : false;
   const pollLink =
     poll.message_id && poll.published && tag
@@ -860,7 +879,19 @@ export function PollCardHeader({
       : "";
 
   const { tags, tagsOrder } = useTagContext();
-  const [description, setDescription] = useState(poll.description);
+
+  const isFirstRender = useFirstRenderResetOnCondition(editable);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    if (editable) {
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+        return;
+      }
+      console.log("lol what");
+      handleTimeChange(dateTime);
+    }
+  }, [dateTime]);
 
   return (
     <Header align="center" justify="start" gap="3">
@@ -901,8 +932,10 @@ export function PollCardHeader({
           tag={tag}
           totalVotes={totalVotes}
           description={description}
-          setDescription={editable ? setDescription : undefined}
+          setDescription={editable ? handleDescriptionChange : undefined}
           editable={editable}
+          dateTime={dateTime}
+          setDateTime={setDateTime}
         />
 
         {poll.published && (

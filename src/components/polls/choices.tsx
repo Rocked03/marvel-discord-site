@@ -30,8 +30,9 @@ import {
 import { useAuthContext } from "@/contexts/AuthProvider";
 import config from "@/app/config/config";
 import { useRouter } from "next/navigation";
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { AutoGrowingTextAreaStyled } from "./autoGrowingRadixTextArea";
+import { useFirstRenderResetOnCondition } from "@/utils/useFirstRender";
 
 const ChoiceLabelMap: Record<number, string> = {
   1: "A",
@@ -388,6 +389,7 @@ type ChoicesProps = {
   tag?: Tag;
   userVote?: number;
   votes?: Poll["votes"];
+  handleChoicesChange?: (choices: string[]) => void;
 };
 
 export function Choices({
@@ -398,6 +400,7 @@ export function Choices({
   tag,
   userVote,
   votes = [],
+  handleChoicesChange = () => {},
 }: ChoicesProps) {
   const { user } = useAuthContext();
   const router = useRouter();
@@ -472,6 +475,18 @@ export function Choices({
 
     setChoices(newChoices);
   }
+
+  const isFirstRender = useFirstRenderResetOnCondition(editable);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    if (editable) {
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+        return;
+      }
+      handleChoicesChange(choices.filter((choice) => choice.trim() !== ""));
+    }
+  }, [editable, choices]);
 
   const choiceComponents = choices.map((choice, index) => {
     const choiceElement = (

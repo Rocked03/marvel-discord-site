@@ -112,12 +112,32 @@ export const pollDescriptionAnonymousAuthorshipRegex =
 export const pollDescriptionArtRegex =
 	/((?:[\w]+ )*?[Aa]rt) by (((\w\.?\w*)[ &-]*)+)\.?/g;
 
+const descriptionRegexes = [
+	pollDescriptionAuthorshipRegex,
+	pollDescriptionAnonymousAuthorshipRegex,
+	pollDescriptionArtRegex,
+];
+
 export function filterDescriptionWithRegex(description?: string | null) {
 	return description
-		?.replace(pollDescriptionAuthorshipRegex, "")
-		.replace(pollDescriptionAnonymousAuthorshipRegex, "")
-		.replace(pollDescriptionArtRegex, "")
-		.trim();
+		? descriptionRegexes
+				.reduce((text, regex) => text.replace(regex, ""), description)
+				.trim()
+		: null;
+}
+
+export function extractDescriptionWithRegex(description?: string | null) {
+	if (!description) return null;
+
+	const matches = descriptionRegexes.flatMap((regex) =>
+		regex.global
+			? [...description.matchAll(regex)].map((m) => m[0].trim())
+			: description.match(regex)
+				? [description.match(regex)?.[0].trim()]
+				: [],
+	);
+
+	return matches.join(" ");
 }
 
 export enum PollSearchType {

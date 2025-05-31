@@ -27,7 +27,6 @@ export default function EditButton({
   return (
     <Card>
       <Flex gap="2" align="center">
-        Editing Polls
         <Button
           variant="surface"
           size="2"

@@ -10,11 +10,12 @@ import {
 } from "@radix-ui/themes";
 import styled from "styled-components";
 import { Choices, ChoicesSkeleton } from "./choices";
-import { useState, type ComponentProps } from "react";
+import { useEffect, useRef, useState, type ComponentProps } from "react";
 import { PollCardHeader, PollCardHeaderSkeleton } from "./cardHeader";
 import { useIsMobile } from "@/utils/isMobile";
 import {
   cleanUrlSafeString,
+  extractDescriptionWithRegex,
   filterDescriptionWithRegex,
   randomText,
   trimRunningStringMultiLine,
@@ -22,6 +23,7 @@ import {
 } from "@/utils";
 import { AutoGrowingTextAreaStyled } from "./autoGrowingRadixTextArea";
 import { Image, ImageOff } from "lucide-react";
+import { useFirstRenderResetOnCondition } from "@/utils/useFirstRender";
 
 const CardBox = styled(Flex)<{ $color?: string }>`
   background-color: var(--gray-a3);
@@ -171,6 +173,7 @@ export function PollCard({
   userVote,
   setUserVote,
   editable = false,
+  updatePoll,
 }: {
   poll: Poll;
   tag?: Tag;
@@ -178,6 +181,7 @@ export function PollCard({
   userVote?: number;
   setUserVote?: (vote: number | undefined) => void;
   editable?: boolean;
+  updatePoll?: (poll: Poll) => void;
 }) {
   const isMobile = useIsMobile();
   const [votes, setVotes] = useState(poll.votes);
@@ -186,25 +190,65 @@ export function PollCard({
   const [descriptionText, setDescriptionText] = useState(
     filterDescriptionWithRegex(poll.description) || ""
   );
+  const [descriptionAdditionalText, setDescriptionAdditionalText] = useState(
+    extractDescriptionWithRegex(poll.description) || ""
+  );
   const [imageUrl, setImageUrl] = useState(poll.image || "");
   const [imageError, setImageError] = useState(false);
   const [currentTag, setCurrentTag] = useState(tag);
+  const [choices, setChoices] = useState(poll.choices);
+  const [dateTime, setDateTime] = useState(poll.time);
 
   const filteredDescription = filterDescriptionWithRegex(poll.description);
 
-  function handleQuestionChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
-    setQuestionText(trimRunningStringSingleLine(event.target.value));
+  const isFirstRender = useFirstRenderResetOnCondition(editable);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    if (!editable) {
+      return;
+    }
+
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    const concatenatedDescription =
+      `${descriptionText}\n${descriptionAdditionalText}`.trim();
+
+    const updatedPoll: Poll = {
+      ...poll,
+      question: questionText.trim(),
+      description: concatenatedDescription || null,
+      image: imageUrl.trim() || null,
+      tag: currentTag?.tag ?? 0,
+      choices: choices,
+      time: dateTime,
+    };
+
+    updatePoll?.(updatedPoll);
+  }, [questionText, descriptionText, imageUrl, currentTag, choices, dateTime]);
+
+  function handleQuestionChange(question: string) {
+    setQuestionText(trimRunningStringSingleLine(question));
   }
 
-  function handleDescriptionChange(
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) {
-    setDescriptionText(trimRunningStringMultiLine(event.target.value));
+  function handleDescriptionChange(description: string) {
+    setDescriptionText(trimRunningStringMultiLine(description));
   }
 
-  function handleImageUrlChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setImageUrl(cleanUrlSafeString(event.target.value));
+  function handleImageUrlChange(url: string) {
+    setImageUrl(cleanUrlSafeString(url));
     setImageError(false);
+  }
+
+  function handleChoicesChange(newChoices: Poll["choices"]) {
+    setChoices(newChoices);
+  }
+
+  function handleTimeChange(newDateTime: Poll["time"]) {
+    setDateTime(newDateTime);
   }
 
   const colorRgb = currentTag?.colour
@@ -230,6 +274,11 @@ export function PollCard({
         guild={guild}
         votes={votes}
         editable={editable}
+        handleTimeChange={editable ? handleTimeChange : undefined}
+        description={descriptionAdditionalText}
+        handleDescriptionChange={
+          editable ? setDescriptionAdditionalText : undefined
+        }
       />
 
       <CardTitleBlock direction="column" gap="1" align="start">
@@ -239,13 +288,13 @@ export function PollCard({
               $isMobile={isMobile}
               placeholder="Question"
               value={questionText}
-              onChange={handleQuestionChange}
+              onChange={(e) => handleQuestionChange(e.target.value)}
               onBlur={(e) => setQuestionText(e.target.value.trim())}
             />
             <DescriptionEditable
               placeholder="Description"
               value={descriptionText}
-              onChange={handleDescriptionChange}
+              onChange={(e) => handleDescriptionChange(e.target.value)}
               onBlur={(e) => setDescriptionText(e.target.value.trim())}
             />
           </>
@@ -267,6 +316,7 @@ export function PollCard({
         userVote={editable ? undefined : userVote}
         setUserVote={editable ? undefined : setUserVote}
         editable={editable}
+        handleChoicesChange={editable ? handleChoicesChange : undefined}
       />
 
       {imageUrl && !imageError && (
@@ -286,7 +336,7 @@ export function PollCard({
           placeholder="Image URL"
           size="2"
           value={imageUrl}
-          onChange={handleImageUrlChange}
+          onChange={(e) => handleImageUrlChange(e.target.value)}
           onBlur={(e) => setImageUrl(e.target.value.trim())}
         >
           <TextField.Slot>
