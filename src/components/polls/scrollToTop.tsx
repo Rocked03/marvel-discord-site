@@ -4,10 +4,7 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 const ScrollToTopButtonStyle = styled(IconButton)<{ $isVisible: boolean }>`
-  bottom: 2rem;
   opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
-  position: fixed;
-  right: 2rem;
   transition: opacity 0.3s ease-in-out;
   pointer-events: ${({ $isVisible }) => ($isVisible ? "auto" : "none")};
 `;

@@ -17,6 +17,9 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import styled from "styled-components";
 import { useAuthContext } from "@/contexts/AuthProvider";
 import { useTagContext } from "@/contexts/TagContext";
+import { FixedPositionContainer } from "@/components/polls/fixedPositionContainer";
+import EditButton from "@/components/polls/editButton";
+import { emptyPoll } from "@/utils/polls/emptyPoll";
 
 const BodyContainer = styled(Flex).attrs({
   direction: "column",
@@ -82,6 +85,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const canEdit = true;
   const [editModeEnabled, setEditModeEnabled] = useState<boolean>(false);
 
   const [polls, setPolls] = useState<Poll[]>([]);
@@ -284,7 +288,15 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
 
   return (
     <>
-      <ScrollToTopButton />
+      <FixedPositionContainer>
+        <ScrollToTopButton />
+        {canEdit && (
+          <EditButton
+            editModeEnabled={editModeEnabled}
+            setEditModeEnabled={setEditModeEnabled}
+          />
+        )}
+      </FixedPositionContainer>
       <BodyContainer>
         <PollsSearch
           handleSearch={handleSearch}
@@ -316,27 +328,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
               <PollCardContainer>
                 {editModeEnabled && (
                   <PollCard
-                    poll={{
-                      id: 0,
-                      question: "",
-                      description: "",
-                      image: "",
-                      votes: [],
-                      tag: 0,
-                      guild_id: BigInt("281648235557421056"),
-                      published: false,
-                      active: false,
-                      choices: [],
-                      time: null,
-                      num: null,
-                      message_id: null,
-                      crosspost_message_ids: [],
-                      thread_question: "",
-                      show_question: true,
-                      show_options: true,
-                      show_voting: true,
-                      fallback: false,
-                    }}
+                    poll={emptyPoll()}
                     guild={guilds["281648235557421056"]}
                     editable
                   />
