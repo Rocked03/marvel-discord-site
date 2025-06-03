@@ -529,7 +529,7 @@ export const galleryEntries: GalleryEntry[] = [
 	},
 	{
 		title: "Pride Month 2025",
-		description: "Logo for Pride Month 2025. Art is from Meghan Hetrick' Marvel Pride Month 2025 variant covers.",
+		description: "Logo for Pride Month 2025. Art is from Meghan Hetrick's Marvel Pride Month 2025 variant covers.",
 		imageUrls: [
 			"/img/gallery/logo/Pride 2025 w art.png",
 			"/img/gallery/logo/Pride 2025.png"
