@@ -22,27 +22,29 @@ import {
   trimRunningStringSingleLine,
 } from "@/utils";
 import { AutoGrowingTextAreaStyled } from "./autoGrowingRadixTextArea";
-import { Image, ImageOff } from "lucide-react";
+import { Image, ImageOff, Save } from "lucide-react";
 import { useFirstRenderResetOnCondition } from "@/utils/useFirstRender";
 
-const CardBox = styled(Flex)<{ $color?: string }>`
+const CardBox = styled(Flex)<{ $color?: string; $isEdited?: boolean }>`
   background-color: var(--gray-a3);
   border-radius: var(--radius-3);
   padding: 1.5rem;
   transition: box-shadow 0.2s ease-in-out;
   transition: outline 0.2s ease-in-out;
   width: 100%;
-  ${({ $color }) =>
-    `outline: 0.2rem solid ${
-      $color ? `rgba(${$color}, 0)` : "var(--color-background)"
+  ${({ $color, $isEdited }) =>
+    `outline: 0.2rem ${$isEdited ? "dashed" : "solid"} ${
+      $color
+        ? `rgba(${$color}, ${$isEdited ? "1" : "0"})`
+        : "var(--color-background)"
     };`}
 
   &:hover {
-    ${({ $color }) =>
+    ${({ $color, $isEdited }) =>
       $color &&
       `
         box-shadow: 0 0 3rem rgba(${$color}, 0.1);
-        outline: 0.2rem solid rgba(${$color}, 1);
+        outline: 0.2rem ${$isEdited ? "dashed" : "solid"} rgba(${$color}, 1);
       `}
   }
 `;
@@ -84,6 +86,8 @@ const Question = styled(Heading).attrs<{ $isMobile: boolean }>(
 const QuestionEditable = styled(AutoGrowingTextAreaStyled)<{
   $isMobile: boolean;
 }>`
+  flex: 1;
+
   ${({ $isMobile }) =>
     `
       min-height: var(${
@@ -188,6 +192,7 @@ export function PollCard({
 
   const originalPoll = useRef(poll);
   const originalTag = useRef(tag);
+  const [isEdited, setIsEdited] = useState(false);
 
   const [questionText, setQuestionText] = useState(poll.question);
   const [descriptionText, setDescriptionText] = useState(
@@ -206,15 +211,15 @@ export function PollCard({
 
   const isFirstRender = useFirstRenderResetOnCondition(editable);
 
-  function isEdited() {
+  function checkIsEdited() {
     const questionChanged =
       questionText.trim() !== originalPoll.current.question;
     const descriptionChanged =
       descriptionText.trim() !==
-      filterDescriptionWithRegex(originalPoll.current.description);
+      (filterDescriptionWithRegex(originalPoll.current.description) || "");
     const descriptionAdditionalChanged =
       descriptionAdditionalText.trim() !==
-      extractDescriptionWithRegex(originalPoll.current.description);
+      (extractDescriptionWithRegex(originalPoll.current.description) || "");
     const imageChanged = imageUrl.trim() !== (originalPoll.current.image || "");
     const tagChanged = currentTag?.tag !== originalTag.current?.tag;
     const choicesChanged =
@@ -259,7 +264,9 @@ export function PollCard({
       time: dateTime,
     };
 
-    updatePoll?.(updatedPoll, isEdited());
+    const isEdited = checkIsEdited();
+    setIsEdited(isEdited);
+    updatePoll?.(updatedPoll, isEdited);
   }, [questionText, descriptionText, imageUrl, currentTag, choices, dateTime]);
 
   function handleQuestionChange(question: string) {
@@ -298,6 +305,7 @@ export function PollCard({
       align="center"
       justify="start"
       $color={colorRgb}
+      $isEdited={isEdited}
     >
       <PollCardHeader
         poll={poll}
@@ -316,13 +324,22 @@ export function PollCard({
       <CardTitleBlock direction="column" gap="1" align="start">
         {editable ? (
           <>
-            <QuestionEditable
-              $isMobile={isMobile}
-              placeholder="Question"
-              value={questionText}
-              onChange={(e) => handleQuestionChange(e.target.value)}
-              onBlur={(e) => setQuestionText(e.target.value.trim())}
-            />
+            <Flex
+              direction="row"
+              gap="2"
+              align="start"
+              justify="start"
+              style={{ width: "100%" }}
+            >
+              <QuestionEditable
+                $isMobile={isMobile}
+                placeholder="Question"
+                value={questionText}
+                onChange={(e) => handleQuestionChange(e.target.value)}
+                onBlur={(e) => setQuestionText(e.target.value.trim())}
+              />
+              {isEdited && <Save size={32} />}
+            </Flex>
             <DescriptionEditable
               placeholder="Description"
               value={descriptionText}
