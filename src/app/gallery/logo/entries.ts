@@ -440,7 +440,7 @@ export const galleryEntries: GalleryEntry[] = [
 	},
 	{
 		title: "Pride Month 2024",
-		description: "Logo and wallpaper for the Pride Month 2024 event.",
+		description: "Logo and wallpaper for Pride Month 2024.",
 		imageUrls: [
 			"/img/gallery/logo/Pride 2024.png",
 			"/img/gallery/wallpaper/Pride 2024.png",
@@ -527,4 +527,14 @@ export const galleryEntries: GalleryEntry[] = [
 		date: new Date("2025-05-02"),
 		creator: "Rocked03",
 	},
+	{
+		title: "Pride Month 2025",
+		description: "Logo for Pride Month 2025.",
+		imageUrls: [
+			"/img/gallery/logo/Pride 2025 w art.png",
+			"/img/gallery/logo/Pride 2025.png"
+		],
+		date: new Date("2025-06-01"),
+		creator: "Rocked03",
+	}
 ];
