@@ -324,6 +324,14 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
           <EditButton
             editModeEnabled={editModeEnabled}
             setEditModeEnabled={setEditModeEnabled}
+            hasChanges={editedPolls.length > 0}
+            text={
+              editedPolls.length > 0
+                ? `${editedPolls.length} poll${
+                    editedPolls.length !== 1 ? "s" : ""
+                  } edited.`
+                : undefined
+            }
           />
         )}
       </FixedPositionContainer>

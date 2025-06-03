@@ -269,6 +269,12 @@ export function PollCard({
     updatePoll?.(updatedPoll, isEdited);
   }, [questionText, descriptionText, imageUrl, currentTag, choices, dateTime]);
 
+  useEffect(() => {
+    if (!editable) {
+      setIsEdited(false);
+    }
+  }, [editable]);
+
   function handleQuestionChange(question: string) {
     setQuestionText(trimRunningStringSingleLine(question));
   }
