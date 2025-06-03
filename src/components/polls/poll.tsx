@@ -181,10 +181,13 @@ export function PollCard({
   userVote?: number;
   setUserVote?: (vote: number | undefined) => void;
   editable?: boolean;
-  updatePoll?: (poll: Poll) => void;
+  updatePoll?: (poll: Poll, isEdited: boolean) => void;
 }) {
   const isMobile = useIsMobile();
   const [votes, setVotes] = useState(poll.votes);
+
+  const originalPoll = useRef(poll);
+  const originalTag = useRef(tag);
 
   const [questionText, setQuestionText] = useState(poll.question);
   const [descriptionText, setDescriptionText] = useState(
@@ -202,6 +205,35 @@ export function PollCard({
   const filteredDescription = filterDescriptionWithRegex(poll.description);
 
   const isFirstRender = useFirstRenderResetOnCondition(editable);
+
+  function isEdited() {
+    const questionChanged =
+      questionText.trim() !== originalPoll.current.question;
+    const descriptionChanged =
+      descriptionText.trim() !==
+      filterDescriptionWithRegex(originalPoll.current.description);
+    const descriptionAdditionalChanged =
+      descriptionAdditionalText.trim() !==
+      extractDescriptionWithRegex(originalPoll.current.description);
+    const imageChanged = imageUrl.trim() !== (originalPoll.current.image || "");
+    const tagChanged = currentTag?.tag !== originalTag.current?.tag;
+    const choicesChanged =
+      choices.length !== originalPoll.current.choices.length ||
+      choices.some(
+        (choice, index) => choice !== originalPoll.current.choices[index]
+      );
+    const dateTimeChanged = dateTime !== originalPoll.current.time;
+
+    return (
+      questionChanged ||
+      descriptionChanged ||
+      descriptionAdditionalChanged ||
+      imageChanged ||
+      tagChanged ||
+      choicesChanged ||
+      dateTimeChanged
+    );
+  }
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -227,7 +259,7 @@ export function PollCard({
       time: dateTime,
     };
 
-    updatePoll?.(updatedPoll);
+    updatePoll?.(updatedPoll, isEdited());
   }, [questionText, descriptionText, imageUrl, currentTag, choices, dateTime]);
 
   function handleQuestionChange(question: string) {

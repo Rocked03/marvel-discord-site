@@ -19,7 +19,6 @@ import { useAuthContext } from "@/contexts/AuthProvider";
 import { useTagContext } from "@/contexts/TagContext";
 import { FixedPositionContainer } from "@/components/polls/fixedPositionContainer";
 import EditButton from "@/components/polls/editButton";
-import { emptyPoll } from "@/utils/polls/emptyPoll";
 
 const BodyContainer = styled(Flex).attrs({
   direction: "column",
@@ -49,11 +48,6 @@ const LoadingText = styled.h4`
   text-align: center;
   padding-block: 1rem;
 `;
-
-interface EditablePoll {
-  poll: Poll;
-  isEdited: boolean;
-}
 
 export default function PollsHome() {
   const skeletons = useMemo(
@@ -302,6 +296,19 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
     }));
   }
 
+  const handleEditChange = (poll: Poll, isEdited: boolean) => {
+    setEditedPolls((prev) => {
+      const alreadyEdited = prev.find((p) => p.id === poll.id);
+      if (isEdited && !alreadyEdited) {
+        return [...prev, poll];
+      }
+      if (!isEdited && alreadyEdited) {
+        return prev.filter((p) => p.id !== poll.id);
+      }
+      return prev;
+    });
+  };
+
   const dataExists =
     polls &&
     tags &&
@@ -369,15 +376,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
                         : undefined
                     }
                     editable={editModeEnabled}
-                    updatePoll={(updatedPoll) => {
-                      setEditedPolls((prev) => {
-                        return prev.some((p) => p.id === updatedPoll.id)
-                          ? prev.map((p) =>
-                              p.id === updatedPoll.id ? updatedPoll : p
-                            )
-                          : [...prev, updatedPoll];
-                      });
-                    }}
+                    updatePoll={handleEditChange}
                   />
                 ))}
               </PollCardContainer>
