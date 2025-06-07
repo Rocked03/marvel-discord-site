@@ -11,7 +11,7 @@ import {
   Heading,
   Text,
 } from "@radix-ui/themes";
-import { LogIn } from "lucide-react";
+import { LogIn, ShieldUser } from "lucide-react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,6 +19,10 @@ import styled from "styled-components";
 
 const ProfileCardStyle = styled(Card)`
   cursor: pointer;
+`;
+
+const StyledManagerIcon = styled(ShieldUser)`
+  color: var(--gray-a11);
 `;
 
 export default function ProfileContainer() {
@@ -60,7 +64,8 @@ function ProfileCard({ router }: { router: AppRouterInstance }) {
     });
   };
 
-  const isInServer: boolean = true; // TODO: Check if user is in server
+  const isInServer: boolean =
+    user.guilds?.some((guild) => guild.id === "281648235557421056") || false;
 
   return (
     <DropdownMenu.Root>
@@ -73,7 +78,10 @@ function ProfileCard({ router }: { router: AppRouterInstance }) {
                 fallback={user.global_name?.charAt(0) || "?"}
               />
               <Flex direction="column" gap="0" align="start">
-                <Heading size="3">{user.global_name}</Heading>
+                <Flex gap="1" align="center">
+                  <Heading size="3">{user.global_name}</Heading>
+                  {user.isManager && <StyledManagerIcon size={18} />}
+                </Flex>
                 <Text size="1">@{user.username}</Text>
               </Flex>
             </Flex>
@@ -91,6 +99,9 @@ function ProfileCard({ router }: { router: AppRouterInstance }) {
       </DropdownMenu.Trigger>
       <DropdownMenu.Content>
         <DropdownMenu.Label>Signed in as @{user.username}</DropdownMenu.Label>
+        {user.isManager && (
+          <DropdownMenu.Label>Poll manager perms enabled</DropdownMenu.Label>
+        )}
         <DropdownMenu.Separator />
 
         <DropdownMenu.Item disabled>
@@ -102,11 +113,14 @@ function ProfileCard({ router }: { router: AppRouterInstance }) {
           </Link>
         </DropdownMenu.Item>
 
-        {isInServer && (
+        {!isInServer && (
           <>
             <DropdownMenu.Separator />
             <DropdownMenu.Item asChild>
-              <Link href="https://discord.gg/marvel" target="_blank">
+              <Link
+                href={config.inviteUrl ?? "https://discord.gg/marvel"}
+                target="_blank"
+              >
                 Join the Marvel Discord
               </Link>
             </DropdownMenu.Item>

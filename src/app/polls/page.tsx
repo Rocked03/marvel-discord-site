@@ -95,9 +95,6 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const canEdit = true;
-  const [editModeEnabled, setEditModeEnabled] = useState<boolean>(false);
-
   const [polls, setPolls] = useState<Poll[]>([]);
   const [meta, setMeta] = useState<Meta | null>(null);
   const { tags } = useTagContext();
@@ -108,6 +105,9 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
   const [editedPolls, setEditedPolls] = useState<Poll[]>([]);
 
   const { user } = useAuthContext();
+
+  const canEdit = user?.isManager ?? false;
+  const [editModeEnabled, setEditModeEnabled] = useState<boolean>(false);
 
   const [searchValue, setSearchValue] = useState<string>(
     searchParams.get("search") || ""
@@ -156,6 +156,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
                     notVoted: !filterStateHasVoted(filterState),
                   }
                 : undefined,
+            published: filterState !== FilterState.UNPUBLISHED,
           });
           if (!cancelled) {
             setPolls((prevPolls) => [...prevPolls, ...polls]);
@@ -331,6 +332,8 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
     Object.keys(tags).length > 0 &&
     Object.keys(guilds).length > 0;
 
+  const displayedPolls = !editModeEnabled ? polls : editablePolls;
+
   return (
     <>
       <FixedPositionContainer>
@@ -379,29 +382,33 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
               }}
             >
               <PollCardContainer>
-                {/* {editModeEnabled && (
+                {displayedPolls.length === 0 ? (
+                  <p>No search results found</p>
+                ) : (
+                  /* {editModeEnabled && (
                   <PollCard
                     poll={emptyPoll()}
                     guild={guilds["281648235557421056"]}
                     editable
                   />
-                )} */}
-                {(!editModeEnabled ? polls : editablePolls).map((poll) => (
-                  <PollCard
-                    key={poll.id}
-                    poll={poll}
-                    tag={tags[Number(poll.tag)]}
-                    guild={guilds[poll.guild_id.toString()]}
-                    userVote={userVotes[poll.id]}
-                    setUserVote={(choice) =>
-                      !editModeEnabled
-                        ? setUserVote(poll.id, choice)
-                        : undefined
-                    }
-                    editable={editModeEnabled}
-                    updatePoll={handleEditChange}
-                  />
-                ))}
+                )} */
+                  displayedPolls.map((poll) => (
+                    <PollCard
+                      key={poll.id}
+                      poll={poll}
+                      tag={tags[Number(poll.tag)]}
+                      guild={guilds[poll.guild_id.toString()]}
+                      userVote={userVotes[poll.id]}
+                      setUserVote={(choice) =>
+                        !editModeEnabled
+                          ? setUserVote(poll.id, choice)
+                          : undefined
+                      }
+                      editable={editModeEnabled}
+                      updatePoll={handleEditChange}
+                    />
+                  ))
+                )}
               </PollCardContainer>
             </InfiniteScroll>
           ) : (

@@ -3,63 +3,63 @@ import { axiosPollsInstance } from "../axios";
 import type { AxiosResponse } from "axios";
 
 interface GetPollsParams {
-	guildId?: string | bigint;
-	published?: boolean;
-	tag?: number;
-	user?: PollFilterUser;
-	search?: string;
+  guildId?: string | bigint;
+  published?: boolean;
+  tag?: number;
+  user?: PollFilterUser;
+  search?: string;
 
-	page?: number;
-	limit?: number;
+  page?: number;
+  limit?: number;
 
-	signal?: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export interface PollFilterUser {
-	userId: bigint;
-	notVoted?: boolean;
+  userId: bigint;
+  notVoted?: boolean;
 }
 
 export const getPolls = async ({
-	guildId = "281648235557421056",
-	published = true,
-	tag,
-	user,
-	search,
-	page = 1,
-	limit = 10,
-	signal,
+  guildId = "281648235557421056",
+  published = true,
+  tag,
+  user,
+  search,
+  page = 1,
+  limit = 10,
+  signal,
 }: GetPollsParams): Promise<{ polls: Poll[]; meta: Meta }> => {
-	try {
-		const params = {
-			guildId: guildId.toString(),
-			published: published,
-			tag: tag,
-			userId: user ? user.userId.toString() : undefined,
-			notVoted: user ? user?.notVoted : undefined,
-			search: search,
-			page: page,
-			limit: limit,
-		};
+  try {
+    const params = {
+      guildId: guildId.toString(),
+      published: published,
+      tag: tag,
+      userId: user ? user.userId.toString() : undefined,
+      notVoted: user ? user?.notVoted : undefined,
+      search: search,
+      page: page,
+      limit: limit,
+    };
 
-		const response: AxiosResponse<{ data: Poll[]; meta: Meta }> =
-			await axiosPollsInstance.get("/polls", { params: params, signal });
+    const response: AxiosResponse<{ data: Poll[]; meta: Meta }> =
+      await axiosPollsInstance.get("/polls", { params: params, signal });
 
-		return { polls: response.data.data, meta: response.data.meta };
-	} catch (error) {
-		console.error("Error fetching polls:", error);
-		throw error;
-	}
+    return { polls: response.data.data, meta: response.data.meta };
+  } catch (error) {
+    console.error("Error fetching polls:", error);
+    throw error;
+  }
 };
 
 export const getPollById = async (pollId: string): Promise<Poll> => {
-	try {
-		const response: AxiosResponse<Poll> = await axiosPollsInstance.get(
-			`/polls/${pollId ?? 0}`,
-		);
-		return response.data;
-	} catch (error) {
-		console.error("Error fetching poll:", error);
-		throw error;
-	}
+  try {
+    const response: AxiosResponse<Poll> = await axiosPollsInstance.get(
+      `/polls/${pollId ?? 0}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching poll:", error);
+    throw error;
+  }
 };

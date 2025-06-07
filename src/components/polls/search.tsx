@@ -82,9 +82,11 @@ const HasVotedInfo: Record<FilterState, HasVotedInfoType> = {
 function FilterToggle({
   filterState,
   setFilterState,
+  isManager = false,
 }: {
   filterState?: FilterState;
   setFilterState?: (state: FilterState) => void;
+  isManager?: boolean;
 }) {
   if (!filterState || !setFilterState) {
     return null;
@@ -99,12 +101,23 @@ function FilterToggle({
       case FilterState.ALL:
         setFilterState(FilterState.NOT_VOTED);
         break;
+
       case FilterState.NOT_VOTED:
         setFilterState(FilterState.HAS_VOTED);
         break;
+
       case FilterState.HAS_VOTED:
+        setFilterState(isManager ? FilterState.UNPUBLISHED : FilterState.ALL);
+        break;
+
+      case FilterState.UNPUBLISHED:
         setFilterState(FilterState.ALL);
         break;
+
+      case FilterState.PUBLISHED:
+        setFilterState(FilterState.ALL);
+        break;
+
       default:
         setFilterState(FilterState.ALL);
     }
@@ -199,6 +212,7 @@ export function PollsSearch({
         <FilterToggle
           filterState={filterState}
           setFilterState={setFilterState}
+          isManager={user.isManager}
         />
       )}
 
