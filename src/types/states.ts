@@ -5,3 +5,10 @@ export enum FilterState {
   UNPUBLISHED = "Unpublished",
   ALL = "All",
 }
+
+export enum EditState {
+  UPDATE = "UPDATE",
+  DELETE = "DELETE",
+  CREATE = "CREATE",
+  NONE = "NONE",
+}

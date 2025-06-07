@@ -1,25 +1,30 @@
 "use client";
 
+import { EditState, FilterState } from "@/types/states";
+import { FixedPositionContainer } from "@/components/polls/fixedPositionContainer";
+import { Flex } from "@radix-ui/themes";
 import { getGuilds } from "@/api/polls/guilds";
 import { getPollById, getPolls } from "@/api/polls/polls";
 import { getUserVotes } from "@/api/polls/votes";
-import { PollCard, PollCardSkeleton } from "@/components/polls/poll";
-import ScrollToTopButton from "@/components/polls/scrollToTop";
-import { PollsSearch } from "@/components/polls/search";
+import {
+  NewPollButton,
+  PollCard,
+  PollCardSkeleton,
+} from "@/components/polls/poll";
 import { PollSearchType, updateUrlParameters } from "@/utils";
-import { useDebounce } from "@/utils/debouncer";
-import type { Meta, Poll, PollInfo } from "@jocasta-polls-api";
-import { Flex } from "@radix-ui/themes";
-import axios from "axios";
-import { useRouter, useSearchParams } from "next/navigation";
+import { PollsSearch } from "@/components/polls/search";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
-import styled from "styled-components";
 import { useAuthContext } from "@/contexts/AuthProvider";
+import { useDebounce } from "@/utils/debouncer";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTagContext } from "@/contexts/TagContext";
-import { FixedPositionContainer } from "@/components/polls/fixedPositionContainer";
+import axios from "axios";
 import EditButton from "@/components/polls/editButton";
-import { FilterState } from "@/types/filterState";
+import InfiniteScroll from "react-infinite-scroll-component";
+import ScrollToTopButton from "@/components/polls/scrollToTop";
+import styled from "styled-components";
+import type { Meta, Poll, PollInfo } from "@jocasta-polls-api";
+import { emptyPoll } from "@/utils/polls/emptyPoll";
 
 const BodyContainer = styled(Flex).attrs({
   direction: "column",
@@ -49,6 +54,11 @@ const LoadingText = styled.h4`
   text-align: center;
   padding-block: 1rem;
 `;
+
+interface EditedPoll {
+  poll: Poll;
+  state: EditState;
+}
 
 export default function PollsHome() {
   const skeletons = useMemo(
@@ -102,7 +112,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
   const [userVotes, setUserVotes] = useState<Record<number, number>>({});
 
   const [editablePolls, setEditablePolls] = useState<Poll[]>([]);
-  const [editedPolls, setEditedPolls] = useState<Poll[]>([]);
+  const [editedPolls, setEditedPolls] = useState<EditedPoll[]>([]);
 
   const { user } = useAuthContext();
 
@@ -212,6 +222,11 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
     fetchGuilds();
   }, []);
 
+  useEffect(() => {
+    // This will run *after* editedPolls updates
+    console.log("editedPolls updated:", editedPolls);
+  }, [editedPolls]);
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: Just on start
   useEffect(() => {
     handleSearch(searchValue);
@@ -241,14 +256,19 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
   useEffect(() => {
     if (!editModeEnabled) {
       setEditedPolls([]);
+      setEditablePolls([]);
       return;
     }
 
     const newPolls = polls.filter(
-      (poll) => !editedPolls.some((editablePoll) => editablePoll.id === poll.id)
+      (poll) =>
+        !editedPolls.some((editablePoll) => editablePoll.poll.id === poll.id)
     );
 
-    const newEditablePolls = [...editedPolls, ...newPolls];
+    const newEditablePolls = [
+      ...editedPolls.map((editablePoll) => editablePoll.poll),
+      ...newPolls,
+    ];
     setEditablePolls(newEditablePolls);
   }, [editModeEnabled, polls]);
 
@@ -312,14 +332,18 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
     }));
   }
 
-  const handleEditChange = (poll: Poll, isEdited: boolean) => {
+  const handleEditChange = (poll: Poll, state: EditState) => {
     setEditedPolls((prev) => {
-      const alreadyEdited = prev.find((p) => p.id === poll.id);
-      if (isEdited && !alreadyEdited) {
-        return [...prev, poll];
+      const alreadyEdited = prev.find((p) => p.poll.id === poll.id);
+      if (state === EditState.NONE) {
+        return alreadyEdited ? prev.filter((p) => p.poll.id !== poll.id) : prev;
       }
-      if (!isEdited && alreadyEdited) {
-        return prev.filter((p) => p.id !== poll.id);
+      if (!alreadyEdited) {
+        if (state === EditState.DELETE && poll.id === 0) {
+          setEditablePolls((prev) => prev.filter((p) => p.id !== poll.id));
+          return prev.filter((p) => p.poll.id !== poll.id);
+        }
+        return [...prev, { poll, state }];
       }
       return prev;
     });
@@ -334,6 +358,24 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
 
   const displayedPolls = !editModeEnabled ? polls : editablePolls;
 
+  const tallyPollsCreated = useMemo(
+    () =>
+      editedPolls.filter((editedPoll) => editedPoll.state === EditState.CREATE),
+    [editedPolls]
+  );
+  const tallyPollsUpdated = useMemo(
+    () =>
+      editedPolls.filter((editedPoll) => editedPoll.state === EditState.UPDATE),
+    [editedPolls]
+  );
+  const tallyPollsDeleted = useMemo(
+    () =>
+      editedPolls.filter((editedPoll) => editedPoll.state === EditState.DELETE),
+    [editedPolls]
+  );
+  const formatCount = (count: number, label: string) =>
+    count > 0 ? `${count} poll${count === 1 ? "" : "s"} ${label}` : null;
+
   return (
     <>
       <FixedPositionContainer>
@@ -345,9 +387,13 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
             hasChanges={editedPolls.length > 0}
             text={
               editedPolls.length > 0
-                ? `${editedPolls.length} poll${
-                    editedPolls.length !== 1 ? "s" : ""
-                  } edited.`
+                ? [
+                    formatCount(tallyPollsCreated.length, "created"),
+                    formatCount(tallyPollsUpdated.length, "updated"),
+                    formatCount(tallyPollsDeleted.length, "deleted"),
+                  ]
+                    .filter(Boolean)
+                    .join(", ")
                 : undefined
             }
           />
@@ -385,29 +431,34 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
                 {displayedPolls.length === 0 ? (
                   <p>No search results found</p>
                 ) : (
-                  /* {editModeEnabled && (
-                  <PollCard
-                    poll={emptyPoll()}
-                    guild={guilds["281648235557421056"]}
-                    editable
-                  />
-                )} */
-                  displayedPolls.map((poll) => (
-                    <PollCard
-                      key={poll.id}
-                      poll={poll}
-                      tag={tags[Number(poll.tag)]}
-                      guild={guilds[poll.guild_id.toString()]}
-                      userVote={userVotes[poll.id]}
-                      setUserVote={(choice) =>
-                        !editModeEnabled
-                          ? setUserVote(poll.id, choice)
-                          : undefined
-                      }
-                      editable={editModeEnabled}
-                      updatePoll={handleEditChange}
-                    />
-                  ))
+                  <>
+                    {editModeEnabled && (
+                      <NewPollButton
+                        onClick={() => {
+                          setEditablePolls((prev) => [emptyPoll(), ...prev]);
+                        }}
+                      />
+                    )}
+                    {displayedPolls.map((poll) => (
+                      <PollCard
+                        key={poll.id}
+                        poll={poll}
+                        tag={tags[Number(poll.tag)]}
+                        guild={guilds[poll.guild_id.toString()]}
+                        userVote={userVotes[poll.id]}
+                        setUserVote={(choice) =>
+                          !editModeEnabled
+                            ? setUserVote(poll.id, choice)
+                            : undefined
+                        }
+                        editable={
+                          editModeEnabled &&
+                          poll.guild_id.toString() === "281648235557421056"
+                        }
+                        updatePoll={handleEditChange}
+                      />
+                    ))}
+                  </>
                 )}
               </PollCardContainer>
             </InfiniteScroll>

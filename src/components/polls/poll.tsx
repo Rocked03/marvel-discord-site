@@ -7,10 +7,17 @@ import {
   Link,
   Skeleton,
   TextField,
+  Button,
 } from "@radix-ui/themes";
 import styled from "styled-components";
 import { Choices, ChoicesSkeleton } from "./choices";
-import { useEffect, useRef, useState, type ComponentProps } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentProps,
+} from "react";
 import { PollCardHeader, PollCardHeaderSkeleton } from "./cardHeader";
 import { useIsMobile } from "@/utils/isMobile";
 import {
@@ -22,31 +29,67 @@ import {
   trimRunningStringSingleLine,
 } from "@/utils";
 import { AutoGrowingTextAreaStyled } from "./autoGrowingRadixTextArea";
-import { Image, ImageOff, Save } from "lucide-react";
+import { Image, ImageOff, MessageSquarePlus, Trash2, Undo } from "lucide-react";
 import { useFirstRenderResetOnCondition } from "@/utils/useFirstRender";
+import { EditState } from "@/types/states";
 
-const CardBox = styled(Flex)<{ $color?: string; $isEdited?: boolean }>`
+const CardBox = styled(Flex)<{ $color?: string; $state?: EditState }>`
   background-color: var(--gray-a3);
   border-radius: var(--radius-3);
   padding: 1.5rem;
-  transition: box-shadow 0.2s ease-in-out;
-  transition: outline 0.2s ease-in-out;
+  transition: box-shadow 0.2s ease-in-out, outline 0.2s ease-in-out,
+    opacity 0.2s ease-in-out;
   width: 100%;
-  ${({ $color, $isEdited }) =>
-    `outline: 0.2rem ${$isEdited ? "dashed" : "solid"} ${
-      $color
-        ? `rgba(${$color}, ${$isEdited ? "1" : "0"})`
-        : "var(--color-background)"
-    };`}
+
+  ${({ $color, $state }) => {
+    const isEdited = $state === EditState.UPDATE || $state === EditState.CREATE;
+    const isDeleted = $state === EditState.DELETE;
+    const outlineStyle = isDeleted ? "dotted" : isEdited ? "dashed" : "solid";
+    const outlineColor = $color
+      ? `rgba(${$color}, ${isDeleted || isEdited ? "1" : "0"})`
+      : $state !== undefined
+      ? "var(--red-9)"
+      : "transparent";
+    const opacity = isDeleted ? "0.75" : "1";
+
+    return `
+      outline: 0.2rem ${outlineStyle} ${outlineColor};
+      opacity: ${opacity};
+    `;
+  }}
 
   &:hover {
-    ${({ $color, $isEdited }) =>
-      $color &&
-      `
-        box-shadow: 0 0 3rem rgba(${$color}, 0.1);
-        outline: 0.2rem ${$isEdited ? "dashed" : "solid"} rgba(${$color}, 1);
-      `}
+    ${({ $color, $state }) => {
+      const isEdited =
+        $state === EditState.UPDATE || $state === EditState.CREATE;
+      const isDeleted = $state === EditState.DELETE;
+
+      if ($color) {
+        const outlineStyle = isDeleted
+          ? "dotted"
+          : isEdited
+          ? "dashed"
+          : "solid";
+        const shadowOpacity = isDeleted ? "0.2" : "0.1";
+
+        return `
+          box-shadow: 0 0 3rem rgba(${$color}, ${shadowOpacity});
+          outline: 0.2rem ${outlineStyle} rgba(${$color}, 1);
+        `;
+      }
+    }}
   }
+`;
+
+const NewPollButtonContainer = styled(Button)`
+  align-items: center;
+  cursor: pointer;
+  height: 100%;
+  justify-content: center;
+  padding-inline: 1.5rem;
+  padding-block: 1rem;
+  transition: box-shadow 0.2s ease-in-out;
+  width: 100%;
 `;
 
 const PollImage = styled.img`
@@ -185,7 +228,7 @@ export function PollCard({
   userVote?: number;
   setUserVote?: (vote: number | undefined) => void;
   editable?: boolean;
-  updatePoll?: (poll: Poll, isEdited: boolean) => void;
+  updatePoll?: (poll: Poll, state: EditState) => void;
 }) {
   const isMobile = useIsMobile();
   const [votes, setVotes] = useState(poll.votes);
@@ -193,7 +236,7 @@ export function PollCard({
   const originalPoll = useRef(poll);
   const originalTag = useRef(tag);
   const [isEdited, setIsEdited] = useState(false);
-  // TODO: doesn't reset when search query changes
+  // TODO: doesn't disappear and reload when search query changes
 
   const [questionText, setQuestionText] = useState(poll.question);
   const [descriptionText, setDescriptionText] = useState(
@@ -207,94 +250,134 @@ export function PollCard({
   const [currentTag, setCurrentTag] = useState(tag);
   const [choices, setChoices] = useState(poll.choices);
   const [dateTime, setDateTime] = useState(poll.time);
+  const [willDelete, setWillDelete] = useState(false);
 
   const filteredDescription = filterDescriptionWithRegex(poll.description);
 
-  const isFirstRender = useFirstRenderResetOnCondition(editable);
+  const state = useMemo(() => {
+    return willDelete
+      ? EditState.DELETE
+      : isEdited
+      ? poll.id < 0
+        ? EditState.CREATE
+        : EditState.UPDATE
+      : EditState.NONE;
+  }, [willDelete, isEdited, poll.id]);
 
-  function checkIsEdited() {
+  const questionRef = useRef(questionText);
+  const descriptionRef = useRef(descriptionText);
+  const descriptionAdditionalRef = useRef(descriptionAdditionalText);
+  const imageUrlRef = useRef(imageUrl);
+  const tagRef = useRef(currentTag);
+  const choicesRef = useRef(choices);
+  const dateTimeRef = useRef(dateTime);
+  const willDeleteRef = useRef(willDelete);
+
+  function notifyUpdate() {
+    const concatenatedDescription =
+      `${descriptionRef.current}\n${descriptionAdditionalRef.current}`.trim();
+
+    const updatedPoll: Poll = {
+      ...poll,
+      question: questionRef.current.trim(),
+      description: concatenatedDescription || null,
+      image: imageUrlRef.current.trim() || null,
+      tag: tagRef.current?.tag ?? 0,
+      choices: choicesRef.current,
+      time: dateTimeRef.current,
+    };
+
     const questionChanged =
-      questionText.trim() !== originalPoll.current.question;
+      questionRef.current.trim() !== originalPoll.current.question;
     const descriptionChanged =
-      descriptionText.trim() !==
+      descriptionRef.current.trim() !==
       (filterDescriptionWithRegex(originalPoll.current.description) || "");
     const descriptionAdditionalChanged =
-      descriptionAdditionalText.trim() !==
+      descriptionAdditionalRef.current.trim() !==
       (extractDescriptionWithRegex(originalPoll.current.description) || "");
-    const imageChanged = imageUrl.trim() !== (originalPoll.current.image || "");
-    const tagChanged = currentTag?.tag !== originalTag.current?.tag;
+    const imageChanged =
+      imageUrlRef.current.trim() !== (originalPoll.current.image || "");
+    const tagChanged = tagRef.current?.tag !== originalTag.current?.tag;
     const choicesChanged =
-      choices.length !== originalPoll.current.choices.length ||
-      choices.some(
+      choicesRef.current.length !== originalPoll.current.choices.length ||
+      choicesRef.current.some(
         (choice, index) => choice !== originalPoll.current.choices[index]
       );
-    const dateTimeChanged = dateTime !== originalPoll.current.time;
+    const dateTimeChanged = dateTimeRef.current !== originalPoll.current.time;
 
-    return (
+    const isEditedNow =
+      willDeleteRef.current ||
       questionChanged ||
       descriptionChanged ||
       descriptionAdditionalChanged ||
       imageChanged ||
       tagChanged ||
       choicesChanged ||
-      dateTimeChanged
-    );
+      dateTimeChanged;
+
+    setIsEdited(isEditedNow);
+    const currentState = willDeleteRef.current
+      ? EditState.DELETE
+      : isEditedNow
+      ? poll.id < 0
+        ? EditState.CREATE
+        : EditState.UPDATE
+      : EditState.NONE;
+
+    updatePoll?.(updatedPoll, currentState);
   }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-  useEffect(() => {
-    if (!editable) {
-      return;
-    }
-
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-
-    const concatenatedDescription =
-      `${descriptionText}\n${descriptionAdditionalText}`.trim();
-
-    const updatedPoll: Poll = {
-      ...poll,
-      question: questionText.trim(),
-      description: concatenatedDescription || null,
-      image: imageUrl.trim() || null,
-      tag: currentTag?.tag ?? 0,
-      choices: choices,
-      time: dateTime,
-    };
-
-    const isEdited = checkIsEdited();
-    setIsEdited(isEdited);
-    updatePoll?.(updatedPoll, isEdited);
-  }, [questionText, descriptionText, imageUrl, currentTag, choices, dateTime]);
-
-  useEffect(() => {
-    if (!editable) {
-      setIsEdited(false);
-    }
-  }, [editable]);
-
   function handleQuestionChange(question: string) {
-    setQuestionText(trimRunningStringSingleLine(question));
+    const trimmed = trimRunningStringSingleLine(question);
+    setQuestionText(trimmed);
+    questionRef.current = trimmed;
+    notifyUpdate();
   }
 
   function handleDescriptionChange(description: string) {
-    setDescriptionText(trimRunningStringMultiLine(description));
+    const trimmed = trimRunningStringMultiLine(description);
+    setDescriptionText(trimmed);
+    descriptionRef.current = trimmed;
+    notifyUpdate();
+  }
+
+  function handleDescriptionAdditionalChange(descriptionAdditional: string) {
+    const trimmed = trimRunningStringMultiLine(descriptionAdditional);
+    setDescriptionAdditionalText(trimmed);
+    descriptionAdditionalRef.current = trimmed;
+    notifyUpdate();
   }
 
   function handleImageUrlChange(url: string) {
-    setImageUrl(cleanUrlSafeString(url));
+    const cleaned = cleanUrlSafeString(url);
+    setImageUrl(cleaned);
+    imageUrlRef.current = cleaned;
     setImageError(false);
+    notifyUpdate();
+  }
+
+  function handleTagChange(tag: Tag | undefined) {
+    setCurrentTag(tag);
+    tagRef.current = tag;
+    notifyUpdate();
   }
 
   function handleChoicesChange(newChoices: Poll["choices"]) {
     setChoices(newChoices);
+    choicesRef.current = newChoices;
+    notifyUpdate();
   }
 
   function handleTimeChange(newDateTime: Poll["time"]) {
     setDateTime(newDateTime);
+    dateTimeRef.current = newDateTime;
+    notifyUpdate();
+  }
+
+  function handleWillDeleteChange(newWillDelete: boolean) {
+    setWillDelete(newWillDelete);
+    willDeleteRef.current = newWillDelete;
+    notifyUpdate();
   }
 
   const colorRgb = currentTag?.colour
@@ -312,19 +395,19 @@ export function PollCard({
       align="center"
       justify="start"
       $color={colorRgb}
-      $isEdited={isEdited}
+      $state={state}
     >
       <PollCardHeader
         poll={poll}
         tag={editable ? currentTag : tag}
-        setTag={editable ? setCurrentTag : undefined}
+        setTag={editable ? handleTagChange : undefined}
         guild={guild}
         votes={votes}
         editable={editable}
         handleTimeChange={editable ? handleTimeChange : undefined}
         description={descriptionAdditionalText}
         handleDescriptionChange={
-          editable ? setDescriptionAdditionalText : undefined
+          editable ? handleDescriptionAdditionalChange : undefined
         }
       />
 
@@ -343,15 +426,22 @@ export function PollCard({
                 placeholder="Question"
                 value={questionText}
                 onChange={(e) => handleQuestionChange(e.target.value)}
-                onBlur={(e) => setQuestionText(e.target.value.trim())}
+                onBlur={(e) => handleQuestionChange(e.target.value.trim())}
               />
-              {isEdited && <Save size={32} />}
+              {!poll.published ? (
+                <Button
+                  variant="ghost"
+                  onClick={() => handleWillDeleteChange(!willDelete)}
+                >
+                  {!willDelete ? <Trash2 size={30} /> : <Undo />}
+                </Button>
+              ) : null}
             </Flex>
             <DescriptionEditable
               placeholder="Description"
               value={descriptionText}
               onChange={(e) => handleDescriptionChange(e.target.value)}
-              onBlur={(e) => setDescriptionText(e.target.value.trim())}
+              onBlur={(e) => handleDescriptionChange(e.target.value.trim())}
             />
           </>
         ) : (
@@ -393,7 +483,7 @@ export function PollCard({
           size="2"
           value={imageUrl}
           onChange={(e) => handleImageUrlChange(e.target.value)}
-          onBlur={(e) => setImageUrl(e.target.value.trim())}
+          onBlur={(e) => handleImageUrlChange(e.target.value.trim())}
         >
           <TextField.Slot>
             {!imageError ? <Image /> : <ImageOff />}
@@ -426,5 +516,14 @@ export function PollCardSkeleton() {
         <PollImageSkeleton />
       </ImageContainer>
     </CardBox>
+  );
+}
+
+export function NewPollButton({ onClick }: { onClick?: () => void }) {
+  return (
+    <NewPollButtonContainer variant="surface" size="3" onClick={onClick}>
+      <MessageSquarePlus />
+      Create a new poll
+    </NewPollButtonContainer>
   );
 }
