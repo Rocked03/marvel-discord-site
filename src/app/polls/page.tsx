@@ -19,6 +19,7 @@ import { useAuthContext } from "@/contexts/AuthProvider";
 import { useTagContext } from "@/contexts/TagContext";
 import { FixedPositionContainer } from "@/components/polls/fixedPositionContainer";
 import EditButton from "@/components/polls/editButton";
+import { FilterState } from "@/types/filterState";
 
 const BodyContainer = styled(Flex).attrs({
   direction: "column",
@@ -80,6 +81,16 @@ export default function PollsHome() {
   );
 }
 
+function filterStateHasVoted(filterState: FilterState): boolean | undefined {
+  if (filterState === FilterState.HAS_VOTED) {
+    return true;
+  }
+  if (filterState === FilterState.NOT_VOTED) {
+    return false;
+  }
+  return undefined;
+}
+
 function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -109,9 +120,12 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
     Number(searchParams.get("tag")) || null
   );
   const searchParamHasVoted = searchParams.get("hasVoted");
-  const [hasVoted, setHasVoted] = useState<boolean | undefined>(
-    (searchParamHasVoted !== null && searchParamHasVoted !== "false") ||
-      undefined
+  const [filterState, setFilterState] = useState<FilterState>(
+    searchParamHasVoted === "true"
+      ? FilterState.HAS_VOTED
+      : searchParamHasVoted === "false"
+      ? FilterState.NOT_VOTED
+      : FilterState.ALL
   );
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -132,14 +146,14 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
         if (searchType === PollSearchType.SEARCH) {
           const { polls, meta } = await getPolls({
             search: debouncedSearchValue,
-            page: page,
+            page,
             tag: selectedTag ?? undefined,
             signal: controller.signal,
             user:
-              user && hasVoted !== undefined
+              user && filterStateHasVoted(filterState) !== undefined
                 ? {
                     userId: BigInt(user.id),
-                    notVoted: !hasVoted,
+                    notVoted: !filterStateHasVoted(filterState),
                   }
                 : undefined,
           });
@@ -179,7 +193,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
       cancelled = true;
       controller.abort();
     };
-  }, [debouncedSearchValue, page, selectedTag, hasVoted, user, searchType]);
+  }, [debouncedSearchValue, page, selectedTag, filterState, user, searchType]);
 
   useEffect(() => {
     const fetchGuilds = async () => {
@@ -241,7 +255,7 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
   useEffect(() => {
     setPage(1);
     setPolls([]);
-  }, [debouncedSearchValue, selectedTag, hasVoted]);
+  }, [debouncedSearchValue, selectedTag, filterState]);
 
   const handleSearch = (value: string, newSearchType?: PollSearchType) => {
     if (newSearchType !== undefined) {
@@ -276,10 +290,11 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
   };
 
   useEffect(() => {
+    const hasVoted = filterStateHasVoted(filterState);
     updateUrlParameters(router, searchParams, {
       hasVoted: hasVoted !== undefined ? hasVoted : null,
     });
-  }, [hasVoted, router, searchParams]);
+  }, [filterState, router, searchParams]);
 
   function setUserVote(pollId: number, choice: number | undefined) {
     if (choice === undefined) {
@@ -342,8 +357,8 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
           searchValue={searchValue}
           meta={meta}
           selectedTag={selectedTag}
-          hasVoted={hasVoted}
-          setHasVoted={setHasVoted}
+          filterState={filterState}
+          setFilterState={setFilterState}
           searchType={searchType}
           user={user}
         />

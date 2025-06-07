@@ -7,11 +7,14 @@ import {
   Search,
   X,
   Hash,
+  CircleDashed,
+  CircleEllipsis,
 } from "lucide-react";
 import styled from "styled-components";
 import { TagSelect } from "./tagSelect";
 import { useIsMobile } from "@/utils/isMobile";
 import { PollSearchType } from "@/utils";
+import { FilterState } from "@/types/filterState";
 
 const SearchContainer = styled(Flex)`
   align-items: center;
@@ -53,39 +56,61 @@ interface HasVotedInfoType {
   tooltip: string;
 }
 
-const HasVotedInfo: Record<string, HasVotedInfoType> = {
-  undefined: {
+const HasVotedInfo: Record<FilterState, HasVotedInfoType> = {
+  [FilterState.ALL]: {
     icon: <CircleCheck />,
     tooltip: "All polls",
   },
-  false: {
+  [FilterState.NOT_VOTED]: {
     icon: <CircleDot />,
     tooltip: "Unvoted polls",
   },
-  true: {
+  [FilterState.HAS_VOTED]: {
     icon: <CircleCheckBig />,
     tooltip: "Voted polls",
   },
+  [FilterState.UNPUBLISHED]: {
+    icon: <CircleDashed />,
+    tooltip: "Unpublished polls",
+  },
+  [FilterState.PUBLISHED]: {
+    icon: <CircleEllipsis />,
+    tooltip: "Published polls",
+  },
 };
 
-function HasVotedToggle({
-  hasVoted,
-  setHasVoted,
+function FilterToggle({
+  filterState,
+  setFilterState,
 }: {
-  hasVoted: boolean | undefined;
-  setHasVoted: (value: boolean | undefined) => void;
+  filterState?: FilterState;
+  setFilterState?: (state: FilterState) => void;
 }) {
+  if (!filterState || !setFilterState) {
+    return null;
+  }
+
   function cycle() {
-    if (hasVoted === undefined) {
-      setHasVoted(false);
-    } else if (hasVoted === false) {
-      setHasVoted(true);
-    } else {
-      setHasVoted(undefined);
+    if (!setFilterState) {
+      return;
+    }
+
+    switch (filterState) {
+      case FilterState.ALL:
+        setFilterState(FilterState.NOT_VOTED);
+        break;
+      case FilterState.NOT_VOTED:
+        setFilterState(FilterState.HAS_VOTED);
+        break;
+      case FilterState.HAS_VOTED:
+        setFilterState(FilterState.ALL);
+        break;
+      default:
+        setFilterState(FilterState.ALL);
     }
   }
 
-  const { icon, tooltip } = HasVotedInfo[String(hasVoted)];
+  const { icon, tooltip } = HasVotedInfo[filterState];
 
   return (
     <Tooltip content={tooltip}>
@@ -103,8 +128,8 @@ export function PollsSearch({
   selectedTag = null,
   meta = null,
   disabled = false,
-  hasVoted = undefined,
-  setHasVoted = () => {},
+  filterState,
+  setFilterState,
   searchType = PollSearchType.SEARCH,
   user = undefined,
 }: {
@@ -114,8 +139,8 @@ export function PollsSearch({
   selectedTag?: number | null;
   meta?: Meta | null;
   disabled?: boolean;
-  hasVoted?: boolean | undefined;
-  setHasVoted?: (value: boolean | undefined) => void;
+  filterState?: FilterState;
+  setFilterState?: (state: FilterState) => void;
   searchType?: PollSearchType;
   user?: DiscordUserProfile | null;
 }) {
@@ -170,7 +195,12 @@ export function PollsSearch({
         )}
       </SearchBar>
 
-      {user && <HasVotedToggle hasVoted={hasVoted} setHasVoted={setHasVoted} />}
+      {user && (
+        <FilterToggle
+          filterState={filterState}
+          setFilterState={setFilterState}
+        />
+      )}
 
       <TagSelect
         selectedTag={selectedTag}

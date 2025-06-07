@@ -193,6 +193,7 @@ export function PollCard({
   const originalPoll = useRef(poll);
   const originalTag = useRef(tag);
   const [isEdited, setIsEdited] = useState(false);
+  // TODO: doesn't reset when search query changes
 
   const [questionText, setQuestionText] = useState(poll.question);
   const [descriptionText, setDescriptionText] = useState(
