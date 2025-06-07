@@ -271,17 +271,18 @@ export function ChoiceContainer({
             </ChoiceText>
           )}
           <Spacer />
-          {(editable ? percentageVotes.length > index : showVotes) && (
-            <Tooltip
-              content={`${poll.votes[index]} Vote${
-                poll.votes[index] > 1 ? "s" : ""
-              }`}
-            >
-              <PercentLabel size="1">
-                {percentageVotes[index].toFixed(0)}%
-              </PercentLabel>
-            </Tooltip>
-          )}
+          {(editable ? percentageVotes.length > index : showVotes) &&
+            poll.votes && (
+              <Tooltip
+                content={`${poll.votes[index]} Vote${
+                  poll.votes[index] > 1 ? "s" : ""
+                }`}
+              >
+                <PercentLabel size="1">
+                  {percentageVotes[index].toFixed(0)}%
+                </PercentLabel>
+              </Tooltip>
+            )}
         </Flex>
 
         <BarContainer>
@@ -417,11 +418,12 @@ export function Choices({
       : (userVote !== undefined || !user) && poll.show_voting
   );
 
-  const totalVotes = votes.reduce((acc, vote) => acc + vote, 0);
+  const totalVotes = (votes ?? []).reduce((acc, vote) => acc + vote, 0);
 
-  const percentageVotes = votes.map((vote) =>
-    totalVotes === 0 ? 0 : Number((vote / totalVotes) * 100)
-  );
+  const percentageVotes =
+    votes?.map((vote) =>
+      totalVotes === 0 ? 0 : Number((vote / totalVotes) * 100)
+    ) || [];
 
   function handleVote(index: number) {
     if (!user || editable) return;
@@ -431,7 +433,7 @@ export function Choices({
       choice = undefined;
     }
 
-    const updatedVotes = [...votes];
+    const updatedVotes = [...(votes ?? [])];
     if (choice === undefined || userVote !== undefined) {
       updatedVotes[index]--;
     }
