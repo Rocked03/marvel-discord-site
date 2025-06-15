@@ -30,9 +30,16 @@ import {
 import { useAuthContext } from "@/contexts/AuthProvider";
 import config from "@/app/config/config";
 import { useRouter } from "next/navigation";
-import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { AutoGrowingTextAreaStyled } from "./autoGrowingRadixTextArea";
 import { useFirstRenderResetOnCondition } from "@/utils/useFirstRender";
+import { postVote } from "@/api/polls/votes";
 
 const ChoiceLabelMap: Record<number, string> = {
   1: "A",
@@ -406,6 +413,9 @@ export function Choices({
   const { user } = useAuthContext();
   const router = useRouter();
 
+  const voteTimeout = useRef<NodeJS.Timeout | null>(null);
+  const DEBOUNCE_DELAY = 500; // ms
+
   const [choices, setChoices] = useState(() =>
     editable && poll.choices.length < 8 && !poll.published
       ? [...poll.choices, ""]
@@ -425,7 +435,7 @@ export function Choices({
       totalVotes === 0 ? 0 : Number((vote / totalVotes) * 100)
     ) || [];
 
-  function handleVote(index: number) {
+  async function handleVote(index: number) {
     if (!user || editable) return;
 
     let choice: number | undefined = index;
@@ -433,18 +443,39 @@ export function Choices({
       choice = undefined;
     }
 
-    const updatedVotes = [...(votes ?? [])];
-    if (choice === undefined || userVote !== undefined) {
-      updatedVotes[index]--;
+    if (votes) {
+      const updatedVotes = [...votes];
+      if (choice === undefined || userVote !== undefined) {
+        updatedVotes[index]--;
+      }
+
+      if (choice !== undefined) {
+        updatedVotes[choice]++;
+      }
+
+      setVotes(updatedVotes);
     }
 
-    if (choice !== undefined) {
-      updatedVotes[choice]++;
-    }
-
-    setVotes(updatedVotes);
     setUserVote(choice);
+
+    if (voteTimeout.current) {
+      clearTimeout(voteTimeout.current);
+    }
+
+    voteTimeout.current = setTimeout(() => {
+      postVote(poll.id, user.id, choice).catch((err) => {
+        console.error("Failed to post vote:", err);
+      });
+    }, DEBOUNCE_DELAY);
   }
+
+  useEffect(() => {
+    return () => {
+      if (voteTimeout.current) {
+        clearTimeout(voteTimeout.current);
+      }
+    };
+  }, []);
 
   function handleChoiceTextChange(index: number, value: string) {
     if (!editable) return;
@@ -513,7 +544,7 @@ export function Choices({
     if (!editable) {
       const choiceButton = (
         <ChoiceContainerButton
-          onClick={() => handleVote(index)}
+          onClick={async () => await handleVote(index)}
           key={ChoiceLabelMap[index + 1]}
         >
           {choiceElement}

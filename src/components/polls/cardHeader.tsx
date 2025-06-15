@@ -888,7 +888,6 @@ export function PollCardHeader({
         isFirstRender.current = false;
         return;
       }
-      console.log("lol what");
       handleTimeChange(dateTime);
     }
   }, [dateTime]);

@@ -222,11 +222,6 @@ function PollsContent({ skeletons }: { skeletons?: React.ReactNode[] }) {
     fetchGuilds();
   }, []);
 
-  useEffect(() => {
-    // This will run *after* editedPolls updates
-    console.log("editedPolls updated:", editedPolls);
-  }, [editedPolls]);
-
   // biome-ignore lint/correctness/useExhaustiveDependencies: Just on start
   useEffect(() => {
     handleSearch(searchValue);
