@@ -84,6 +84,7 @@ export default function StaggeredBackground({
   const expansionCount = 10;
 
   useEffect(() => {
+    if (!window) return;
     const updateSize = () => {
       const maxDim = Math.max(window.innerWidth, window.innerHeight);
       setTileSize(maxDim * tileScale);
@@ -117,8 +118,12 @@ export default function StaggeredBackground({
   const scaleRatio = tileSize / originalTileSize;
   const scaledOffset = pixelOffsetX * scaleRatio;
 
-  const numCols = Math.ceil(window.innerWidth / tileSize) + expansionCount;
-  const numRows = Math.ceil(window.innerHeight / tileSize) + expansionCount;
+  const numCols = window
+    ? Math.ceil(window.innerWidth / tileSize) + expansionCount
+    : 0;
+  const numRows = window
+    ? Math.ceil(window.innerHeight / tileSize) + expansionCount
+    : 0;
 
   const tiles = [];
   for (let x = -1; x < numCols; x++) {
