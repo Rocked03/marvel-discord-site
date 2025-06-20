@@ -79,6 +79,8 @@ export default function StaggeredBackground({
   originalTileSize = 4000,
   withinParent = false,
 }: Props) {
+  if (typeof window === "undefined") return null;
+
   const [tileSize, setTileSize] = useState(1000);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const expansionCount = 10;
