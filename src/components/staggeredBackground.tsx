@@ -79,14 +79,12 @@ export default function StaggeredBackground({
   originalTileSize = 4000,
   withinParent = false,
 }: Props) {
-  if (typeof window === "undefined") return null;
-
   const [tileSize, setTileSize] = useState(1000);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const expansionCount = 10;
 
   useEffect(() => {
-    if (!window) return;
+    if (typeof window === "undefined") return;
     const updateSize = () => {
       const maxDim = Math.max(window.innerWidth, window.innerHeight);
       setTileSize(maxDim * tileScale);
@@ -116,6 +114,8 @@ export default function StaggeredBackground({
     animationFrameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrameId);
   }, [tileSize, scrollSpeedX, scrollSpeedY, pixelOffsetX, tileScale]);
+
+  if (typeof window === "undefined") return null;
 
   const scaleRatio = tileSize / originalTileSize;
   const scaledOffset = pixelOffsetX * scaleRatio;
