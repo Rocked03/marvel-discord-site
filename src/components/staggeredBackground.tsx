@@ -174,7 +174,7 @@ export function BackgroundWallpaper({
 }) {
   return (
     <StaggeredBackground
-      imagePath="/img/tile.png"
+      imagePath="/img/tile.webp"
       pixelOffsetX={1465}
       tileScale={$tileScale}
       scrollSpeedX={$scrollSpeedX}
