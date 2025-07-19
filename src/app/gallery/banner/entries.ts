@@ -187,7 +187,7 @@ export const galleryEntries: GalleryEntry[] = [
   },
   {
     title: "Thunderbolts*",
-    description: "Logo and banner for the Thunderbolts* film.",
+    description: "Banner and logo for the Thunderbolts* film.",
     imageUrls: [
       "/img/gallery/banner/Thunderbolts.png",
       "/img/gallery/logo/Thunderbolts.gif",
@@ -205,6 +205,18 @@ export const galleryEntries: GalleryEntry[] = [
       "/img/gallery/banner/Marvel collage 8k.png",
     ],
     date: new Date("2025-06-20"),
+    creator: "Rocked03",
+  },
+  {
+    title: "The Fantastic Four: First Steps",
+    description:
+      "Banner and logo for the The Fantastic Four: First Steps film.",
+    imageUrls: [
+      "/img/gallery/banner/The Fantastic Four First Steps banner.png",
+      "/img/gallery/logo/The Fantastic Four First Steps logo 1024p 25fps.gif",
+      "/img/gallery/logo/The Fantastic Four First Steps logo.png",
+    ],
+    date: new Date("2025-07-25"),
     creator: "Rocked03",
   },
 ];

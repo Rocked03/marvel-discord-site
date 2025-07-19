@@ -551,4 +551,17 @@ export const galleryEntries: GalleryEntry[] = [
     date: new Date("2025-06-20"),
     creator: "Rocked03",
   },
+  {
+    title: "The Fantastic Four: First Steps",
+    description:
+      "Logo and banner for the The Fantastic Four: First Steps film.",
+    imageUrls: [
+      "/img/gallery/logo/The Fantastic Four First Steps logo 1024p 25fps.gif",
+      "/img/gallery/logo/The Fantastic Four First Steps logo.png",
+      "/img/gallery/banner/The Fantastic Four First Steps banner.png",
+    ],
+    previewImageIndex: 1,
+    date: new Date("2025-07-25"),
+    creator: "Rocked03",
+  },
 ];
